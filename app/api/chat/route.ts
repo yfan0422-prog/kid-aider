@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
 
         // Process funnel advancement if in funnel
         if (funnelState && funnelState.currentLayer > 0) {
-          const transition = evaluateLayerCompletion(funnelState, fullResponse);
+          const transition = evaluateLayerCompletion(funnelState, message);
 
           if (transition.action === "advance") {
             // Save completed layer to requirement node
