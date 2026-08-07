@@ -17,6 +17,7 @@ export function InputBar() {
   const clearStreamContent = useChatStore((s) => s.clearStreamContent);
   const setSessionId = useChatStore((s) => s.setSessionId);
   const setFunnelComplete = useChatStore((s) => s.setFunnelComplete);
+  const setFunnelNodes = useChatStore((s) => s.setFunnelNodes);
   const setSolutionStatus = useChatStore((s) => s.setSolutionStatus);
 
   const handleSend = useCallback(async () => {
@@ -73,6 +74,11 @@ export function InputBar() {
             if (parsed.funnel_complete) {
               setFunnelComplete(true);
               setSolutionStatus("idle");
+              // Fetch requirement nodes to populate funnel view
+              fetch(`/api/requirements?sessionId=${sessionId || newSessionId}`)
+                .then(r => r.json())
+                .then(d => { if (d.nodes) setFunnelNodes(d.nodes); })
+                .catch(console.error);
             }
           } catch {
             // Ignore parse errors for partial chunks
@@ -95,6 +101,7 @@ export function InputBar() {
     appendStreamContent,
     clearStreamContent,
     setFunnelComplete,
+    setFunnelNodes,
     setSessionId,
     setSolutionStatus,
     setStreaming,
