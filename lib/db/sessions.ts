@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { getDb } from "./index";
-import type { Session, AgeGroup, SessionStatus } from "@/lib/utils/types";
+import type { Session, AgeGroup } from "@/lib/utils/types";
 
 export function createSession(attrs: {
   title?: string;

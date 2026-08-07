@@ -1,0 +1,26 @@
+"use client";
+
+interface Props {
+  content: string;
+  strategyId?: string | null;
+}
+
+export function BubbleGuide({ content, strategyId }: Props) {
+  return (
+    <div className="flex gap-3 mb-4">
+      {/* Avatar */}
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent-purple flex items-center justify-center text-white text-sm font-bold shrink-0 mt-1">
+        K
+      </div>
+      {/* Bubble */}
+      <div className="bubble-guide bg-bubble-guide border border-border rounded-tl-sm rounded-tr-bubble rounded-br-bubble rounded-bl-bubble px-5 py-4 text-body-lg shadow-sm max-w-[80%]">
+        <p className="whitespace-pre-wrap">{content}</p>
+        {strategyId && (
+          <span className="inline-block mt-2 text-xs text-ink-tertiary bg-surface-raised px-2 py-0.5 rounded-full">
+            {strategyId}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}

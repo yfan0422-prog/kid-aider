@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { getDb } from "./index";
-import { decryptApiKey, encryptApiKey } from "@/lib/utils/crypto";
+import { encryptApiKey } from "@/lib/utils/crypto";
 import type { ModelProfile, ModelProvider, ModelRole } from "@/lib/utils/types";
 
 interface CreateAttrs {
