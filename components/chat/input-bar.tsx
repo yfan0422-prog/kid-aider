@@ -20,14 +20,18 @@ export function InputBar() {
   const setFunnelNodes = useChatStore((s) => s.setFunnelNodes);
   const setSolutionStatus = useChatStore((s) => s.setSolutionStatus);
 
+  // Ref to accumulate streaming text (avoid stale closure on streamingContent)
+  const streamAccRef = useRef("");
+
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || isStreaming) return;
 
     setInput("");
+    const effectiveSessionId = sessionId || "";
     addMessage({
       id: crypto.randomUUID(),
-      session_id: sessionId || "",
+      session_id: effectiveSessionId,
       role: "child",
       content: text,
       strategy_id: null,
@@ -36,6 +40,7 @@ export function InputBar() {
 
     setStreaming(true);
     clearStreamContent();
+    streamAccRef.current = "";
 
     try {
       const response = await fetch("/api/chat", {
@@ -43,6 +48,21 @@ export function InputBar() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, sessionId, ageGroup }),
       });
+
+      // Surface server errors
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => ({}));
+        const errMsg = (errBody as { error?: string }).error || "请求失败，请稍后重试";
+        addMessage({
+          id: crypto.randomUUID(),
+          session_id: effectiveSessionId,
+          role: "guide",
+          content: `⚠️ ${errMsg}`,
+          strategy_id: null,
+          created_at: new Date().toISOString(),
+        });
+        return;
+      }
 
       const newSessionId = response.headers.get("X-Session-Id");
       if (newSessionId && !sessionId) setSessionId(newSessionId);
@@ -69,7 +89,19 @@ export function InputBar() {
           try {
             const parsed = JSON.parse(data);
             if (parsed.text) {
+              streamAccRef.current += parsed.text;
               appendStreamContent(parsed.text);
+            }
+            if (parsed.error) {
+              // Server-side error in stream — surface as a guide message
+              addMessage({
+                id: crypto.randomUUID(),
+                session_id: effectiveSessionId,
+                role: "guide",
+                content: `⚠️ ${parsed.error}`,
+                strategy_id: null,
+                created_at: new Date().toISOString(),
+              });
             }
             if (parsed.funnel_complete) {
               setFunnelComplete(true);
@@ -85,11 +117,31 @@ export function InputBar() {
           }
         }
       }
+
+      // Persist guide reply to messages (was cleared without persisting)
+      const fullReply = streamAccRef.current;
+      if (fullReply) {
+        addMessage({
+          id: crypto.randomUUID(),
+          session_id: effectiveSessionId,
+          role: "guide",
+          content: fullReply,
+          strategy_id: null,
+          created_at: new Date().toISOString(),
+        });
+      }
     } catch (error) {
       console.error("Chat error:", error);
+      addMessage({
+        id: crypto.randomUUID(),
+        session_id: effectiveSessionId,
+        role: "guide",
+        content: "⚠️ 网络连接失败，请检查设置后重试。",
+        strategy_id: null,
+        created_at: new Date().toISOString(),
+      });
     } finally {
       setStreaming(false);
-      // Flush streaming content as a guide message
       clearStreamContent();
     }
   }, [
@@ -108,7 +160,7 @@ export function InputBar() {
   ]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSend();
     }
