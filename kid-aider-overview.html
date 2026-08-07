@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kid-Aider — 让孩子想清楚，再让 AI 做出来</title>
+<style>
+  :root {
+    --primary: #4F7CFF;
+    --primary-dark: #3B5FCC;
+    --brand: #FF9F43;
+    --brand-soft: #FFF3E3;
+    --purple: #8B7CF6;
+    --green: #34C77B;
+    --ink: #2B2D42;
+    --ink-2: #6B7194;
+    --ink-3: #A3A8C3;
+    --divider: #E8EAF4;
+    --bg: #FAF9F6;
+    --surface: #FFFFFF;
+    --raised: #F4F5FB;
+    --border: #E3E6F2;
+    --bubble: #EAF0FF;
+    --shadow: 0 2px 6px rgba(43,45,66,.06), 0 8px 24px rgba(43,45,66,.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink);
+    font-size: 17px; line-height: 1.7; -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 32px; }
+
+  /* 导航 */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,249,246,.88); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topnav-inner { max-width: 1000px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
+  .logo-dot {
+    width: 28px; height: 28px; border-radius: 9px; color: #fff; font-size: 14px; font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Hero */
+  .hero { padding: 96px 0 72px; text-align: center; position: relative; }
+  .hero::before {
+    content: ""; position: absolute; top: -160px; left: 50%; transform: translateX(-50%);
+    width: 680px; height: 440px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(79,124,255,.13), transparent);
+    pointer-events: none;
+  }
+  .hero h1 { font-size: 44px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; position: relative; }
+  .hero h1 .grad {
+    background: linear-gradient(120deg, var(--primary), var(--purple));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero-sub { margin: 20px auto 0; max-width: 560px; font-size: 18px; color: var(--ink-2); position: relative; }
+  @media (max-width: 640px) { .hero h1 { font-size: 32px; } }
+
+  section { padding: 64px 0; }
+  .sec-alt { background: var(--surface); border-top: 1px solid var(--divider); border-bottom: 1px solid var(--divider); }
+  .sec-head { text-align: center; max-width: 640px; margin: 0 auto 40px; }
+  .sec-head h2 { font-size: 28px; font-weight: 700; }
+  .sec-head p { margin-top: 10px; color: var(--ink-2); font-size: 16px; }
+
+  /* 问题 */
+  .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 800px) { .pain-grid { grid-template-columns: 1fr; } }
+  .pain {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+    padding: 24px; box-shadow: var(--shadow);
+  }
+  .pain .p-icon { font-size: 24px; margin-bottom: 10px; }
+  .pain h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .pain p { font-size: 14.5px; color: var(--ink-2); }
+
+  /* 价值主张流转带 */
+  .band {
+    display: flex; align-items: stretch; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .band-cell { flex: 1 1 180px; padding: 24px 20px; text-align: center; position: relative; }
+  .band-cell + .band-cell::before {
+    content: "→"; position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff;
+    font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 2;
+  }
+  .band-cell .b-label { font-size: 12.5px; color: var(--ink-3); font-weight: 600; letter-spacing: .05em; margin-bottom: 6px; }
+  .band-cell .b-main { font-size: 16.5px; font-weight: 700; }
+  .band-cell .b-desc { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+  .band-cell.hl { background: linear-gradient(160deg, #EEF3FF, #F6F2FF); }
+  .band-cell.hl .b-main { color: var(--primary-dark); }
+
+  /* 收益 */
+  .gain-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 800px) { .gain-grid { grid-template-columns: 1fr; } }
+  .gain {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 24px; box-shadow: var(--shadow);
+  }
+  .gain .g-icon {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center; font-size: 21px;
+  }
+  .gi-blue { background: var(--bubble); } .gi-orange { background: var(--brand-soft); }
+  .gi-purple { background: #F1EBFF; } .gi-green { background: #E5F8EE; }
+  .gain h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .gain p { font-size: 14.5px; color: var(--ink-2); }
+
+  /* 差异化对比 */
+  .vs-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { padding: 16px 22px; text-align: left; }
+  thead th { background: var(--raised); font-size: 13.5px; color: var(--ink-2); font-weight: 600; }
+  thead th.kid { color: var(--primary-dark); }
+  tbody tr { border-top: 1px solid var(--divider); }
+  td:first-child { font-weight: 600; }
+  td .no { color: var(--ink-3); } td .yes { color: var(--primary-dark); font-weight: 600; }
+  td.kid { background: #F7FAFF; }
+  @media (max-width: 720px) { th, td { padding: 12px 12px; font-size: 13.5px; } }
+
+  /* 收尾 */
+  .quote {
+    text-align: center; padding: 52px 32px; border-radius: 26px; color: #fff;
+    background: linear-gradient(130deg, #4F7CFF 0%, #8B7CF6 60%, #B98AFC 100%);
+    box-shadow: 0 18px 44px rgba(79,124,255,.26);
+  }
+  .quote .q-main { font-size: 24px; font-weight: 700; line-height: 1.55; }
+  .quote .q-sub { margin-top: 12px; font-size: 14.5px; opacity: .9; }
+
+  footer { padding: 36px 0 48px; text-align: center; color: var(--ink-3); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="logo"><span class="logo-dot">K</span>Kid-Aider</div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <h1>让孩子想清楚，<br><span class="grad">再让 AI 做出来</span></h1>
+    <p class="hero-sub">Kid-Aider 把孩子模糊的想法梳理成清晰的方案，孩子带着方案去 Claude Code 等智能体中落地——AI 时代的表达能力，从每一次对话中长出来。</p>
+  </div>
+</header>
+
+<!-- 解决什么 -->
+<section>
+  <div class="container">
+    <div class="sec-head">
+      <h2>孩子不缺强大的 AI，缺的是「接得住 AI」的能力</h2>
+    </div>
+    <div class="pain-grid">
+      <div class="pain"><div class="p-icon">🗣️</div><h3>说不清</h3><p>想法很多，表达碎片化，AI 听不懂。</p></div>
+      <div class="pain"><div class="p-icon">🧩</div><h3>想不到</h3><p>不知道自己要什么，不会拆解问题。</p></div>
+      <div class="pain"><div class="p-icon">🤲</div><h3>接不住</h3><p>AI 给了答案，孩子不会判断、不会行动。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 怎么解决 -->
+<section class="sec-alt">
+  <div class="container">
+    <div class="sec-head">
+      <h2>Kid-Aider 是引导层，不是代劳者</h2>
+      <p>提问引导 → 梳理需求 → 输出方案包。动手落地的那一步，永远留给孩子。</p>
+    </div>
+    <div class="band">
+      <div class="band-cell"><div class="b-label">输入</div><div class="b-main">孩子的想法</div><div class="b-desc">一句话愿望</div></div>
+      <div class="band-cell hl"><div class="b-label">Kid-Aider</div><div class="b-main">引导 · 梳理 · 成案</div><div class="b-desc">五层澄清 + 语音陪伴</div></div>
+      <div class="band-cell"><div class="b-label">交付</div><div class="b-main">方案包</div><div class="b-desc">需求 + 步骤 + Prompt</div></div>
+      <div class="band-cell"><div class="b-label">落地</div><div class="b-main">下游智能体</div><div class="b-desc">Claude Code 等执行</div></div>
+      <div class="band-cell"><div class="b-label">沉淀</div><div class="b-main">能力成长</div><div class="b-desc">表达力 + 动手力</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 核心收益 -->
+<section>
+  <div class="container">
+    <div class="sec-head">
+      <h2>四个核心收益</h2>
+    </div>
+    <div class="gain-grid">
+      <div class="gain">
+        <span class="g-icon gi-blue">🧠</span>
+        <div><h3>思维表达力，越用越强</h3><p>每次对话都是一次需求梳理训练；引导随能力递减，直到孩子不再需要系统。</p></div>
+      </div>
+      <div class="gain">
+        <span class="g-icon gi-orange">🔧</span>
+        <div><h3>从想法到作品，真做出来</h3><p>软件小程序、DIY 装置双轨项目制，孩子完成的是自己的作品，不是 AI 的演示。</p></div>
+      </div>
+      <div class="gain">
+        <span class="g-icon gi-purple">🎙️</span>
+        <div><h3>不会打字也能用</h3><p>双向语音 + 情绪感知：听懂 6 岁孩子的发音，也听懂孩子的沮丧与兴奋，回应始终有温度。</p></div>
+      </div>
+      <div class="gain">
+        <span class="g-icon gi-green">🛡️</span>
+        <div><h3>家长安心，数据可控</h3><p>本地优先存储、原始语音不留存、成长报告只呈现进步——没有监控，没有攀比。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 差异化 -->
+<section class="sec-alt">
+  <div class="container">
+    <div class="sec-head">
+      <h2>为什么不是直接给孩子用 AI？</h2>
+    </div>
+    <div class="vs-card">
+      <table>
+        <thead>
+          <tr><th></th><th>通用问答 AI</th><th>执行型智能体</th><th class="kid">Kid-Aider</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>直接给答案/成品</td><td class="no">✓ 给答案</td><td class="no">✓ 给成品</td><td class="kid"><span class="yes">✗ 只给引导</span></td></tr>
+          <tr><td>帮孩子梳理需求</td><td class="no">✗</td><td class="no">✗</td><td class="kid"><span class="yes">✓ 五层澄清漏斗</span></td></tr>
+          <tr><td>能力培养机制</td><td class="no">✗</td><td class="no">✗</td><td class="kid"><span class="yes">✓ 六维能力画像</span></td></tr>
+          <tr><td>低龄语音 + 情绪感知</td><td class="no">✗</td><td class="no">✗</td><td class="kid"><span class="yes">✓ 内置</span></td></tr>
+          <tr><td>儿童安全与隐私设计</td><td class="no">弱</td><td class="no">弱</td><td class="kid"><span class="yes">✓ 全链路</span></td></tr>
+          <tr><td>定位</td><td class="no">答疑工具</td><td class="no">干活工具</td><td class="kid"><span class="yes">孩子的 AI 教练</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 收尾 -->
+<section>
+  <div class="container">
+    <div class="quote">
+      <div class="q-main">「我可以帮你把它想清楚，<br>但动手做的那部分留给你——那是最好玩的部分。」</div>
+      <div class="q-sub">Kid-Aider 的产品哲学：宁可多问一轮，不可多替一步。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Kid-Aider &nbsp;|&nbsp; 孩子与 AI 之间的翻译官与教练 &nbsp;|&nbsp; 详见 kid-aider_design.md
+</footer>
+
+</body>
+</html>
