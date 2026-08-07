@@ -16,6 +16,8 @@ interface CreateAttrs {
 export function createModelProfile(attrs: CreateAttrs): ModelProfile {
   const db = getDb();
   const now = new Date().toISOString();
+  // First profile auto-becomes default
+  const existingCount = (db.prepare("SELECT COUNT(*) as count FROM model_profiles").get() as { count: number }).count;
   const profile: ModelProfile = {
     id: uuid(),
     name: attrs.name,
@@ -25,7 +27,7 @@ export function createModelProfile(attrs: CreateAttrs): ModelProfile {
     model: attrs.model,
     assigned_roles: attrs.assigned_roles || ["dialogue"],
     params: attrs.params || { temperature: 0.7, max_tokens: 2048 },
-    is_default: false,
+    is_default: existingCount === 0,
     created_at: now,
     updated_at: now,
   };
@@ -50,7 +52,12 @@ export function getModelProfile(id: string): ModelProfile | undefined {
 
 export function getDefaultProfile(role?: ModelRole): ModelProfile | undefined {
   const db = getDb();
-  const rows = db.prepare("SELECT * FROM model_profiles WHERE is_default = 1").all() as Array<Record<string, unknown>>;
+  // Prefer profiles explicitly marked as default
+  let rows = db.prepare("SELECT * FROM model_profiles WHERE is_default = 1").all() as Array<Record<string, unknown>>;
+  // Fall back to all profiles if no explicit default
+  if (rows.length === 0) {
+    rows = db.prepare("SELECT * FROM model_profiles ORDER BY created_at ASC").all() as Array<Record<string, unknown>>;
+  }
   const profiles = rows.map(deserializeProfile);
   if (!role) return profiles[0];
   return profiles.find(p => p.assigned_roles.includes(role)) || profiles[0];
