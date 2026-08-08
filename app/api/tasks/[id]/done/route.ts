@@ -30,11 +30,12 @@ export async function POST(
     updated.title
   );
 
-  // Record evidence event
-  recordEvent("execution", "task_done", "tasks", updated.id, {
-    title: updated.title,
-    status: updated.status,
-  });
+  // Only record evidence on actual completion, not undo
+  if (updated.status === "done") {
+    recordEvent("execution", "task_done", "tasks", updated.id, {
+      title: updated.title,
+    });
+  }
 
   // Check if milestone is now complete
   let milestoneComplete = false;

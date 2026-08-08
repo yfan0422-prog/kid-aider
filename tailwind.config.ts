@@ -19,6 +19,7 @@ const config: Config = {
         "body-lg": ["1.125rem", { lineHeight: "1.65" }],
         body: ["1rem", { lineHeight: "1.65" }],
         "body-sm": ["0.875rem", { lineHeight: "1.6" }],
+        "body-xs": ["0.75rem", { lineHeight: "1rem", fontWeight: "400" }],
         caption: ["0.75rem", { lineHeight: "1.5" }],
       },
       fontFamily: {

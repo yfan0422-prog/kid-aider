@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, updateSession } from "@/lib/db/sessions";
 import { composeSolutionPack } from "@/lib/compose/composer";
+import { recordEvent } from "@/lib/engine/evidence-collector";
 import type { AgeGroup } from "@/lib/utils/types";
 
 export async function POST(req: NextRequest) {
@@ -16,6 +17,9 @@ export async function POST(req: NextRequest) {
   if (!pack) {
     return NextResponse.json({ error: "生成方案包失败。请确认需求已完整填写。" }, { status: 500 });
   }
+
+  // Record evidence event
+  recordEvent("creativity", "solution_generated", "solution_packs", pack.id);
 
   updateSession(sessionId, { status: "completed" });
 

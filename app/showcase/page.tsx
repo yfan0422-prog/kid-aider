@@ -18,26 +18,25 @@ export default function ShowcasePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/projects")
+    fetch("/api/showcase")
       .then(r => r.json())
       .then(data => {
-        const completed = (data.projects || []).filter(
-          (p: { status: string }) => p.status === "completed"
-        );
         // Load featured from localStorage
         let featured: string[] = [];
         try {
           featured = JSON.parse(localStorage.getItem("showcase-featured") || "[]");
         } catch { /* ignore */ }
 
-        const mapped: ShowcaseProject[] = completed.map((p: { id: string; title: string }) => ({
-          id: p.id,
-          title: p.title,
-          days: 0, // Will be populated by detail fetch — acceptable simplification
-          tasksDone: 0,
-          badges: [],
-          isFeatured: featured.includes(p.id),
-        }));
+        const mapped: ShowcaseProject[] = (data.projects || []).map(
+          (p: { id: string; title: string; days: number; tasksDone: number; badges: Array<{ icon: string; label: string }> }) => ({
+            id: p.id,
+            title: p.title,
+            days: p.days,
+            tasksDone: p.tasksDone,
+            badges: p.badges,
+            isFeatured: featured.includes(p.id),
+          })
+        );
         setProjects(mapped);
       })
       .catch(console.error)

@@ -63,6 +63,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Record decomposition evidence — track/milestone/task counts
+  const stats = { tracks: decomposed.tracks.length, milestones: 0, tasks: 0 };
+  for (const t of decomposed.tracks) {
+    stats.milestones += t.milestones.length;
+    for (const m of t.milestones) stats.tasks += m.tasks.length;
+  }
+  recordEvent("decomposition", "project_decomposed", "projects", project.id, stats);
+
   addLog(project.id, "task_done", "项目创建成功");
 
   // Record evidence event
