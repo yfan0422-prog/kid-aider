@@ -3,6 +3,7 @@ import { getProject } from "@/lib/db/projects";
 import { createReflection, getReflections } from "@/lib/db/reflections";
 import { addLog } from "@/lib/db/project-logs";
 import { buildReflectionQuestions } from "@/lib/engine/reflection-coach";
+import { recordEvent } from "@/lib/engine/evidence-collector";
 import type { AgeGroup, ReflectionType } from "@/lib/utils/types";
 
 export async function GET(
@@ -54,6 +55,15 @@ export async function POST(
   });
 
   addLog(params.id, "reflection", `${type}复盘`);
+
+  // Record evidence event
+  recordEvent("reflection", "reflection_submit", "reflections", reflection.id, {
+    type: reflection.type,
+    has_q1: !!reflection.q1,
+    has_q2: !!reflection.q2,
+    has_q3: !!reflection.q3,
+    has_q4: !!reflection.q4,
+  });
 
   return NextResponse.json({ reflection }, { status: 201 });
 }

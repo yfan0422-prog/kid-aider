@@ -3,6 +3,7 @@ import { toggleTaskDone, getTask } from "@/lib/db/tasks";
 import { updateMilestone } from "@/lib/db/milestones";
 import { addLog } from "@/lib/db/project-logs";
 import { getDb } from "@/lib/db/index";
+import { recordEvent } from "@/lib/engine/evidence-collector";
 
 export async function POST(
   _req: NextRequest,
@@ -28,6 +29,12 @@ export async function POST(
     updated.status === "done" ? "task_done" : "task_undo",
     updated.title
   );
+
+  // Record evidence event
+  recordEvent("execution", "task_done", "tasks", updated.id, {
+    title: updated.title,
+    status: updated.status,
+  });
 
   // Check if milestone is now complete
   let milestoneComplete = false;

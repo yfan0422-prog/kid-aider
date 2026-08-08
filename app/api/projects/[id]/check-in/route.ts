@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { upsertCheckIn, getCheckIns, getStreak } from "@/lib/db/check-ins";
 import { addLog } from "@/lib/db/project-logs";
 import { getProject } from "@/lib/db/projects";
+import { recordEvent } from "@/lib/engine/evidence-collector";
 
 export async function GET(
   _req: NextRequest,
@@ -27,6 +28,11 @@ export async function POST(
   }
   const checkIn = upsertCheckIn(params.id, summary);
   addLog(params.id, "check_in", summary.slice(0, 100));
+  // Record evidence event
+  recordEvent("execution", "check_in", "check_ins", checkIn.id, {
+    date: checkIn.date,
+    summary: checkIn.summary,
+  });
   const streak = getStreak(params.id);
   return NextResponse.json({ check_in: checkIn, streak });
 }

@@ -5,6 +5,7 @@ import { createMilestone } from "@/lib/db/milestones";
 import { createTask } from "@/lib/db/tasks";
 import { addLog } from "@/lib/db/project-logs";
 import { decomposeSolutionPack } from "@/lib/engine/project-decomposer";
+import { recordEvent } from "@/lib/engine/evidence-collector";
 import type { AgeGroup } from "@/lib/utils/types";
 
 export async function GET() {
@@ -63,6 +64,9 @@ export async function POST(req: NextRequest) {
   }
 
   addLog(project.id, "task_done", "项目创建成功");
+
+  // Record evidence event
+  recordEvent("creativity", "project_created", "projects", project.id, { title });
 
   return NextResponse.json({ project: { ...project, tracks: decomposed.tracks } }, { status: 201 });
 }
