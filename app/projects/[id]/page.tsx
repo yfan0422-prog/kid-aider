@@ -5,6 +5,11 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ProjectHero } from "@/components/projects/project-hero";
 import { TrackColumn } from "@/components/projects/track-column";
+import { CalendarHeatmap } from "@/components/projects/calendar-heatmap";
+import { StreakBadge } from "@/components/projects/streak-badge";
+import { CheckInDialog } from "@/components/projects/check-in-dialog";
+import { ReflectionDialog } from "@/components/projects/reflection-dialog";
+import type { CheckIn, ReflectionType } from "@/lib/utils/types";
 import { useChatStore } from "@/lib/store/chat-store";
 
 interface ProjectData {
@@ -37,6 +42,22 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const ageGroup = useChatStore(s => s.ageGroup);
 
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+  const [streak, setStreak] = useState({ current: 0, longest: 0 });
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  const [showReflection, setShowReflection] = useState(false);
+  const [reflectionType, setReflectionType] = useState<ReflectionType>("daily");
+
+  const fetchCheckIns = () => {
+    fetch(`/api/projects/${id}/check-in`)
+      .then(r => r.json())
+      .then(d => {
+        setCheckIns(d.check_ins || []);
+        setStreak(d.streak || { current: 0, longest: 0 });
+      })
+      .catch(console.error);
+  };
+
   const fetchProject = () => {
     fetch(`/api/projects/${id}`)
       .then(r => r.json())
@@ -46,6 +67,7 @@ export default function ProjectDetailPage() {
   };
 
   useEffect(() => { fetchProject(); }, [id]);
+  useEffect(() => { fetchCheckIns(); }, [id]);
 
   const handleTaskToggle = async (taskId: string) => {
     const res = await fetch(`/api/tasks/${taskId}/done`, { method: "POST" });
@@ -103,6 +125,65 @@ export default function ProjectDetailPage() {
           <TrackColumn key={t.id} track={t} onTaskToggle={handleTaskToggle} />
         ))}
       </div>
+
+      {/* Check-in & Reflection bar */}
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <button
+          onClick={() => setShowCheckIn(true)}
+          className="bg-primary text-white border-none rounded-btn px-4 py-2 font-semibold text-body-sm"
+        >
+          📝 每日总结
+        </button>
+        <button
+          onClick={() => { setReflectionType("daily"); setShowReflection(true); }}
+          className="bg-surface border border-border rounded-btn px-4 py-2 font-medium text-body-sm hover:bg-surface-raised transition-colors"
+        >
+          💭 每日复盘
+        </button>
+        <button
+          onClick={() => { setReflectionType("milestone"); setShowReflection(true); }}
+          className="bg-surface border border-border rounded-btn px-4 py-2 font-medium text-body-sm hover:bg-surface-raised transition-colors"
+        >
+          🏔 里程碑复盘
+        </button>
+        <button
+          onClick={() => { setReflectionType("final"); setShowReflection(true); }}
+          className="bg-surface border border-border rounded-btn px-4 py-2 font-medium text-body-sm hover:bg-surface-raised transition-colors"
+        >
+          🎯 总复盘
+        </button>
+      </div>
+
+      {/* Calendar and streak */}
+      <div className="mt-6 bg-surface border border-border rounded-card p-5">
+        <h3 className="font-semibold text-body mb-3">📅 打卡记录</h3>
+        <CalendarHeatmap checkIns={checkIns} />
+        <div className="mt-3">
+          <StreakBadge current={streak.current} longest={streak.longest} />
+        </div>
+      </div>
+
+      {/* Dialogs */}
+      {showCheckIn && (
+        <CheckInDialog
+          projectId={id}
+          onDone={() => {
+            setShowCheckIn(false);
+            fetchCheckIns();
+          }}
+          onClose={() => setShowCheckIn(false)}
+        />
+      )}
+      {showReflection && (
+        <ReflectionDialog
+          projectId={id}
+          type={reflectionType}
+          onDone={() => {
+            setShowReflection(false);
+          }}
+          onClose={() => setShowReflection(false)}
+        />
+      )}
     </div>
   );
 }
