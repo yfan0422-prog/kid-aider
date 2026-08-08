@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { Badge } from "@/lib/utils/types";
 
 interface SnapshotMap {
   [dimension: string]: { score: number; score_type: string; evidence: string };
@@ -7,18 +8,6 @@ interface SnapshotMap {
 interface TrendPoint {
   week_start: string;
   scores: Record<string, number>;
-}
-
-interface BadgeItem {
-  id: string;
-  name: string;
-  label: string;
-  tier: string;
-  dimension: string | null;
-  category: string;
-  description: string;
-  icon: string;
-  earned_at: string | null;
 }
 
 interface ReportSummary {
@@ -39,7 +28,7 @@ interface NewBadge {
 
 interface GrowthState {
   snapshots: SnapshotMap;
-  badges: BadgeItem[];
+  badges: Badge[];
   trends: TrendPoint[];
   newBadges: NewBadge[];
   summary: ReportSummary | null;
