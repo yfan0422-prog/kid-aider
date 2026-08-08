@@ -32,6 +32,7 @@ export function ModelProfileList() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("确定要删除这个模型档案吗？此操作无法撤销。")) return;
     await fetch(`/api/config/models?id=${id}`, { method: "DELETE" });
     fetchProfiles();
   };

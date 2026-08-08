@@ -31,10 +31,12 @@ export async function POST(req: NextRequest) {
 
   // Determine if entering funnel
   let funnelState = session.funnel_step > 0 ? createFunnelState() : undefined;
+  let justEnteredFunnel = false;
   if (intent === "project" && session.funnel_step === 0) {
-    // Start funnel
+    // Start funnel — this message is the intent signal, not a layer answer
     updateSession(session.id, { status: "funneling", funnel_step: 1 });
     funnelState = createFunnelState();
+    justEnteredFunnel = true;
   } else if (session.funnel_step > 0) {
     // Restore funnel state from existing requirement nodes
     funnelState = createFunnelState();
@@ -102,7 +104,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Process funnel advancement if in funnel
-        if (funnelState && funnelState.currentLayer > 0) {
+        // Skip evaluation on the entry message — it's an intent signal, not a layer answer
+        if (funnelState && funnelState.currentLayer > 0 && !justEnteredFunnel) {
           const transition = evaluateLayerCompletion(funnelState, message);
 
           if (transition.action === "advance") {

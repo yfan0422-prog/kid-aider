@@ -52,7 +52,13 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "档案不存在" }, { status: 404 });
   }
 
-  updateModelProfile(id, attrs as Record<string, unknown>);
+  // Whitelist allowed fields to prevent arbitrary column injection
+  const ALLOWED_FIELDS = ["name", "provider", "base_url", "api_key", "model", "assigned_roles", "params", "is_default"];
+  const safe: Record<string, unknown> = {};
+  for (const key of ALLOWED_FIELDS) {
+    if (key in attrs) safe[key] = (attrs as Record<string, unknown>)[key];
+  }
+  updateModelProfile(id, safe);
   return NextResponse.json({ success: true });
 }
 
