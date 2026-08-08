@@ -136,3 +136,50 @@ export interface ProjectLog {
   detail: string;
   created_at: string;
 }
+
+export type CompetencyDimension =
+  | "clarification"
+  | "decomposition"
+  | "execution"
+  | "reflection"
+  | "creativity"
+  | "persistence";
+
+export type ScoreType = "rule" | "ai";
+
+export type BadgeTier = "silver" | "gold";
+
+export type BadgeCategory = "competency" | "achievement";
+
+export interface CompetencySnapshot {
+  id: string;
+  week_start: string; // YYYY-MM-DD Monday
+  dimension: CompetencyDimension;
+  score: number; // 0-100
+  score_type: ScoreType;
+  evidence: string; // JSON array of {source_table, source_id, quote, weight}
+  created_at: string;
+}
+
+export interface EvidenceEvent {
+  id: string;
+  dimension: CompetencyDimension;
+  event_type: string;
+  source_table: string;
+  source_id: string;
+  payload: string; // JSON object
+  created_at: string;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  label: string;
+  tier: BadgeTier;
+  dimension: CompetencyDimension | null;
+  category: BadgeCategory;
+  description: string;
+  icon: string;
+  earned_at: string | null;
+  created_at: string;
+}

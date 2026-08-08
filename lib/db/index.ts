@@ -151,6 +151,49 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_check_ins_project_date ON check_ins(project_id, date);
     CREATE INDEX IF NOT EXISTS idx_reflections_project ON reflections(project_id);
     CREATE INDEX IF NOT EXISTS idx_project_logs_project ON project_logs(project_id);
+
+    CREATE TABLE IF NOT EXISTS competency_snapshots (
+      id          TEXT PRIMARY KEY,
+      week_start  TEXT NOT NULL,
+      dimension   TEXT NOT NULL CHECK(dimension IN (
+                    'clarification','decomposition','execution',
+                    'reflection','creativity','persistence'
+                  )),
+      score       INTEGER NOT NULL CHECK(score BETWEEN 0 AND 100),
+      score_type  TEXT NOT NULL CHECK(score_type IN ('rule','ai')),
+      evidence    TEXT NOT NULL DEFAULT '[]',
+      created_at  TEXT NOT NULL,
+      UNIQUE(week_start, dimension)
+    );
+
+    CREATE TABLE IF NOT EXISTS evidence_events (
+      id           TEXT PRIMARY KEY,
+      dimension    TEXT NOT NULL,
+      event_type   TEXT NOT NULL,
+      source_table TEXT NOT NULL,
+      source_id    TEXT NOT NULL,
+      payload      TEXT NOT NULL DEFAULT '{}',
+      created_at   TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS badges (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      label       TEXT NOT NULL,
+      tier        TEXT NOT NULL CHECK(tier IN ('silver','gold')),
+      dimension   TEXT,
+      category    TEXT NOT NULL CHECK(category IN ('competency','achievement')),
+      description TEXT NOT NULL,
+      icon        TEXT NOT NULL,
+      earned_at   TEXT,
+      created_at  TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_snapshots_week ON competency_snapshots(week_start);
+    CREATE INDEX IF NOT EXISTS idx_evidence_dimension ON evidence_events(dimension);
+    CREATE INDEX IF NOT EXISTS idx_evidence_created ON evidence_events(created_at);
+    CREATE INDEX IF NOT EXISTS idx_badges_dimension ON badges(dimension);
+    CREATE INDEX IF NOT EXISTS idx_badges_earned ON badges(earned_at);
   `);
 
   return db;
