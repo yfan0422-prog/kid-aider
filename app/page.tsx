@@ -21,6 +21,24 @@ export default function Home() {
             🚀 项目
           </Link>
           <Link
+            href="/growth"
+            className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
+          >
+            🌟 成长
+          </Link>
+          <Link
+            href="/showcase"
+            className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
+          >
+            🖼 作品
+          </Link>
+          <Link
+            href="/report"
+            className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
+          >
+            📊 报告
+          </Link>
+          <Link
             href="/settings"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
