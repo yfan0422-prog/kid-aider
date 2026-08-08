@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useChatStore } from "@/lib/store/chat-store";
 
 export function SolutionPreview() {
@@ -10,7 +11,10 @@ export function SolutionPreview() {
   const setSolutionStatus = useChatStore((s) => s.setSolutionStatus);
   const setSolutionPack = useChatStore((s) => s.setSolutionPack);
   const sessionId = useChatStore((s) => s.sessionId);
+  const ageGroup = useChatStore((s) => s.ageGroup);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const router = useRouter();
 
   const handleGenerate = async () => {
     if (!sessionId || isGenerating) return;
@@ -44,6 +48,24 @@ export function SolutionPreview() {
       const prompt = match ? match[1].trim() : solutionPack.content;
       navigator.clipboard.writeText(prompt).catch(console.error);
       setSolutionStatus("confirmed");
+    }
+  };
+
+  const handleStartProject = async () => {
+    if (!sessionId || isStarting) return;
+    setIsStarting(true);
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, ageGroup }),
+      });
+      const data = await res.json();
+      if (data.project?.id) {
+        router.push(`/projects/${data.project.id}`);
+      }
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -90,8 +112,17 @@ export function SolutionPreview() {
             </div>
           )}
           {solutionStatus === "confirmed" && (
-            <div className="bg-accent-green/10 text-accent-green rounded-btn px-4 py-3 text-sm font-semibold text-center">
-              ✅ 方案包已确认！Prompt 已复制，去 Claude Code 试试吧！
+            <div className="space-y-3">
+              <div className="bg-accent-green/10 text-accent-green rounded-btn px-4 py-3 text-sm font-semibold text-center">
+                ✅ 方案包已确认！Prompt 已复制，去 Claude Code 试试吧！
+              </div>
+              <button
+                onClick={handleStartProject}
+                disabled={isStarting}
+                className="w-full bg-accent-green text-white border-none rounded-btn px-4 py-2.5 font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {isStarting ? "正在创建项目……" : "🚀 开始项目"}
+              </button>
             </div>
           )}
         </div>
