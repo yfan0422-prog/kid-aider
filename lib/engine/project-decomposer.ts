@@ -2,7 +2,6 @@ import type { AgeGroup, SolutionPack } from "@/lib/utils/types";
 import { getDb } from "@/lib/db/index";
 import { routeModel } from "@/lib/models/router";
 import { buildSystemPrompt } from "@/lib/prompts/system-prompt";
-import { getAgeConfig } from "@/lib/utils/age-config";
 
 export interface DecomposedTrack {
   name: string;
@@ -45,7 +44,6 @@ export async function decomposeSolutionPack(
   if (packs.length === 0) return null;
 
   const pack: SolutionPack = packs[0]; // latest version first
-  const config = getAgeConfig(ageGroup);
   const maxTasksPerMilestone = ageGroup === "6-9" ? 2 : ageGroup === "10-12" ? 4 : 5;
 
   const routed = routeModel("dialogue");

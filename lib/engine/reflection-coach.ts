@@ -18,6 +18,7 @@ export async function buildReflectionQuestions(
   type: ReflectionType,
   triggerRef?: string | null
 ): Promise<ReflectionQuestions> {
+  void triggerRef;
   const logs = getRecentLogs(project.id, 5);
 
   // Build context from recent activity

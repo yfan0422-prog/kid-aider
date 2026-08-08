@@ -4,7 +4,6 @@ import { getCheckIns, getStreak } from "@/lib/db/check-ins";
 import { getTasksByProject } from "@/lib/db/tasks";
 import { routeModel } from "@/lib/models/router";
 import { buildSystemPrompt } from "@/lib/prompts/system-prompt";
-import { getAgeConfig } from "@/lib/utils/age-config";
 
 export interface ResumeContext {
   resume_text: string;
@@ -29,7 +28,6 @@ export async function buildResume(
     ? Math.floor((Date.now() - new Date(latestLog.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
-  const config = getAgeConfig(ageGroup);
   const maxSentences = ageGroup === "6-9" ? 3 : ageGroup === "10-12" ? 4 : 5;
 
   const logSummary = logs.map(l => l.detail).join("；");
