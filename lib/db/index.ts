@@ -71,6 +71,84 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id);
     CREATE INDEX IF NOT EXISTS idx_requirements_session ON requirement_nodes(session_id);
     CREATE INDEX IF NOT EXISTS idx_packs_session ON solution_packs(session_id);
+
+    CREATE TABLE IF NOT EXISTS projects (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS tracks (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'software',
+      sort_order INTEGER DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS milestones (
+      id TEXT PRIMARY KEY,
+      track_id TEXT NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      sort_order INTEGER DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'pending',
+      completed_at TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS tasks (
+      id TEXT PRIMARY KEY,
+      milestone_id TEXT NOT NULL REFERENCES milestones(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      what_to_do TEXT NOT NULL,
+      how_hint TEXT DEFAULT '',
+      difficulty INTEGER DEFAULT 1,
+      status TEXT NOT NULL DEFAULT 'pending',
+      completed_at TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS check_ins (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      date TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      UNIQUE(project_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS reflections (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      trigger_ref TEXT,
+      q1 TEXT DEFAULT '',
+      q2 TEXT DEFAULT '',
+      q3 TEXT DEFAULT '',
+      q4 TEXT DEFAULT '',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS project_logs (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      action TEXT NOT NULL,
+      detail TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_tracks_project ON tracks(project_id);
+    CREATE INDEX IF NOT EXISTS idx_milestones_track ON milestones(track_id);
+    CREATE INDEX IF NOT EXISTS idx_tasks_milestone ON tasks(milestone_id);
+    CREATE INDEX IF NOT EXISTS idx_check_ins_project_date ON check_ins(project_id, date);
+    CREATE INDEX IF NOT EXISTS idx_reflections_project ON reflections(project_id);
+    CREATE INDEX IF NOT EXISTS idx_project_logs_project ON project_logs(project_id);
   `);
 
   return db;
