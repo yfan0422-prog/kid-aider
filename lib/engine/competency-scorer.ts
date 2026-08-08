@@ -82,7 +82,7 @@ const DIMENSION_CRITERIA: Record<CompetencyDimension, string> = {
 async function evaluateWithAI(
   dimension: CompetencyDimension,
   events: EvidenceEvent[]
-): Promise<{ score: number; summary: string; evidence: Array<{ quote: string; source: string; weight: string }> }> {
+): Promise<{ score: number; summary: string; evidence: Array<{ quote: string; source: string; weight: string }> } | null> {
   const routed = routeModel("dialogue");
   if (!routed || events.length === 0) {
     return { score: 50, summary: "数据不足，继续加油！", evidence: [] };
@@ -135,8 +135,19 @@ ${eventsJson}
     if (!Array.isArray(result.evidence)) result.evidence = [];
     result.evidence = result.evidence.slice(0, 5); // max 5 evidence items
 
+    const score = result.score;
+    if (!Number.isFinite(score)) {
+      console.error(
+        "[competency-scorer] Malformed AI score for dimension",
+        dimension,
+        ":",
+        score
+      );
+      return null;
+    }
+
     return {
-      score: Math.max(0, Math.min(100, Math.round(result.score))),
+      score: Math.max(0, Math.min(100, Math.round(score))),
       summary: String(result.summary || "").slice(0, 80),
       evidence: result.evidence,
     };
@@ -179,8 +190,17 @@ export async function generateSnapshot(
 
   for (const dim of AI_DIMENSIONS) {
     const dimEvents = weekEvents.filter(e => e.dimension === dim);
+    const evaluated = await evaluateWithAI(dim, dimEvents);
+    if (evaluated === null) {
+      // Malformed AI score — fall back to a neutral snapshot so the dimension
+      // is not dropped and no partial/NaN data is persisted.
+      results.push(
+        upsertSnapshot(weekStart, dim, 50, "ai", JSON.stringify([]))
+      );
+      continue;
+    }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- summary reserved for future UX; snapshots store evidence only
-    const { score, summary, evidence } = await evaluateWithAI(dim, dimEvents);
+    const { score, summary, evidence } = evaluated;
     results.push(
       upsertSnapshot(weekStart, dim, score, "ai", JSON.stringify(evidence))
     );

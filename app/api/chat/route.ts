@@ -6,6 +6,7 @@ import { routeModel } from "@/lib/models/router";
 import { classifyIntent } from "@/lib/engine/intent";
 import { createFunnelState, evaluateLayerCompletion, getLayerLabel } from "@/lib/engine/funnel-machine";
 import { buildChatPrompt } from "@/lib/engine/prompt-builder";
+import { recordEvent } from "@/lib/engine/evidence-collector";
 import type { AgeGroup, FunnelLayer } from "@/lib/utils/types";
 
 export async function POST(req: NextRequest) {
@@ -135,6 +136,18 @@ export async function POST(req: NextRequest) {
             }
             updateSession(session.id, { status: "composing", funnel_step: 5 });
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ funnel_complete: true })}\n\n`));
+
+            // Record clarification evidence — fires async after the SSE response is
+            // flushed so it never blocks the stream. Fire-and-forget DB write.
+            setTimeout(() => {
+              try {
+                recordEvent("clarification", "funnel_complete", "sessions", session.id, {
+                  funnel_step: funnelState.currentLayer,
+                });
+              } catch (err) {
+                console.error("[chat] failed to record funnel_complete evidence:", err);
+              }
+            }, 0);
           }
 
           if (transition.action === "stay") {

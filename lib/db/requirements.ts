@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { getDb } from "./index";
+import { recordEvent } from "@/lib/engine/evidence-collector";
 import type { RequirementNode, FunnelLayer } from "@/lib/utils/types";
 
 export function upsertRequirementNode(attrs: {
@@ -41,6 +42,10 @@ export function upsertRequirementNode(attrs: {
     `INSERT INTO requirement_nodes (id, session_id, layer, label, content, parent_id, sort_order, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(node.id, node.session_id, node.layer, node.label, node.content, node.parent_id, node.sort_order, node.created_at, node.updated_at);
+
+  // Record clarification evidence on successful creation (run() throws on failure)
+  recordEvent("clarification", "requirement_created", "requirement_nodes", node.id);
+
   return node;
 }
 

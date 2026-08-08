@@ -47,8 +47,11 @@ export async function POST(req: NextRequest) {
   if (action === "snapshot") {
     const weekStart = getCurrentWeekStart();
 
-    // Skip if no new events this week
-    if (!hasWeekEvents(weekStart)) {
+    // Idempotent snapshot generation: skip when there are no new events this
+    // week AND snapshots already exist for this week. This avoids re-running
+    // the 4 AI scoring calls on every /growth visit.
+    const existingWeekSnapshots = getSnapshotsByRange(weekStart, weekStart);
+    if (!hasWeekEvents(weekStart) && existingWeekSnapshots.length > 0) {
       return NextResponse.json({
         snapshots: {},
         new_badges: [],
@@ -58,8 +61,20 @@ export async function POST(req: NextRequest) {
     }
 
     initBadgesIfNeeded();
-    const snapshots = await generateSnapshot(weekStart);
-    const newBadges = checkBadges();
+
+    let snapshots: Awaited<ReturnType<typeof generateSnapshot>>;
+    let newBadges: ReturnType<typeof checkBadges>;
+    try {
+      snapshots = await generateSnapshot(weekStart);
+      newBadges = checkBadges();
+    } catch (error) {
+      // Don't surface partial data as success — return a clean error instead
+      console.error("[competency] snapshot generation failed:", error);
+      return NextResponse.json(
+        { error: "快照生成失败，请稍后重试" },
+        { status: 500 }
+      );
+    }
 
     const snapshotMap: Record<string, { score: number; score_type: string; evidence: string }> = {};
     for (const s of snapshots) {

@@ -32,14 +32,14 @@ export async function GET(req: NextRequest) {
   const projectStats = db.prepare(
     `SELECT
        COUNT(*) as total_projects,
-       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_projects
+       COALESCE(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END), 0) as completed_projects
      FROM projects`
   ).get() as { total_projects: number; completed_projects: number };
 
   const taskStats = db.prepare(
     `SELECT
        COUNT(*) as total,
-       SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done
+       COALESCE(SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END), 0) as done
      FROM tasks`
   ).get() as { total: number; done: number };
 
