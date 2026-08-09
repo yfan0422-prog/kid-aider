@@ -57,7 +57,11 @@ export function updateTopic(
 ): void {
   const db = getDb();
   const now = new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "");
-  const keys = Object.keys(fields);
+  const allowedColumns = new Set([
+    "title", "summary", "cover_image", "category", "age_group",
+    "interest_tag", "sort_order", "is_active",
+  ]);
+  const keys = Object.keys(fields).filter(k => allowedColumns.has(k));
   if (keys.length === 0) return;
   const setClause = keys.map(k => `${k} = ?`).join(", ");
   const values = keys.map(k => (fields as Record<string, unknown>)[k]);
