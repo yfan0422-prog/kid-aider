@@ -256,3 +256,79 @@ export interface ProfileUpdate {
   snapshot: string | null;  // JSON: 变更后的画像快照
   created_at: string;
 }
+
+// ─── P7 内容生态 ───────────────────────────────────────────────
+
+export type TopicLanguage = "zh-CN" | "zh-HK" | "en";
+export type TopicCategory =
+  | "自然科学" | "技术编程" | "视觉艺术" | "音乐表演"
+  | "历史长廊" | "国学经典" | "诗词歌赋" | "中医智慧"
+  | "中文精进" | "英文探索" | "数学思维" | "综合能力";
+export type TopicSource = "seed" | "auto_suggested" | "manual";
+export type SuggestionStatus = "pending" | "approved" | "rejected";
+
+export interface TopicCatalog {
+  id: string;
+  title: string;
+  summary: string;
+  cover_image: string | null;
+  category: TopicCategory;
+  age_group: AgeGroup | "all";
+  language: TopicLanguage;
+  interest_tag: string | null;
+  source: TopicSource;
+  sort_order: number;
+  is_active: number; // 0|1
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TopicContent {
+  id: string;
+  topic_id: string;
+  age_group: string;
+  language: TopicLanguage;
+  version: number;
+  intro_text: string;
+  challenges: string; // JSON: Challenge[]
+  project_prompt: string | null;
+  image_prompts: string | null; // JSON: {section, prompt}[]
+  generation_rule_version: string;
+  is_active: number; // 0|1
+  generated_at: string;
+  created_at: string;
+}
+
+export interface Challenge {
+  title: string;
+  description: string;
+  hint: string | null;
+  difficulty: number; // 1-3
+  materials: string[];
+  estimated_minutes: number;
+}
+
+export interface ContentGenerationRequest {
+  topicId: string;
+  ageGroup: AgeGroup | "all";
+  language: TopicLanguage;
+  forceRefresh: boolean;
+}
+
+export interface GeneratedContent {
+  intro: string;
+  challenges: Challenge[];
+  project_prompt: string;
+  image_prompts: { section: string; prompt: string }[];
+}
+
+export interface TopicSuggestion {
+  id: string;
+  interest_tag: string;
+  candidate_title: string;
+  viability_score: number;
+  viability_reason: string | null;
+  status: SuggestionStatus;
+  reviewed_at: string | null;
+  created_at: string;
+}

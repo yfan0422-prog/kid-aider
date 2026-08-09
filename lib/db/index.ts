@@ -280,6 +280,70 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_badges_dimension ON badges(dimension);
     CREATE INDEX IF NOT EXISTS idx_badges_earned ON badges(earned_at);
     CREATE INDEX IF NOT EXISTS idx_usage_log_date ON usage_log(date);
+
+    CREATE TABLE IF NOT EXISTS topic_catalog (
+      id            TEXT PRIMARY KEY,
+      title         TEXT NOT NULL,
+      summary       TEXT NOT NULL,
+      cover_image   TEXT,
+      category      TEXT NOT NULL,
+      age_group     TEXT NOT NULL,
+      language      TEXT NOT NULL DEFAULT 'zh-CN',
+      interest_tag  TEXT,
+      source        TEXT NOT NULL DEFAULT 'seed',
+      sort_order    INTEGER DEFAULT 0,
+      is_active     INTEGER DEFAULT 1,
+      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS topic_contents (
+      id              TEXT PRIMARY KEY,
+      topic_id        TEXT NOT NULL REFERENCES topic_catalog(id),
+      age_group       TEXT NOT NULL,
+      language        TEXT NOT NULL DEFAULT 'zh-CN',
+      version         INTEGER NOT NULL DEFAULT 1,
+      intro_text      TEXT NOT NULL,
+      challenges      TEXT NOT NULL,
+      project_prompt  TEXT,
+      image_prompts   TEXT,
+      generation_rule_version TEXT NOT NULL,
+      is_active       INTEGER NOT NULL DEFAULT 1,
+      generated_at    TEXT NOT NULL,
+      created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_topic_content_version
+      ON topic_contents(topic_id, age_group, language, version);
+
+    CREATE INDEX IF NOT EXISTS idx_topic_contents_active
+      ON topic_contents(topic_id, is_active);
+
+    CREATE INDEX IF NOT EXISTS idx_topic_catalog_category
+      ON topic_catalog(category);
+
+    CREATE INDEX IF NOT EXISTS idx_topic_catalog_age
+      ON topic_catalog(age_group);
+
+    CREATE INDEX IF NOT EXISTS idx_topic_catalog_language
+      ON topic_catalog(language);
+
+    CREATE INDEX IF NOT EXISTS idx_topic_catalog_source
+      ON topic_catalog(source);
+
+    CREATE TABLE IF NOT EXISTS topic_suggestions (
+      id              TEXT PRIMARY KEY,
+      interest_tag    TEXT NOT NULL,
+      candidate_title TEXT NOT NULL,
+      viability_score REAL NOT NULL,
+      viability_reason TEXT,
+      status          TEXT NOT NULL DEFAULT 'pending',
+      reviewed_at     TEXT,
+      created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_topic_suggestions_status
+      ON topic_suggestions(status);
   `);
 
   return db;
