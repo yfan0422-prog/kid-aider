@@ -40,3 +40,6 @@ data/
 *.db
 .env
 .env.local
+
+# worktrees
+.claude/worktrees/
