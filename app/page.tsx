@@ -15,6 +15,12 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-1">
           <Link
+            href="/explore"
+            className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
+          >
+            🔍 探索
+          </Link>
+          <Link
             href="/projects"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
