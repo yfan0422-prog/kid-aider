@@ -19,6 +19,6 @@ export function updateUsageConfig(attrs: Partial<Pick<UsageConfig, "daily_limit_
   }
   if (fields.length === 0) return;
   fields.push("updated_at = ?");
-  values.push(new Date().toISOString());
+  values.push(new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, ""));
   db.prepare(`UPDATE usage_config SET ${fields.join(", ")} WHERE id = 1`).run(...values);
 }

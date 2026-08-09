@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   // Attach task progress for each project
   const result = projects.map(p => {
     const taskStats = db.prepare(
-      `SELECT COUNT(*) as total, SUM(CASE WHEN t.status = 'done' THEN 1 ELSE 0 END) as done
+      `SELECT COUNT(*) as total, COALESCE(SUM(CASE WHEN t.status = 'done' THEN 1 ELSE 0 END), 0) as done
        FROM tasks t
        JOIN milestones m ON m.id = t.milestone_id
        JOIN tracks tr ON tr.id = m.track_id

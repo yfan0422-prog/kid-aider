@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       const inQuiet = startMin < endMin
         ? currentMin >= startMin && currentMin < endMin
         : currentMin >= startMin || currentMin < endMin;
-      if (inQuiet) {
+      if (!sessionId && inQuiet) {
         return blockedResponse("现在是休息时间，明天再来探索吧！");
       }
     }
