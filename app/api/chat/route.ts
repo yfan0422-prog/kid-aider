@@ -10,7 +10,7 @@ import { recordEvent } from "@/lib/engine/evidence-collector";
 import { getUsageConfig } from "@/lib/db/usage-config";
 import { getTodayUsageSec, recordUsageTime } from "@/lib/db/usage-log";
 import { checkTextFilter } from "@/lib/db/filtered-words";
-import { classifyEmotion } from "@/lib/voice/emotion-classifier";
+import { classifyEmotion, classifyEmotionByRules } from "@/lib/voice/emotion-classifier";
 import { createEmotionLog } from "@/lib/db/emotion-log";
 import type { AgeGroup, FunnelLayer } from "@/lib/utils/types";
 
@@ -130,41 +130,41 @@ export async function POST(req: NextRequest) {
   const recentMessages = getRecentMessages(session.id, 20);
 
   // --- Emotion detection (non-blocking for text input) ---
+  // The rule path is O(1) and synchronous — it feeds the prompt immediately so
+  // the hot path never blocks on LLM latency. The full rule+LLM classification
+  // runs fire-and-forget afterwards to enrich emotion_log.
   let emotionContext = "";
-  try {
-    const recentTexts = recentMessages
-      .filter(m => m.role === "child")
-      .slice(-3)
-      .map(m => m.content);
-    const emotionResult = await classifyEmotion({
-      text: message,
-      history: recentTexts,
-      sessionId: session.id,
-    });
+  const recentTexts = recentMessages
+    .filter(m => m.role === "child")
+    .slice(-3)
+    .map(m => m.content);
 
-    // Log emotion
-    createEmotionLog({
-      sessionId: session.id,
-      source: "text",
-      emotion: emotionResult.emotion,
-      confidence: emotionResult.confidence,
-      textSnippet: message.slice(0, 200),
-      modelUsed: emotionResult.modelUsed,
-    });
+  const ruleEmotion = classifyEmotionByRules({ text: message, history: recentTexts });
+  const strategies: Record<string, string> = {
+    excited: "孩子当前情绪: 兴奋。请保持热情回应，同时适度引导聚焦。",
+    calm: "孩子当前情绪: 平静。请正常引导。",
+    frustrated: "孩子当前情绪: 沮丧。请以鼓励为主，降低任务难度。",
+    impatient: "孩子当前情绪: 着急。请先安抚情绪，再拆解步骤引导。",
+    confused: "孩子当前情绪: 困惑。请主动解释，给出具体例子帮助理解。",
+  };
+  emotionContext = strategies[ruleEmotion.emotion] || "";
 
-    // Build emotion context string
-    const strategies: Record<string, string> = {
-      excited: "孩子当前情绪: 兴奋。请保持热情回应，同时适度引导聚焦。",
-      calm: "孩子当前情绪: 平静。请正常引导。",
-      frustrated: "孩子当前情绪: 沮丧。请以鼓励为主，降低任务难度。",
-      impatient: "孩子当前情绪: 着急。请先安抚情绪，再拆解步骤引导。",
-      confused: "孩子当前情绪: 困惑。请主动解释，给出具体例子帮助理解。",
-    };
-    emotionContext = strategies[emotionResult.emotion] || "";
-  } catch (err) {
-    console.warn("[chat] emotion detection failed:", err);
-    // 静默降级，不影响正常对话
-  }
+  setTimeout(() => {
+    classifyEmotion({ text: message, history: recentTexts, sessionId: session.id })
+      .then((emotionResult) => {
+        createEmotionLog({
+          sessionId: session.id,
+          source: "text",
+          emotion: emotionResult.emotion,
+          confidence: emotionResult.confidence,
+          textSnippet: message.slice(0, 200),
+          modelUsed: emotionResult.modelUsed,
+        });
+      })
+      .catch((err) => {
+        console.warn("[chat] emotion detection failed:", err);
+      });
+  }, 0);
 
   let promptMessages = buildChatPrompt({
     ageGroup: ag,

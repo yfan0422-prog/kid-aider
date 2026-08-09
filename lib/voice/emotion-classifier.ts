@@ -143,6 +143,15 @@ async function classifyByLLM(opts: ClassifyOpts): Promise<RuleEmotion | null> {
 
 // --- 融合 ---
 
+/**
+ * Synchronous O(1) rule-only classification (no LLM round-trip).
+ * Safe for the chat hot path: returns immediately so prompt injection never
+ * blocks on model latency.
+ */
+export function classifyEmotionByRules(opts: ClassifyOpts): EmotionResult {
+  return { ...classifyByRules(opts), modelUsed: "rule" };
+}
+
 export async function classifyEmotion(opts: ClassifyOpts): Promise<EmotionResult> {
   // 第一轨：规则（即时）
   const ruleResult = classifyByRules(opts);
