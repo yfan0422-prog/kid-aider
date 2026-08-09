@@ -53,6 +53,40 @@ function soxStats(audioPath: string): Promise<SoxStats> {
   });
 }
 
+/**
+ * Convert any audio container/codec (webm/opus, mp4, m4a, ...) to 16 kHz mono
+ * 16-bit PCM WAV so whisper.cpp can decode it. MediaRecorder on Chrome emits
+ * `audio/webm;codecs=opus` and on iOS `audio/mp4` — neither is decodable by
+ * whisper.cpp directly. Throws on ffmpeg failure or if ffmpeg is unavailable.
+ */
+export function convertAudioToWav(inputPath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn("ffmpeg", [
+      "-y",
+      "-i", inputPath,
+      "-ar", "16000",
+      "-ac", "1",
+      "-c:a", "pcm_s16le",
+      outputPath,
+    ], { timeout: 30000 });
+
+    let stderr = "";
+    child.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
+
+    child.on("close", (code: number | null) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`ffmpeg exited with code ${code}: ${stderr}`));
+      }
+    });
+
+    child.on("error", (err: Error) => {
+      reject(new Error(`Failed to start ffmpeg: ${err.message}`));
+    });
+  });
+}
+
 async function getAudioDuration(audioPath: string): Promise<number> {
   return new Promise((resolve) => {
     // 用 ffprobe 获取时长 (秒)

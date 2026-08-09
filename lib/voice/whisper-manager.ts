@@ -24,6 +24,16 @@ export function isModelAvailable(): boolean {
   return modelPath !== null;
 }
 
+/**
+ * Resolve the whisper model name (e.g. "ggml-base") for the actual model file
+ * that will be used, so callers can record it rather than a hardcoded guess.
+ */
+export function getModelName(): string | null {
+  const resolved = modelPath ?? findModel();
+  if (!resolved) return null;
+  return path.basename(resolved).replace(/\.bin$/, "");
+}
+
 export function healthCheck(): boolean {
   // whisper.cpp 作为一次性 CLI 调用，无需常驻进程
   // 检查二进制是否可用

@@ -1,6 +1,7 @@
 import { getDb } from "./index";
 import type { VoiceSession } from "@/lib/utils/types";
 import { v4 as uuid } from "uuid";
+import fs from "fs";
 
 export function createVoiceSession(attrs: {
   sessionId?: string | null;
@@ -35,9 +36,26 @@ export function getVoiceSession(id: string): VoiceSession | undefined {
 
 export function deleteOldRecordings(daysToKeep = 30): number {
   const db = getDb();
+  const cutoff = `-${daysToKeep}`;
+  const rows = db.prepare(`
+    SELECT audio_path FROM voice_sessions
+    WHERE created_at < datetime('now', ? || ' days')
+  `).all(cutoff) as { audio_path: string | null }[];
+
   const result = db.prepare(`
     DELETE FROM voice_sessions
     WHERE created_at < datetime('now', ? || ' days')
-  `).run(`-${daysToKeep}`);
+  `).run(cutoff);
+
+  // Best-effort cleanup of the underlying audio files so disk does not
+  // accumulate forever alongside the DB rows.
+  for (const row of rows) {
+    if (!row.audio_path) continue;
+    try {
+      fs.unlinkSync(row.audio_path);
+    } catch {
+      // Ignore files already removed or missing on disk.
+    }
+  }
   return result.changes;
 }
