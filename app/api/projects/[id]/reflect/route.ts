@@ -4,6 +4,8 @@ import { createReflection, getReflections } from "@/lib/db/reflections";
 import { addLog } from "@/lib/db/project-logs";
 import { buildReflectionQuestions } from "@/lib/engine/reflection-coach";
 import { recordEvent } from "@/lib/engine/evidence-collector";
+import { awardPoints } from "@/lib/engine/points-engine";
+import { getOrCreateAccount } from "@/lib/db/user-account";
 import type { AgeGroup, ReflectionType } from "@/lib/utils/types";
 
 export async function GET(
@@ -64,6 +66,10 @@ export async function POST(
     has_q3: !!reflection.q3,
     has_q4: !!reflection.q4,
   });
+
+  // P8a: award habit points for reflection
+  const account = getOrCreateAccount();
+  awardPoints(account.id, "reflection", params.id);
 
   return NextResponse.json({ reflection }, { status: 201 });
 }

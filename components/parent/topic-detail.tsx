@@ -113,6 +113,31 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
     }
   };
 
+  const handleCompleteChallenge = async (title: string) => {
+    try {
+      const res = await fetch("/api/user/activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action_type: "complete_challenge",
+          action_target: title,
+        }),
+      });
+      if (!res.ok) {
+        alert("积分记录失败，请检查网络连接");
+        return;
+      }
+      const result = await res.json();
+      if (result.new_badges?.length > 0) {
+        alert(`🎉 获得新徽章: ${result.new_badges.map((b: { name: string }) => b.name).join(", ")}`);
+      } else {
+        alert(`✅ 完成挑战！+${result.points_awarded} 分`);
+      }
+    } catch {
+      alert("积分记录失败，请检查网络连接");
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -201,6 +226,12 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
                       <p className="text-body-xs text-ink-tertiary">💡 {ch.hint}</p>
                     </div>
                   )}
+                  <button
+                    onClick={() => handleCompleteChallenge(ch.title)}
+                    className="mt-3 bg-primary text-white border-none rounded-btn px-3 py-1.5 text-body-sm font-semibold hover:opacity-90 transition-opacity"
+                  >
+                    ✅ 完成挑战 (+20分)
+                  </button>
                 </div>
               ));
             })()}

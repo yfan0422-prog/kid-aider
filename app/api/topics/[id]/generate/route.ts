@@ -1,6 +1,8 @@
 import { getTopic, getActiveContent } from "@/lib/db/topics";
 import { generateContent } from "@/lib/engine/content-generator";
 import { getOrCreateChildProfile } from "@/lib/db/child-profile";
+import { awardPoints } from "@/lib/engine/points-engine";
+import { getOrCreateAccount } from "@/lib/db/user-account";
 import type { TopicLanguage } from "@/lib/utils/types";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +62,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       inFlight.delete(key);
       if (content) {
         console.log(`[generate] content generated for topic ${params.id} v${content.version}`);
+        // P8a: award habit points for exploring a topic
+        try {
+          const account = getOrCreateAccount();
+          awardPoints(account.id, "explore_topic", params.id);
+        } catch (err) {
+          console.error("[generate] failed to award points:", err);
+        }
       } else {
         console.error(`[generate] content generation failed for topic ${params.id}`);
       }

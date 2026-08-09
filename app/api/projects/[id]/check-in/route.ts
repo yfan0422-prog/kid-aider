@@ -3,6 +3,8 @@ import { upsertCheckIn, getCheckIns, getStreak } from "@/lib/db/check-ins";
 import { addLog } from "@/lib/db/project-logs";
 import { getProject } from "@/lib/db/projects";
 import { recordEvent } from "@/lib/engine/evidence-collector";
+import { awardPoints } from "@/lib/engine/points-engine";
+import { getOrCreateAccount } from "@/lib/db/user-account";
 
 export async function GET(
   _req: NextRequest,
@@ -33,6 +35,9 @@ export async function POST(
     date: checkIn.date,
     summary: checkIn.summary,
   });
+  // P8a: award habit points for check-in
+  const account = getOrCreateAccount();
+  awardPoints(account.id, "check_in", params.id);
   const streak = getStreak(params.id);
   return NextResponse.json({ check_in: checkIn, streak });
 }
