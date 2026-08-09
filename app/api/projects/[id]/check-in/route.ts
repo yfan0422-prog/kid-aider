@@ -6,6 +6,8 @@ import { recordEvent } from "@/lib/engine/evidence-collector";
 import { awardPoints } from "@/lib/engine/points-engine";
 import { getOrCreateAccount } from "@/lib/db/user-account";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }

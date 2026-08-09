@@ -6,6 +6,8 @@ import { buildReflectionQuestions } from "@/lib/engine/reflection-coach";
 import { recordEvent } from "@/lib/engine/evidence-collector";
 import { awardPoints } from "@/lib/engine/points-engine";
 import { getOrCreateAccount } from "@/lib/db/user-account";
+
+export const dynamic = "force-dynamic";
 import type { AgeGroup, ReflectionType } from "@/lib/utils/types";
 
 export async function GET(
