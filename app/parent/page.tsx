@@ -5,6 +5,8 @@ import Link from "next/link";
 import { UsageControl } from "@/components/parent/usage-control";
 import { FilteredWordsManager } from "@/components/parent/filtered-words-manager";
 import { ProjectManager } from "@/components/parent/project-manager";
+import { DataPanel } from "@/components/parent/data-panel";
+import { SystemLog } from "@/components/parent/system-log";
 import type { UsageConfig } from "@/lib/utils/types";
 
 type Tab = "control" | "projects" | "data" | "logs";
@@ -88,8 +90,8 @@ export default function ParentPage() {
         </div>
       )}
       {tab === "projects" && <ProjectManager />}
-      {tab === "data" && <p className="text-ink-tertiary text-body-sm">数据面板 — 待 Task 10 实现</p>}
-      {tab === "logs" && <p className="text-ink-tertiary text-body-sm">系统日志 — 待 Task 10 实现</p>}
+      {tab === "data" && <DataPanel />}
+      {tab === "logs" && <SystemLog />}
     </div>
   );
 }
