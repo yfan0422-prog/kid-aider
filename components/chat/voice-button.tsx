@@ -15,14 +15,24 @@ export function VoiceButton({ onTranscription, disabled }: Props) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const debounceRef = useRef(false);
+  const releasedRef = useRef(false);
 
   const startRecording = useCallback(async () => {
     if (debounceRef.current) return;
     debounceRef.current = true;
     setTimeout(() => { debounceRef.current = false; }, 500);
+    releasedRef.current = false; // fresh press
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // The user may have released (onMouseUp/onTouchEnd) while the mic
+      // permission was still pending. If so, stop the tracks and bail out —
+      // otherwise the recorder would start after release and never stop.
+      if (releasedRef.current) {
+        stream.getTracks().forEach(t => t.stop());
+        setState("idle");
+        return;
+      }
       // Prefer opus-coded webm, fall back to plain webm for browsers without codec support
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
@@ -73,6 +83,7 @@ export function VoiceButton({ onTranscription, disabled }: Props) {
   }, [onTranscription]);
 
   const stopRecording = useCallback(() => {
+    releasedRef.current = true;
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
     }
