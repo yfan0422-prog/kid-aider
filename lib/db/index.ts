@@ -211,6 +211,31 @@ export function getDb(): Database.Database {
       word TEXT NOT NULL UNIQUE
     );
 
+    CREATE TABLE IF NOT EXISTS voice_sessions (
+      id            TEXT PRIMARY KEY,
+      session_id    TEXT,
+      audio_path    TEXT NOT NULL,
+      transcript    TEXT,
+      asr_model     TEXT NOT NULL,
+      asr_time_ms   INTEGER,
+      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS emotion_log (
+      id             TEXT PRIMARY KEY,
+      session_id     TEXT,
+      source         TEXT NOT NULL CHECK(source IN ('voice', 'text', 'fused')),
+      emotion        TEXT NOT NULL,
+      confidence     REAL,
+      voice_features TEXT,
+      text_snippet   TEXT,
+      model_used     TEXT NOT NULL DEFAULT 'rule',
+      created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_voice_sessions_session ON voice_sessions(session_id);
+    CREATE INDEX IF NOT EXISTS idx_emotion_log_session ON emotion_log(session_id);
+
     INSERT OR IGNORE INTO usage_config (id) VALUES (1);
 
     INSERT OR IGNORE INTO filtered_words (word) VALUES

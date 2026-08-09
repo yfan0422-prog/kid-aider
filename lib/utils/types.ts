@@ -204,3 +204,25 @@ export interface FilteredWord {
   id: number;
   word: string;
 }
+
+export interface VoiceSession {
+  id: string;
+  session_id: string | null;
+  audio_path: string;
+  transcript: string | null;
+  asr_model: string;
+  asr_time_ms: number | null;
+  created_at: string;
+}
+
+export interface EmotionLog {
+  id: string;
+  session_id: string | null;
+  source: "voice" | "text" | "fused";
+  emotion: string;
+  confidence: number | null;
+  voice_features: string | null; // JSON: {pitch, rate, volume} | null
+  text_snippet: string | null;
+  model_used: string; // 'rule' | 'llm' | 'rule+llm'
+  created_at: string;
+}
