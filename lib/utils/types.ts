@@ -332,3 +332,59 @@ export interface TopicSuggestion {
   reviewed_at: string | null;
   created_at: string;
 }
+
+// ─── P8a 习惯养成 ───────────────────────────────────────────────
+
+export type ActionType = "login" | "explore_topic" | "complete_challenge" | "task_done" | "check_in" | "reflection";
+export type BadgeRarity = "common" | "rare" | "epic" | "legendary";
+export type BadgeCategory8 = "explore" | "project" | "streak" | "special";
+export type RankTier = "bronze" | "silver" | "gold" | "diamond" | "legendary";
+
+export interface UnlockRule {
+  type: "action_count" | "streak_days" | "total_points" | "projects_count" | "reflections_count";
+  threshold: number;
+  subject?: string;
+}
+
+export interface UserAccount {
+  id: string;
+  display_name: string;
+  avatar_emoji: string;
+  age_group: string;
+  language: string;
+  total_points: number;
+  current_streak: number;
+  longest_streak: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DailyActivity {
+  id: string;
+  user_id: string;
+  action_type: ActionType;
+  action_target: string | null;
+  points: number;
+  note: string | null;
+  created_at: string;
+}
+
+export interface BadgeDef {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: BadgeCategory8;
+  rarity: BadgeRarity;
+  points_value: number;
+  unlock_rule: string; // JSON: UnlockRule
+  sort_order: number;
+  created_at: string;
+}
+
+export interface BadgeUnlock {
+  id: string;
+  user_id: string;
+  badge_id: string;
+  unlocked_at: string;
+}

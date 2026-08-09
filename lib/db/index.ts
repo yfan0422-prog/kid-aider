@@ -344,6 +344,53 @@ export function getDb(): Database.Database {
 
     CREATE INDEX IF NOT EXISTS idx_topic_suggestions_status
       ON topic_suggestions(status);
+
+    CREATE TABLE IF NOT EXISTS user_account (
+      id              TEXT PRIMARY KEY,
+      display_name    TEXT NOT NULL DEFAULT '小小探索者',
+      avatar_emoji    TEXT DEFAULT '🧒',
+      age_group       TEXT NOT NULL DEFAULT '10-12',
+      language        TEXT NOT NULL DEFAULT 'zh-CN',
+      total_points    INTEGER NOT NULL DEFAULT 0,
+      current_streak  INTEGER NOT NULL DEFAULT 0,
+      longest_streak  INTEGER NOT NULL DEFAULT 0,
+      created_at      TEXT NOT NULL,
+      updated_at      TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS daily_activity (
+      id              TEXT PRIMARY KEY,
+      user_id         TEXT NOT NULL,
+      action_type     TEXT NOT NULL,
+      action_target   TEXT,
+      points          INTEGER NOT NULL,
+      note            TEXT,
+      created_at      TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_daily_activity_user_date
+      ON daily_activity(user_id, created_at);
+
+    CREATE TABLE IF NOT EXISTS badge_def (
+      id              TEXT PRIMARY KEY,
+      name            TEXT NOT NULL,
+      description     TEXT NOT NULL,
+      icon            TEXT NOT NULL,
+      category        TEXT NOT NULL,
+      rarity          TEXT NOT NULL DEFAULT 'common',
+      points_value    INTEGER NOT NULL DEFAULT 0,
+      unlock_rule     TEXT NOT NULL,
+      sort_order      INTEGER DEFAULT 0,
+      created_at      TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS badge_unlock (
+      id              TEXT PRIMARY KEY,
+      user_id         TEXT NOT NULL,
+      badge_id        TEXT NOT NULL REFERENCES badge_def(id),
+      unlocked_at     TEXT NOT NULL,
+      UNIQUE(user_id, badge_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_badge_unlock_user ON badge_unlock(user_id);
   `);
 
   return db;
