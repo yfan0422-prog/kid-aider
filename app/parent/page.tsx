@@ -6,12 +6,13 @@ import { UsageControl } from "@/components/parent/usage-control";
 import { FilteredWordsManager } from "@/components/parent/filtered-words-manager";
 import { ProjectManager } from "@/components/parent/project-manager";
 import { ProfileView } from "@/components/parent/profile-view";
+import { TopicManager } from "@/components/parent/topic-manager";
 import { DataPanel } from "@/components/parent/data-panel";
 import { SystemLog } from "@/components/parent/system-log";
 import { ModelProfileList } from "@/components/settings/model-profile-list";
 import type { UsageConfig } from "@/lib/utils/types";
 
-type Tab = "control" | "models" | "projects" | "profile" | "data" | "logs";
+type Tab = "control" | "models" | "projects" | "profile" | "content" | "data" | "logs";
 
 export default function ParentPage() {
   const [tab, setTab] = useState<Tab>("control");
@@ -28,6 +29,7 @@ export default function ParentPage() {
     { key: "models", label: "模型", icon: "🤖" },
     { key: "projects", label: "项目", icon: "📁" },
     { key: "profile", label: "画像", icon: "🧠" },
+    { key: "content", label: "内容", icon: "📰" },
     { key: "data", label: "数据", icon: "📊" },
     { key: "logs", label: "日志", icon: "📋" },
   ];
@@ -100,6 +102,7 @@ export default function ParentPage() {
       )}
       {tab === "projects" && <ProjectManager />}
       {tab === "profile" && <ProfileView />}
+      {tab === "content" && <TopicManager />}
       {tab === "data" && <DataPanel />}
       {tab === "logs" && <SystemLog />}
     </div>
