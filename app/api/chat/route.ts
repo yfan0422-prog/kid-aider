@@ -169,8 +169,13 @@ export async function POST(req: NextRequest) {
   }, 0);
 
   // --- P6 profile injection ---
-  const profile = getOrCreateChildProfile();
-  const profileContext = buildProfileContext(profile);
+  let profileContext = "";
+  try {
+    const profile = getOrCreateChildProfile();
+    profileContext = buildProfileContext(profile);
+  } catch (err) {
+    console.warn("[chat] profile read failed, falling back to empty context:", err);
+  }
   // --- End P6 profile injection ---
 
   let promptMessages = buildChatPrompt({
@@ -321,7 +326,7 @@ export async function POST(req: NextRequest) {
       // ── End P4 usage recording ──────────────────────────────────
 
       // P6 session-end lightweight update (fire-and-forget)
-      const messagesThisSession = recentMessages.filter(m => m.role === "child").length + 1;
+      const messagesThisSession = recentMessages.filter(m => m.role === "child").length;
       if (streamOk && messagesThisSession >= 3) {
         setTimeout(() => {
           try {

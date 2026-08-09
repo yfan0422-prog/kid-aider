@@ -223,7 +223,7 @@ export function runDeepAnalysisSync(
   return {
     ...abilities,
     ability_updated_at: now,
-    emotion_baseline: JSON.stringify(emotionBaseline),
+    emotion_baseline: Object.keys(emotionBaseline).length > 0 ? JSON.stringify(emotionBaseline) : profile.emotion_baseline,
     emotion_updated_at: Object.keys(emotionBaseline).length > 0 ? now : profile.emotion_updated_at,
     interest_tags: JSON.stringify(interestTags),
     interest_updated_at: interestTags.length > 0 ? now : profile.interest_updated_at,
