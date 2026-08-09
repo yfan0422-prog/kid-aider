@@ -27,7 +27,7 @@ export function MessageList() {
       )}
       {messages.map((msg) =>
         msg.role === "guide" ? (
-          <BubbleGuide key={msg.id} content={msg.content} strategyId={msg.strategy_id} />
+          <BubbleGuide key={msg.id} content={msg.content} strategyId={msg.strategy_id} messageId={msg.id} />
         ) : msg.role === "child" ? (
           <BubbleChild key={msg.id} content={msg.content} />
         ) : null

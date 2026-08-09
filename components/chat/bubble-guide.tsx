@@ -1,11 +1,14 @@
 "use client";
 
+import { AudioPlayer } from "./audio-player";
+
 interface Props {
   content: string;
   strategyId?: string | null;
+  messageId?: string;
 }
 
-export function BubbleGuide({ content, strategyId }: Props) {
+export function BubbleGuide({ content, strategyId, messageId }: Props) {
   return (
     <div className="flex gap-3 mb-4">
       {/* Avatar */}
@@ -15,6 +18,7 @@ export function BubbleGuide({ content, strategyId }: Props) {
       {/* Bubble */}
       <div className="bubble-guide bg-bubble-guide border border-border rounded-tl-sm rounded-tr-bubble rounded-br-bubble rounded-bl-bubble px-5 py-4 text-body-lg shadow-sm max-w-[80%]">
         <p className="whitespace-pre-wrap">{content}</p>
+        <AudioPlayer messageId={messageId || ""} text={content} />
         {strategyId && (
           <span className="inline-block mt-2 text-xs text-ink-tertiary bg-surface-raised px-2 py-0.5 rounded-full">
             {strategyId}

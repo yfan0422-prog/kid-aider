@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useChatStore } from "@/lib/store/chat-store";
 import { AgeSwitcher } from "./age-switcher";
+import { VoiceButton } from "./voice-button";
 import { getAgeConfig } from "@/lib/utils/age-config";
 
 export function InputBar() {
@@ -22,6 +23,10 @@ export function InputBar() {
 
   // Ref to accumulate streaming text (avoid stale closure on streamingContent)
   const streamAccRef = useRef("");
+
+  const handleVoiceTranscription = useCallback((text: string) => {
+    setInput(text);
+  }, []);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
@@ -172,12 +177,16 @@ export function InputBar() {
     <div className="border-t border-border bg-surface px-4 py-3">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-end gap-3">
+          <VoiceButton
+            onTranscription={handleVoiceTranscription}
+            disabled={isStreaming}
+          />
           <textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isStreaming ? "小K正在打字……" : "说说你的想法……"}
+            placeholder={isStreaming ? "小K正在打字……" : "输入文字，或按住🎤说话"}
             rows={1}
             disabled={isStreaming}
             className={`flex-1 resize-none bg-surface-raised border-2 border-border rounded-btn px-5 py-3.5 ${config.fontSize} min-h-[56px] max-h-[120px] focus:border-primary focus:shadow-[0_0_0_4px_rgba(79,124,255,0.15)] focus:outline-none transition-all placeholder:text-ink-tertiary disabled:opacity-50`}
