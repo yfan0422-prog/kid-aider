@@ -7,7 +7,34 @@ import { classifyIntent } from "@/lib/engine/intent";
 import { createFunnelState, evaluateLayerCompletion, getLayerLabel } from "@/lib/engine/funnel-machine";
 import { buildChatPrompt } from "@/lib/engine/prompt-builder";
 import { recordEvent } from "@/lib/engine/evidence-collector";
+import { getUsageConfig } from "@/lib/db/usage-config";
+import { getTodayUsageSec, recordUsageTime } from "@/lib/db/usage-log";
+import { checkTextFilter } from "@/lib/db/filtered-words";
 import type { AgeGroup, FunnelLayer } from "@/lib/utils/types";
+
+/**
+ * Build an SSE response carrying a single "blocked" guide message.
+ * The chat client only renders SSE `text` events, so a soft block (quiet
+ * hours / daily limit) is delivered as a normal guide reply instead of a
+ * JSON body the client does not know how to render.
+ */
+function blockedResponse(message: string): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: message, blocked: true })}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
+}
 
 export async function POST(req: NextRequest) {
   const { message, sessionId, ageGroup } = await req.json() as {
@@ -15,6 +42,37 @@ export async function POST(req: NextRequest) {
     sessionId?: string;
     ageGroup?: AgeGroup;
   };
+
+  // ── P4 usage check ──────────────────────────────────────────
+  const usageConfig = getUsageConfig();
+
+  if (!usageConfig.restrictions_paused) {
+    // Quiet hours check
+    if (usageConfig.quiet_start && usageConfig.quiet_end) {
+      const now = new Date();
+      const currentMin = now.getHours() * 60 + now.getMinutes();
+      const [sh, sm] = usageConfig.quiet_start.split(":").map(Number);
+      const [eh, em] = usageConfig.quiet_end.split(":").map(Number);
+      const startMin = sh * 60 + sm;
+      const endMin = eh * 60 + em;
+      const inQuiet = startMin < endMin
+        ? currentMin >= startMin && currentMin < endMin
+        : currentMin >= startMin || currentMin < endMin;
+      if (inQuiet) {
+        return blockedResponse("现在是休息时间，明天再来探索吧！");
+      }
+    }
+
+    // Daily limit check
+    if (usageConfig.daily_limit_min) {
+      const todaySec = getTodayUsageSec();
+      const limitSec = usageConfig.daily_limit_min * 60;
+      if (todaySec >= limitSec) {
+        return blockedResponse("今天的探索时间到啦！明天再来吧 🌙");
+      }
+    }
+  }
+  // ── End P4 usage check ──────────────────────────────────────
 
   // Get or create session
   let session = sessionId ? getSession(sessionId) : null;
@@ -95,13 +153,13 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       let fullResponse = "";
+      let streamOk = true;
 
       try {
         for await (const chunk of routed.adapter.streamChat({
           messages: promptMessages,
         })) {
           fullResponse += chunk;
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`));
         }
 
         // Process funnel advancement if in funnel
@@ -155,17 +213,55 @@ export async function POST(req: NextRequest) {
           }
         }
       } catch (error) {
+        streamOk = false;
         const errMsg = error instanceof Error ? error.message : "Unknown error";
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`));
+      }
+
+      // ── P4 content filter ───────────────────────────────────────
+      // The response is fully assembled before emission so the filter can
+      // actually gate what the child sees (streamed chunks cannot be retracted).
+      let finalContent = fullResponse;
+      if (streamOk && usageConfig.filter_enabled) {
+        const filterResult = checkTextFilter(fullResponse);
+        if (filterResult.blocked) {
+          finalContent = "这个问题我们换一种方式回答。";
+        }
+      }
+      // ── End P4 content filter ───────────────────────────────────
+
+      // ── P4 80% time warning ─────────────────────────────────────
+      if (streamOk && !usageConfig.restrictions_paused && usageConfig.daily_limit_min) {
+        const todaySec = getTodayUsageSec();
+        const limitSec = usageConfig.daily_limit_min * 60;
+        if (todaySec >= limitSec * 0.8 && todaySec < limitSec) {
+          const remainingMin = Math.ceil((limitSec - todaySec) / 60);
+          finalContent = finalContent + `\n\n⏰ 今天还剩约 ${remainingMin} 分钟哦！`;
+        }
+      }
+      // ── End P4 time warning ─────────────────────────────────────
+
+      if (streamOk) {
+        // Emit the fully assembled (filtered, warning-appended) response as one text event
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: finalContent })}\n\n`));
       }
 
       // Save guide message
       createMessage({
         session_id: session.id,
         role: "guide",
-        content: fullResponse,
+        content: finalContent,
         strategy_id: funnelState ? `funnel-layer-${funnelState.currentLayer}` : "open-dialogue",
       });
+
+      // ── P4 record usage time (rough estimate: ~10s per exchange) ──
+      // Only count successful exchanges — blocked/errored requests never reach here,
+      // and an errored stream should not consume the child's daily allowance.
+      if (streamOk) {
+        const today = new Date().toISOString().slice(0, 10);
+        recordUsageTime(today, 10);
+      }
+      // ── End P4 usage recording ──────────────────────────────────
 
       controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       controller.close();
