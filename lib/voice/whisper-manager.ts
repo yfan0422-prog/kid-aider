@@ -1,8 +1,7 @@
-import { spawn, type ChildProcess } from "child_process";
+import { spawn, execSync } from "child_process";
 import path from "path";
 import fs from "fs";
 
-let process_: ChildProcess | null = null;
 let modelPath: string | null = null;
 
 const WHISPER_BIN = "whisper.cpp";
@@ -29,7 +28,6 @@ export function healthCheck(): boolean {
   // whisper.cpp 作为一次性 CLI 调用，无需常驻进程
   // 检查二进制是否可用
   try {
-    const { execSync } = require("child_process");
     execSync(`which ${WHISPER_BIN}`, { encoding: "utf8" });
     return true;
   } catch {

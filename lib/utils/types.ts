@@ -221,7 +221,7 @@ export interface EmotionLog {
   source: "voice" | "text" | "fused";
   emotion: string;
   confidence: number | null;
-  voice_features: string | null; // JSON: {pitch, rate, volume} | null
+  voice_features: string | null; // JSON: {pitch, duration, volume} | null
   text_snippet: string | null;
   model_used: string; // 'rule' | 'llm' | 'rule+llm'
   created_at: string;
