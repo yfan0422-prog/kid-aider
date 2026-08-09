@@ -1,6 +1,5 @@
 "use client";
 
-import { ModelProfileList } from "@/components/settings/model-profile-list";
 import Link from "next/link";
 
 export default function SettingsPage() {
@@ -12,7 +11,14 @@ export default function SettingsPage() {
         </Link>
         <h1 className="text-2xl font-bold">设置</h1>
       </div>
-      <ModelProfileList />
+      <div className="mt-8 pt-4 border-t border-border">
+        <Link
+          href="/parent"
+          className="text-body-sm text-ink-tertiary hover:text-ink transition-colors"
+        >
+          家长控制 →
+        </Link>
+      </div>
     </div>
   );
 }

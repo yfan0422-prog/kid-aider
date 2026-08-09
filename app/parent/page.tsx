@@ -7,9 +7,10 @@ import { FilteredWordsManager } from "@/components/parent/filtered-words-manager
 import { ProjectManager } from "@/components/parent/project-manager";
 import { DataPanel } from "@/components/parent/data-panel";
 import { SystemLog } from "@/components/parent/system-log";
+import { ModelProfileList } from "@/components/settings/model-profile-list";
 import type { UsageConfig } from "@/lib/utils/types";
 
-type Tab = "control" | "projects" | "data" | "logs";
+type Tab = "control" | "models" | "projects" | "data" | "logs";
 
 export default function ParentPage() {
   const [tab, setTab] = useState<Tab>("control");
@@ -23,6 +24,7 @@ export default function ParentPage() {
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "control", label: "控制", icon: "🔧" },
+    { key: "models", label: "模型", icon: "🤖" },
     { key: "projects", label: "项目", icon: "📁" },
     { key: "data", label: "数据", icon: "📊" },
     { key: "logs", label: "日志", icon: "📋" },
@@ -88,6 +90,11 @@ export default function ParentPage() {
             <FilteredWordsManager />
           </section>
         </div>
+      )}
+      {tab === "models" && (
+        <section className="bg-surface border border-border rounded-card p-5">
+          <ModelProfileList />
+        </section>
       )}
       {tab === "projects" && <ProjectManager />}
       {tab === "data" && <DataPanel />}
