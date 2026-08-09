@@ -110,7 +110,7 @@ function edgeTimestamp(): string {
 
 // 服务不支持若干控制字符（尤其垂直制表符），替换为空格
 function removeControlChars(s: string): string {
-  return [...s].map(c => {
+  return Array.from(s).map(c => {
     const code = c.codePointAt(0)!;
     if ((code >= 0 && code <= 8) || (code >= 11 && code <= 12) || (code >= 14 && code <= 31)) return " ";
     return c;
