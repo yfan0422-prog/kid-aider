@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ProjectDetailModal } from "./project-detail-modal";
 
 interface ParentProject {
@@ -33,16 +33,16 @@ export function ProjectManager() {
   const [loading, setLoading] = useState(true);
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  const fetchProjects = () => {
+  const fetchProjects = useCallback(() => {
     setLoading(true);
     const params = filter ? `?status=${filter}` : "";
     fetch(`/api/parent/projects${params}`)
       .then(r => r.json())
       .then(d => setProjects(d.projects))
       .finally(() => setLoading(false));
-  };
+  }, [filter]);
 
-  useEffect(() => { fetchProjects(); }, [filter]);
+  useEffect(() => { fetchProjects(); }, [fetchProjects]);
 
   const changeStatus = async (id: string, status: string) => {
     await fetch(`/api/parent/projects/${id}`, {
