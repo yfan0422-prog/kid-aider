@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UsageControl } from "@/components/parent/usage-control";
+import { FilteredWordsManager } from "@/components/parent/filtered-words-manager";
+import { ProjectManager } from "@/components/parent/project-manager";
 import type { UsageConfig } from "@/lib/utils/types";
 
 type Tab = "control" | "projects" | "data" | "logs";
@@ -76,8 +78,16 @@ export default function ParentPage() {
       </div>
 
       {/* Tab content */}
-      {tab === "control" && <UsageControl config={config} onConfigChange={setConfig} />}
-      {tab === "projects" && <p className="text-ink-tertiary text-body-sm">项目管理 — 待 Task 9 实现</p>}
+      {tab === "control" && (
+        <div className="space-y-6">
+          <UsageControl config={config} onConfigChange={setConfig} />
+          <section className="bg-surface border border-border rounded-card p-5">
+            <h2 className="text-body-lg font-bold mb-3">🚫 敏感词管理</h2>
+            <FilteredWordsManager />
+          </section>
+        </div>
+      )}
+      {tab === "projects" && <ProjectManager />}
       {tab === "data" && <p className="text-ink-tertiary text-body-sm">数据面板 — 待 Task 10 实现</p>}
       {tab === "logs" && <p className="text-ink-tertiary text-body-sm">系统日志 — 待 Task 10 实现</p>}
     </div>
