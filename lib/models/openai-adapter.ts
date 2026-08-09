@@ -45,13 +45,16 @@ export function createOpenAIAdapter(profile: ModelProfile) {
     },
 
     async speech(text: string, voice: string, speed: number): Promise<Buffer> {
-      const response = await client.audio.speech.create({
-        model: "tts-1",
-        voice,
-        input: text,
-        speed,
-        response_format: "mp3",
-      });
+      const response = await client.audio.speech.create(
+        {
+          model: "tts-1",
+          voice,
+          input: text,
+          speed,
+          response_format: "mp3",
+        },
+        { signal: AbortSignal.timeout(5000) }
+      );
       const arrayBuffer = await response.arrayBuffer();
       return Buffer.from(arrayBuffer);
     },
