@@ -4,9 +4,6 @@ import type {
   TopicCatalog,
   TopicContent,
   TopicSuggestion,
-  TopicLanguage,
-  TopicCategory,
-  AgeGroup,
   Challenge,
 } from "@/lib/utils/types";
 

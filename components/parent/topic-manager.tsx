@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { TopicCatalog, TopicContent, TopicSuggestion } from "@/lib/utils/types";
+import type { TopicCatalog, TopicSuggestion } from "@/lib/utils/types";
 
 type SubTab = "catalog" | "suggestions";
 
@@ -10,7 +10,6 @@ export function TopicManager() {
   const [topics, setTopics] = useState<TopicCatalog[]>([]);
   const [suggestions, setSuggestions] = useState<TopicSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingTopic, setEditingTopic] = useState<TopicCatalog | null>(null);
 
   // Add form state
   const [showAddForm, setShowAddForm] = useState(false);
