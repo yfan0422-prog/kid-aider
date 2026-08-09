@@ -1,5 +1,7 @@
 import { getOrCreateChildProfile, getChildProfile } from "@/lib/db/child-profile";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const profile = getChildProfile();
   if (!profile) {
