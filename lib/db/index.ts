@@ -236,6 +236,36 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_voice_sessions_session ON voice_sessions(session_id);
     CREATE INDEX IF NOT EXISTS idx_emotion_log_session ON emotion_log(session_id);
 
+    CREATE TABLE IF NOT EXISTS child_profile (
+      id                TEXT PRIMARY KEY,
+      ability_creativity    REAL DEFAULT 0.5,
+      ability_logical       REAL DEFAULT 0.5,
+      ability_focus         REAL DEFAULT 0.5,
+      ability_expression    REAL DEFAULT 0.5,
+      ability_curiosity     REAL DEFAULT 0.5,
+      ability_updated_at    TEXT,
+      interest_tags         TEXT DEFAULT '[]',
+      interest_updated_at   TEXT,
+      emotion_baseline      TEXT DEFAULT '{}',
+      emotion_updated_at    TEXT,
+      preferred_time_range  TEXT,
+      avg_session_minutes   REAL,
+      engagement_trend      TEXT DEFAULT 'stable',
+      total_sessions        INTEGER DEFAULT 0,
+      last_session_at       TEXT,
+      deep_analysis_at      TEXT,
+      created_at            TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at            TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS profile_updates (
+      id            TEXT PRIMARY KEY,
+      trigger       TEXT NOT NULL CHECK(trigger IN ('session_start', 'session_end', 'deep_analysis')),
+      changes       TEXT NOT NULL,
+      snapshot      TEXT,
+      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     INSERT OR IGNORE INTO usage_config (id) VALUES (1);
 
     INSERT OR IGNORE INTO filtered_words (word) VALUES

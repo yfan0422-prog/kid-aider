@@ -226,3 +226,33 @@ export interface EmotionLog {
   model_used: string; // 'rule' | 'llm' | 'rule+llm'
   created_at: string;
 }
+
+export interface ChildProfile {
+  id: string;
+  ability_creativity: number;   // 0.0-1.0
+  ability_logical: number;
+  ability_focus: number;
+  ability_expression: number;
+  ability_curiosity: number;
+  ability_updated_at: string | null;
+  interest_tags: string;        // JSON array: ["绘画","恐龙"]
+  interest_updated_at: string | null;
+  emotion_baseline: string;     // JSON: {"excited":0.3,"calm":0.4,...}
+  emotion_updated_at: string | null;
+  preferred_time_range: string | null;
+  avg_session_minutes: number | null;
+  engagement_trend: string;     // "rising" | "stable" | "declining"
+  total_sessions: number;
+  last_session_at: string | null;
+  deep_analysis_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProfileUpdate {
+  id: string;
+  trigger: "session_start" | "session_end" | "deep_analysis";
+  changes: string;   // JSON: 记录哪些字段发生了变化
+  snapshot: string | null;  // JSON: 变更后的画像快照
+  created_at: string;
+}
