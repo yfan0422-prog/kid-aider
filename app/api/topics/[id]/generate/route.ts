@@ -5,6 +5,13 @@ import type { TopicLanguage } from "@/lib/utils/types";
 
 export const dynamic = "force-dynamic";
 
+// In-flight guard: prevent concurrent generation for the same topic+age+language combo
+const inFlight = new Set<string>();
+
+function inflightKey(topicId: string, ageGroup: string, language: string): string {
+  return `${topicId}|${ageGroup}|${language}`;
+}
+
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const topic = getTopic(params.id);
   if (!topic) {
@@ -26,8 +33,22 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
   }
 
+  // Check in-flight guard — prevent concurrent generation for same combo
+  const key = inflightKey(params.id, topic.age_group, lang);
+  if (inFlight.has(key)) {
+    return Response.json({
+      status: "generating",
+      topic_id: params.id,
+      language: lang,
+      reason: "already_in_progress",
+    });
+  }
+
   // Fire-and-forget: start generation, return immediately with pending status
   const profile = getOrCreateChildProfile();
+
+  // Mark as in-flight before starting async generation
+  inFlight.add(key);
 
   // Start generation asynchronously
   const generationPromise = generateContent(topic, lang, profile);
@@ -36,6 +57,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   // The client polls GET /api/topics/[id]/contents to check for results
   generationPromise.then(
     (content) => {
+      inFlight.delete(key);
       if (content) {
         console.log(`[generate] content generated for topic ${params.id} v${content.version}`);
       } else {
@@ -43,6 +65,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       }
     },
     (err) => {
+      inFlight.delete(key);
       console.error(`[generate] content generation failed for topic ${params.id}:`, err);
     },
   );

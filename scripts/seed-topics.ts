@@ -2,7 +2,7 @@
  * P7 种子话题迁移脚本
  * 运行: npx tsx scripts/seed-topics.ts
  *
- * 64 个种子话题 × 3 种语言（zh-CN / zh-HK / en）= 192 行 topic_catalog
+ * 72 个种子话题 × 3 种语言（zh-CN / zh-HK / en）= 216 行 topic_catalog
  * 仅在 topic_catalog 表为空时插入（幂等保护）
  */
 

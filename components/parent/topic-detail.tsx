@@ -170,10 +170,9 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
         <div className="space-y-4">
           {/* Intro */}
           <section className="bg-surface border border-border rounded-card p-5">
-            <div
-              className="max-w-none text-body text-ink whitespace-pre-line"
-              dangerouslySetInnerHTML={{ __html: stripMarkdown(content.intro_text) }}
-            />
+            <div className="max-w-none text-body text-ink whitespace-pre-line">
+              {stripMarkdown(content.intro_text)}
+            </div>
           </section>
 
           {/* Challenges */}
