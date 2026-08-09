@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db/index";
 import { getEarnedBadges, initBadges } from "@/lib/db/badges";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const db = getDb();
 

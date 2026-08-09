@@ -8,6 +8,8 @@ import { decomposeSolutionPack } from "@/lib/engine/project-decomposer";
 import { recordEvent } from "@/lib/engine/evidence-collector";
 import type { AgeGroup } from "@/lib/utils/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const projects = listProjects();
   return NextResponse.json({ projects });

@@ -4,6 +4,8 @@ import { getEarnedBadges } from "@/lib/db/badges";
 import { getDb } from "@/lib/db/index";
 import { getCurrentWeekStart } from "@/lib/engine/evidence-collector";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const weeks = parseInt(url.searchParams.get("weeks") || "4", 10);
