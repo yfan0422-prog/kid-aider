@@ -221,8 +221,10 @@ export async function POST(req: NextRequest) {
       // ── P4 content filter ───────────────────────────────────────
       // The response is fully assembled before emission so the filter can
       // actually gate what the child sees (streamed chunks cannot be retracted).
+      // The filter always runs — on an error path the partial response is still
+      // persisted to the messages table, so it must be filtered too.
       let finalContent = fullResponse;
-      if (streamOk && usageConfig.filter_enabled) {
+      if (usageConfig.filter_enabled) {
         const filterResult = checkTextFilter(fullResponse);
         if (filterResult.blocked) {
           finalContent = "这个问题我们换一种方式回答。";
