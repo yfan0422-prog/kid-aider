@@ -1,7 +1,17 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { TopicCatalog, TopicContent, Challenge } from "@/lib/utils/types";
+
+/** Strip basic markdown markers from LLM-generated intro text for display. */
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^###?\s+/gm, "")      // headings
+    .replace(/\*\*(.+?)\*\*/g, "$1") // bold
+    .replace(/\*(.+?)\*/g, "$1")      // italic
+    .replace(/^>\s+/gm, "")           // blockquote
+    .replace(/`(.+?)`/g, "$1");       // inline code
+}
 
 interface Props {
   topic: TopicCatalog;
@@ -14,6 +24,14 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup poll on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
 
   const fetchContent = useCallback(async () => {
     setLoading(true);
@@ -48,27 +66,46 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ language: initialLanguage }),
       });
+      if (!res.ok) {
+        setError("生成失败，请稍后重试");
+        setGenerating(false);
+        return;
+      }
       const data = await res.json();
       if (data.status === "generating") {
         // Poll for content
         let attempts = 0;
         const poll = setInterval(async () => {
           attempts++;
-          const check = await fetch(
-            `/api/topics/${topic.id}/contents?age_group=${topic.age_group}&language=${initialLanguage}`
-          );
-          const checkData = await check.json();
-          if (checkData.hasContent) {
-            setContent(checkData.content);
-            setGenerating(false);
-            clearInterval(poll);
-          } else if (attempts >= 30) {
-            // 60 seconds timeout
-            setError("内容生成超时，请稍后重试");
-            setGenerating(false);
-            clearInterval(poll);
+          try {
+            const check = await fetch(
+              `/api/topics/${topic.id}/contents?age_group=${topic.age_group}&language=${initialLanguage}`
+            );
+            const checkData = await check.json();
+            if (checkData.hasContent) {
+              setContent(checkData.content);
+              setGenerating(false);
+              clearInterval(poll);
+              pollRef.current = null;
+            } else if (attempts >= 30) {
+              setError("内容生成超时，请稍后重试");
+              setGenerating(false);
+              clearInterval(poll);
+              pollRef.current = null;
+            }
+          } catch {
+            // Network error during poll — keep polling up to timeout
           }
         }, 2000);
+        pollRef.current = poll;
+      } else if (data.content) {
+        // Content already exists (race between client fetch and generate POST)
+        setContent(data.content);
+        setGenerating(false);
+      } else {
+        // Unexpected response — stop spinner
+        setError("生成失败，请稍后重试");
+        setGenerating(false);
       }
     } catch {
       setError("生成失败，请稍后重试");
@@ -134,8 +171,8 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
           {/* Intro */}
           <section className="bg-surface border border-border rounded-card p-5">
             <div
-              className="prose prose-sm max-w-none text-body text-ink"
-              dangerouslySetInnerHTML={{ __html: content.intro_text.replace(/\n/g, "<br/>") }}
+              className="max-w-none text-body text-ink whitespace-pre-line"
+              dangerouslySetInnerHTML={{ __html: stripMarkdown(content.intro_text) }}
             />
           </section>
 

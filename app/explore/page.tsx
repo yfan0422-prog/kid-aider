@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useEffect, useState, useMemo } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { TopicCard } from "@/components/parent/topic-card";
 import { TopicDetail } from "@/components/parent/topic-detail";
 import type { TopicCatalog, TopicCategory, TopicLanguage } from "@/lib/utils/types";
@@ -31,6 +31,8 @@ export default function ExplorePage() {
 
 function ExploreContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const topicIdParam = searchParams.get("topic");
 
   const [topics, setTopics] = useState<TopicCatalog[]>([]);
@@ -60,15 +62,23 @@ function ExploreContent() {
     if (topicIdParam && topics.length > 0) {
       const found = topics.find(t => t.id === topicIdParam);
       if (found) setSelectedTopic(found);
+    } else if (!topicIdParam && selectedTopic) {
+      // Browser-back cleared the query param — dismiss the detail view
+      setSelectedTopic(null);
     }
   }, [topicIdParam, topics]);
+
+  const handleBack = () => {
+    setSelectedTopic(null);
+    router.replace(pathname, { scroll: false });
+  };
 
   if (selectedTopic) {
     return (
       <div className="max-w-2xl mx-auto p-6">
         <TopicDetail
           topic={selectedTopic}
-          onBack={() => setSelectedTopic(null)}
+          onBack={handleBack}
           initialLanguage={language}
         />
       </div>
