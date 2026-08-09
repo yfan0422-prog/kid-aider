@@ -16,9 +16,15 @@ export function buildChatPrompt(opts: {
   funnelState?: FunnelState;
   recentMessages: Message[];
   currentInput: string;
+  profileContext?: string;  // ← 新增 P6
 }): ChatMessage[] {
   const systemPrompt = buildSystemPrompt(opts.ageGroup, opts.funnelStep);
   const messages: ChatMessage[] = [{ role: "system", content: systemPrompt }];
+
+  // P6: 注入画像上下文（在情绪上下文之前，对终端用户不可见）
+  if (opts.profileContext) {
+    messages.push({ role: "system", content: opts.profileContext });
+  }
 
   // Add recent conversation history
   for (const msg of opts.recentMessages) {

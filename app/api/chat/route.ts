@@ -12,6 +12,8 @@ import { getTodayUsageSec, recordUsageTime } from "@/lib/db/usage-log";
 import { checkTextFilter } from "@/lib/db/filtered-words";
 import { classifyEmotion, classifyEmotionByRules } from "@/lib/voice/emotion-classifier";
 import { createEmotionLog } from "@/lib/db/emotion-log";
+import { getOrCreateChildProfile, updateChildProfile, createProfileUpdate } from "@/lib/db/child-profile";
+import { buildProfileContext } from "@/lib/engine/profile-builder";
 import type { AgeGroup, FunnelLayer } from "@/lib/utils/types";
 
 /**
@@ -166,12 +168,18 @@ export async function POST(req: NextRequest) {
       });
   }, 0);
 
+  // --- P6 profile injection ---
+  const profile = getOrCreateChildProfile();
+  const profileContext = buildProfileContext(profile);
+  // --- End P6 profile injection ---
+
   let promptMessages = buildChatPrompt({
     ageGroup: ag,
     funnelStep: session.funnel_step,
     funnelState,
     recentMessages,
     currentInput: message,
+    profileContext,  // ← P6 新增
   });
   if (emotionContext) {
     // 在 system message 后插入情绪上下文
@@ -311,6 +319,26 @@ export async function POST(req: NextRequest) {
         recordUsageTime(today, 10);
       }
       // ── End P4 usage recording ──────────────────────────────────
+
+      // P6 session-end lightweight update (fire-and-forget)
+      const messagesThisSession = recentMessages.filter(m => m.role === "child").length + 1;
+      if (streamOk && messagesThisSession >= 3) {
+        setTimeout(() => {
+          try {
+            const p = getOrCreateChildProfile();
+            updateChildProfile(p.id, {
+              total_sessions: p.total_sessions + 1,
+              last_session_at: new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, ""),
+            });
+            createProfileUpdate({
+              trigger: "session_end",
+              changes: { total_sessions: p.total_sessions + 1 },
+            });
+          } catch (err) {
+            console.warn("[chat] profile session-end update failed:", err);
+          }
+        }, 0);
+      }
 
       controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       controller.close();
