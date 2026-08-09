@@ -10,6 +10,8 @@ import { recordEvent } from "@/lib/engine/evidence-collector";
 import { getUsageConfig } from "@/lib/db/usage-config";
 import { getTodayUsageSec, recordUsageTime } from "@/lib/db/usage-log";
 import { checkTextFilter } from "@/lib/db/filtered-words";
+import { classifyEmotion } from "@/lib/voice/emotion-classifier";
+import { createEmotionLog } from "@/lib/db/emotion-log";
 import type { AgeGroup, FunnelLayer } from "@/lib/utils/types";
 
 /**
@@ -126,6 +128,44 @@ export async function POST(req: NextRequest) {
 
   // Build prompt
   const recentMessages = getRecentMessages(session.id, 20);
+
+  // --- Emotion detection (non-blocking for text input) ---
+  let emotionContext = "";
+  try {
+    const recentTexts = recentMessages
+      .filter(m => m.role === "child")
+      .slice(-3)
+      .map(m => m.content);
+    const emotionResult = await classifyEmotion({
+      text: message,
+      history: recentTexts,
+      sessionId: session.id,
+    });
+
+    // Log emotion
+    createEmotionLog({
+      sessionId: session.id,
+      source: "text",
+      emotion: emotionResult.emotion,
+      confidence: emotionResult.confidence,
+      textSnippet: message.slice(0, 200),
+      modelUsed: emotionResult.modelUsed,
+    });
+
+    // Build emotion context string
+    const strategies: Record<string, string> = {
+      excited: "孩子当前情绪: 兴奋。请保持热情回应，同时适度引导聚焦。",
+      calm: "孩子当前情绪: 平静。请正常引导。",
+      frustrated: "孩子当前情绪: 沮丧。请以鼓励为主，降低任务难度。",
+      impatient: "孩子当前情绪: 着急。请先安抚情绪，再拆解步骤引导。",
+      confused: "孩子当前情绪: 困惑。请主动解释，给出具体例子帮助理解。",
+    };
+    emotionContext = strategies[emotionResult.emotion] || "";
+  } catch (err) {
+    console.warn("[chat] emotion detection failed:", err);
+    // 静默降级，不影响正常对话
+  }
+
   let promptMessages = buildChatPrompt({
     ageGroup: ag,
     funnelStep: session.funnel_step,
@@ -133,6 +173,13 @@ export async function POST(req: NextRequest) {
     recentMessages,
     currentInput: message,
   });
+  if (emotionContext) {
+    // 在 system message 后插入情绪上下文
+    promptMessages.splice(1, 0, {
+      role: "system" as const,
+      content: emotionContext,
+    });
+  }
 
   // The Anthropic adapter only reads the FIRST system message, but
   // buildChatPrompt may emit the funnel context as a SECOND system message.
