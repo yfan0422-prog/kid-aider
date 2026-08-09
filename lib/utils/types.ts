@@ -183,3 +183,24 @@ export interface Badge {
   earned_at: string | null;
   created_at: string;
 }
+
+export interface UsageConfig {
+  id: number; // always 1
+  daily_limit_min: number | null;
+  quiet_start: string | null; // HH:mm
+  quiet_end: string | null;
+  filter_enabled: number; // 0/1
+  restrictions_paused: number; // 0/1
+  updated_at: string;
+}
+
+export interface UsageLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  total_sec: number;
+}
+
+export interface FilteredWord {
+  id: number;
+  word: string;
+}

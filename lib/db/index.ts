@@ -189,11 +189,42 @@ export function getDb(): Database.Database {
       created_at  TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS usage_config (
+      id                  INTEGER PRIMARY KEY CHECK(id = 1),
+      daily_limit_min     INTEGER,
+      quiet_start         TEXT,
+      quiet_end           TEXT,
+      filter_enabled      INTEGER DEFAULT 0,
+      restrictions_paused INTEGER DEFAULT 0,
+      updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS usage_log (
+      id          TEXT PRIMARY KEY,
+      date        TEXT NOT NULL,
+      total_sec   INTEGER NOT NULL DEFAULT 0,
+      UNIQUE(date)
+    );
+
+    CREATE TABLE IF NOT EXISTS filtered_words (
+      id   INTEGER PRIMARY KEY AUTOINCREMENT,
+      word TEXT NOT NULL UNIQUE
+    );
+
+    INSERT OR IGNORE INTO usage_config (id) VALUES (1);
+
+    INSERT OR IGNORE INTO filtered_words (word) VALUES
+    ('暴力'),('自杀'),('自残'),('毒品'),('色情'),('赌博'),
+    ('恐怖主义'),('种族歧视'),('虐待'),('枪支'),
+    ('炸弹'),('炸药'),('毒药'),('酗酒'),('吸烟'),
+    ('诈骗'),('黑客'),('盗版'),('欺凌'),('裸体');
+
     CREATE INDEX IF NOT EXISTS idx_snapshots_week ON competency_snapshots(week_start);
     CREATE INDEX IF NOT EXISTS idx_evidence_dimension ON evidence_events(dimension);
     CREATE INDEX IF NOT EXISTS idx_evidence_created ON evidence_events(created_at);
     CREATE INDEX IF NOT EXISTS idx_badges_dimension ON badges(dimension);
     CREATE INDEX IF NOT EXISTS idx_badges_earned ON badges(earned_at);
+    CREATE INDEX IF NOT EXISTS idx_usage_log_date ON usage_log(date);
   `);
 
   return db;
