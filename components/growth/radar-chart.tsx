@@ -4,6 +4,7 @@ interface RadarChartProps {
   data: Record<string, number>; // dimension → 0-100 score
   labels: Record<string, string>; // dimension → Chinese label
   size?: number;
+  dimensions?: string[]; // ordered dimension keys; defaults to DEFAULT_DIMENSIONS
 }
 
 const DEFAULT_DIMENSIONS = [
@@ -15,13 +16,13 @@ const DEFAULT_DIMENSIONS = [
   "persistence",
 ];
 
-export function RadarChart({ data, labels, size = 280 }: RadarChartProps) {
+export function RadarChart({ data, labels, size = 280, dimensions }: RadarChartProps) {
   const cx = size / 2;
   const cy = size / 2;
   const radius = size * 0.35;
   const levels = 5; // 20, 40, 60, 80, 100
 
-  const dims = DEFAULT_DIMENSIONS;
+  const dims = dimensions ?? DEFAULT_DIMENSIONS;
   const angleStep = (2 * Math.PI) / dims.length;
   const startAngle = -Math.PI / 2; // Start from top
 
