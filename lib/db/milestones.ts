@@ -7,16 +7,17 @@ interface CreateMilestoneAttrs {
   title: string;
   description?: string;
   sort_order?: number;
+  challenge_json?: string;
 }
 
 export function createMilestone(attrs: CreateMilestoneAttrs): Milestone {
   const db = getDb();
-  const now = new Date().toISOString();
+  const now = new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "");
   const id = uuid();
   db.prepare(
-    `INSERT INTO milestones (id, track_id, title, description, sort_order, status, created_at)
-     VALUES (?, ?, ?, ?, ?, 'pending', ?)`
-  ).run(id, attrs.track_id, attrs.title, attrs.description || "", attrs.sort_order || 0, now);
+    `INSERT INTO milestones (id, track_id, title, description, sort_order, status, challenge_json, created_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
+  ).run(id, attrs.track_id, attrs.title, attrs.description || "", attrs.sort_order || 0, attrs.challenge_json || null, now);
   return db.prepare("SELECT * FROM milestones WHERE id = ?").get(id) as Milestone;
 }
 

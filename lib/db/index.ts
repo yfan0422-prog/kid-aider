@@ -393,5 +393,10 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_badge_unlock_user ON badge_unlock(user_id);
   `);
 
+  // P8b: schema migration for topic→project integration
+  try { db.exec("ALTER TABLE projects ADD COLUMN source TEXT DEFAULT 'funnel'"); } catch {}
+  try { db.exec("ALTER TABLE projects ADD COLUMN source_topic_id TEXT"); } catch {}
+  try { db.exec("ALTER TABLE milestones ADD COLUMN challenge_json TEXT"); } catch {}
+
   return db;
 }

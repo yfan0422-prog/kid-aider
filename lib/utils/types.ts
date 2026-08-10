@@ -72,6 +72,8 @@ export interface Project {
   session_id: string;
   title: string;
   status: ProjectStatus;
+  source: ProjectSource;          // ← 新增
+  source_topic_id: string | null;  // ← 新增
   created_at: string;
   updated_at: string;
 }
@@ -94,6 +96,7 @@ export interface Milestone {
   sort_order: number;
   status: ItemStatus;
   completed_at: string | null;
+  challenge_json: string | null;  // ← 新增
   created_at: string;
 }
 
@@ -335,7 +338,21 @@ export interface TopicSuggestion {
 
 // ─── P8a 习惯养成 ───────────────────────────────────────────────
 
-export type ActionType = "login" | "explore_topic" | "complete_challenge" | "task_done" | "check_in" | "reflection";
+export type ActionType = "login" | "explore_topic" | "complete_challenge" | "task_done" | "check_in" | "reflection" | "create_project";
+
+export type ProjectSource = "funnel" | "topic";
+
+export interface StartProjectRequest {
+  project_name: string;
+  goto: "project" | "chat";
+  language?: string;
+}
+
+export interface StartProjectResponse {
+  project: Project;
+  session?: { id: string };
+}
+
 export type BadgeRarity = "common" | "rare" | "epic" | "legendary";
 export type BadgeCategory8 = "explore" | "project" | "streak" | "special";
 export type RankTier = "bronze" | "silver" | "gold" | "diamond" | "legendary";
