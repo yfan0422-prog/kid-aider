@@ -10,6 +10,7 @@ export function ModelProfileList() {
   const { t } = useLocale();
   const [profiles, setProfiles] = useState<ModelProfile[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const fetchProfiles = async () => {
     const res = await fetch("/api/config/models");
@@ -39,6 +40,23 @@ export function ModelProfileList() {
     fetchProfiles();
   };
 
+  const handleUpdate = async (id: string, formData: {
+    name: string; provider: ModelProvider; base_url: string;
+    api_key: string; model: string; assigned_roles: ModelRole[];
+    params: { temperature: number; max_tokens: number };
+  }) => {
+    const body: Record<string, unknown> = { ...formData };
+    // Don't send empty api_key on update (leave unchanged)
+    if (!body.api_key) delete body.api_key;
+    await fetch(`/api/config/models?id=${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    setEditingId(null);
+    fetchProfiles();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -55,7 +73,22 @@ export function ModelProfileList() {
         </div>
       )}
 
-      {profiles.length === 0 && !showForm && (
+      {editingId && (() => {
+        const profile = profiles.find(p => p.id === editingId);
+        if (!profile) return null;
+        return (
+          <div className="bg-surface border-2 border-primary rounded-card p-6 shadow-sm">
+            <h3 className="text-body-lg font-semibold mb-4">{t("settings.model.edit")}</h3>
+            <ModelProfileForm
+              editingProfile={profile}
+              onSave={(data) => handleUpdate(editingId, data)}
+              onCancel={() => setEditingId(null)}
+            />
+          </div>
+        );
+      })()}
+
+      {profiles.length === 0 && !showForm && !editingId && (
         <div className="text-center py-12 text-ink-tertiary">
           <p className="text-body-lg">{t("settings.model.empty")}</p>
           <p className="text-body-sm mt-2">{t("settings.model.empty.hint")}</p>
@@ -73,6 +106,10 @@ export function ModelProfileList() {
               {p.is_default && (
                 <span className="text-xs bg-brand-soft text-[#B26A00] rounded-full px-2.5 py-1 font-semibold">{t("settings.model.default")}</span>
               )}
+              <button onClick={() => { setShowForm(false); setEditingId(p.id); }}
+                className="text-ink-tertiary hover:text-primary text-sm transition-colors">
+                {t("settings.model.edit")}
+              </button>
               <button onClick={() => handleDelete(p.id)}
                 className="text-ink-tertiary hover:text-[#FF6B6B] text-sm transition-colors">
                 {t("settings.model.delete")}

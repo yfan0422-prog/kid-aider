@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "@/lib/i18n/context";
-import type { ModelProvider, ModelRole } from "@/lib/utils/types";
+import type { ModelProfile, ModelProvider, ModelRole } from "@/lib/utils/types";
 
 interface Props {
   onSave: (data: {
@@ -15,15 +15,20 @@ interface Props {
     name?: string; provider?: string; base_url?: string;
     model?: string; assigned_roles?: ModelRole[];
   };
+  /** When set, the form is in edit mode — onSave is the update handler */
+  editingProfile?: ModelProfile | null;
 }
 
-export function ModelProfileForm({ onSave, onCancel, initial }: Props) {
+export function ModelProfileForm({ onSave, onCancel, initial, editingProfile }: Props) {
   const { t } = useLocale();
-  const [name, setName] = useState(initial?.name || "");
-  const [provider, setProvider] = useState<ModelProvider>((initial?.provider as ModelProvider) || "openai");
-  const [baseUrl, setBaseUrl] = useState(initial?.base_url || "");
+  const isEditing = !!editingProfile;
+  const [name, setName] = useState(editingProfile?.name || initial?.name || "");
+  const [provider, setProvider] = useState<ModelProvider>(
+    (editingProfile?.provider as ModelProvider) || (initial?.provider as ModelProvider) || "openai"
+  );
+  const [baseUrl, setBaseUrl] = useState(editingProfile?.base_url || initial?.base_url || "");
   const [apiKey, setApiKey] = useState("");
-  const [model, setModel] = useState(initial?.model || "");
+  const [model, setModel] = useState(editingProfile?.model || initial?.model || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,8 +65,11 @@ export function ModelProfileForm({ onSave, onCancel, initial }: Props) {
         <label className="block text-body-sm font-semibold mb-1.5">{t("settings.model.key")}</label>
         <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)}
           className="w-full bg-surface border-2 border-border rounded-btn px-4 py-3 text-body focus:border-primary focus:outline-none transition-colors"
-          placeholder="sk-……" required />
-        <p className="text-caption text-ink-tertiary mt-1">{t("settings.model.key.hint")}</p>
+          placeholder={isEditing ? t("settings.model.key.edit.placeholder") : "sk-……"}
+          required={!isEditing} />
+        <p className="text-caption text-ink-tertiary mt-1">
+          {isEditing ? t("settings.model.key.edit.hint") : t("settings.model.key.hint")}
+        </p>
       </div>
       <div>
         <label className="block text-body-sm font-semibold mb-1.5">{t("settings.model.model")}</label>
@@ -72,7 +80,7 @@ export function ModelProfileForm({ onSave, onCancel, initial }: Props) {
       <div className="flex gap-3 pt-2">
         <button type="submit"
           className="flex-1 bg-primary text-white border-none rounded-btn px-5 py-3 font-semibold text-body hover:bg-primary-dark transition-colors">
-          {t("settings.model.save")}
+          {isEditing ? t("settings.model.update") : t("settings.model.save")}
         </button>
         <button type="button" onClick={onCancel}
           className="flex-1 bg-surface text-ink-secondary border-2 border-border rounded-btn px-5 py-3 font-semibold text-body hover:bg-surface-raised transition-colors">
