@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { TopicCatalog, TopicContent, Challenge } from "@/lib/utils/types";
+import { useLocale } from "@/lib/i18n/context";
 import { StartProjectDialog } from "./start-project-dialog";
 import { useRouter } from "next/navigation";
 import type { StartProjectResponse } from "@/lib/utils/types";
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
+  const { t } = useLocale();
   const [content, setContent] = useState<TopicContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -53,11 +55,11 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
         setContent(null);
       }
     } catch {
-      setError("无法加载内容");
+      setError(t("explore.content.error"));
     } finally {
       setLoading(false);
     }
-  }, [topic.id, topic.age_group, initialLanguage]);
+  }, [topic.id, topic.age_group, initialLanguage, t]);
 
   useEffect(() => {
     fetchContent();
@@ -83,7 +85,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
         body: JSON.stringify({ language: initialLanguage }),
       });
       if (!res.ok) {
-        setError("生成失败，请稍后重试");
+        setError(t("error.content_generation_failed"));
         setGenerating(false);
         return;
       }
@@ -104,7 +106,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
               clearInterval(poll);
               pollRef.current = null;
             } else if (attempts >= 30) {
-              setError("内容生成超时，请稍后重试");
+              setError(t("error.content_generation_timeout"));
               setGenerating(false);
               clearInterval(poll);
               pollRef.current = null;
@@ -120,11 +122,11 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
         setGenerating(false);
       } else {
         // Unexpected response — stop spinner
-        setError("生成失败，请稍后重试");
+        setError(t("error.content_generation_failed"));
         setGenerating(false);
       }
     } catch {
-      setError("生成失败，请稍后重试");
+      setError(t("error.content_generation_failed"));
       setGenerating(false);
     }
   };
@@ -140,17 +142,18 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
         }),
       });
       if (!res.ok) {
-        alert("积分记录失败，请检查网络连接");
+        alert(t("error.points_record_failed"));
         return;
       }
       const result = await res.json();
       if (result.new_badges?.length > 0) {
-        alert(`🎉 获得新徽章: ${result.new_badges.map((b: { name: string }) => b.name).join(", ")}`);
+        const badgeNames = result.new_badges.map((b: { name: string }) => b.name).join(", ");
+        alert(t("explore.challenge.badge_alert", { badges: badgeNames }));
       } else {
-        alert(`✅ 完成挑战！+${result.points_awarded} 分`);
+        alert(t("explore.challenge.completed_alert", { points: String(result.points_awarded) }));
       }
     } catch {
-      alert("积分记录失败，请检查网络连接");
+      alert(t("error.points_record_failed"));
     }
   };
 
@@ -161,10 +164,10 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
           onClick={onBack}
           className="text-body-sm text-ink-tertiary hover:text-primary transition-colors"
         >
-          ← 返回目录
+          {t("explore.back.catalog")}
         </button>
         <div className="bg-surface border border-border rounded-card p-8 text-center">
-          <p className="text-ink-tertiary">加载中...</p>
+          <p className="text-ink-tertiary">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -176,7 +179,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
         onClick={onBack}
         className="text-body-sm text-ink-tertiary hover:text-primary transition-colors"
       >
-        ← 返回目录
+        {t("explore.back.catalog")}
       </button>
 
       {error && (
@@ -195,7 +198,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
             disabled={generating}
             className="bg-primary text-white border-none rounded-btn px-5 py-2.5 font-semibold text-body-sm disabled:opacity-40"
           >
-            开始探索
+            {t("explore.start")}
           </button>
         </div>
       )}
@@ -203,7 +206,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
       {generating && (
         <div className="bg-surface border border-border rounded-card p-8 text-center">
           <div className="text-4xl animate-bounce mb-3">✨</div>
-          <p className="text-ink-tertiary">正在准备内容...</p>
+          <p className="text-ink-tertiary">{t("explore.content.loading")}</p>
         </div>
       )}
 
@@ -218,23 +221,23 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
 
           {/* Challenges */}
           <section className="space-y-3">
-            <h3 className="text-body-lg font-bold">🎯 互动挑战</h3>
+            <h3 className="text-body-lg font-bold">{t("explore.challenge.title")}</h3>
             {(() => {
               const challenges: Challenge[] = JSON.parse(content.challenges);
               return challenges.map((ch, i) => (
                 <div key={i} className="bg-surface border border-border rounded-card p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-body-sm font-bold text-primary">挑战 {i + 1}</span>
+                    <span className="text-body-sm font-bold text-primary">{t("explore.challenge.number", { n: String(i + 1) })}</span>
                     <span className={`text-body-xs px-2 py-0.5 rounded-btn ${ch.difficulty === 1 ? "bg-accent-green/15 text-accent-green" : ch.difficulty === 2 ? "bg-accent-yellow/15 text-ink-secondary" : "bg-primary/15 text-primary"}`}>
                       {"⭐".repeat(ch.difficulty)}
                     </span>
-                    <span className="text-body-xs text-ink-tertiary ml-auto">⏱ {ch.estimated_minutes} 分钟</span>
+                    <span className="text-body-xs text-ink-tertiary ml-auto">⏱ {ch.estimated_minutes} {t("explore.challenge.minutes")}</span>
                   </div>
                   <h4 className="text-body font-bold mb-2">{ch.title}</h4>
                   <p className="text-body-sm text-ink-secondary mb-2">{ch.description}</p>
                   {ch.materials.length > 0 && (
                     <p className="text-body-xs text-ink-tertiary mb-2">
-                      🧰 材料：{ch.materials.join("、")}
+                      🧰 {t("explore.challenge.materials")}{ch.materials.join("、")}
                     </p>
                   )}
                   {ch.hint && (
@@ -246,7 +249,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
                     onClick={() => handleCompleteChallenge(ch.title)}
                     className="mt-3 bg-primary text-white border-none rounded-btn px-3 py-1.5 text-body-sm font-semibold hover:opacity-90 transition-opacity"
                   >
-                    ✅ 完成挑战 (+20分)
+                    {t("explore.challenge.complete")}
                   </button>
                 </div>
               ));
@@ -262,14 +265,14 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
                   onClick={() => router.push(`/projects/${linkedProjectId}`)}
                   className="bg-primary text-white border-none rounded-btn px-5 py-2.5 font-semibold text-body-sm hover:opacity-90 transition-opacity"
                 >
-                  📋 查看项目
+                  📋 {t("explore.project.linked")}
                 </button>
               ) : (
                 <button
                   onClick={() => setShowStartDialog(true)}
                   className="bg-primary text-white border-none rounded-btn px-5 py-2.5 font-semibold text-body-sm hover:opacity-90 transition-opacity"
                 >
-                  🚀 进入项目工坊
+                  🚀 {t("explore.project.cta")}
                 </button>
               )}
             </section>

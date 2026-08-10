@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import type { TopicCatalog, TopicContent, Challenge, StartProjectResponse } from "@/lib/utils/types";
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function StartProjectDialog({ topic, content, open, onClose, onSuccess }: Props) {
+  const { t } = useLocale();
   const [projectName, setProjectName] = useState(topic.title);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,14 +32,14 @@ export function StartProjectDialog({ topic, content, open, onClose, onSuccess }:
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || "创建项目失败，请稍后重试");
+        setError(data.error || t("explore.project.dialog.error.default"));
         setSubmitting(false);
         return;
       }
       const result: StartProjectResponse = await res.json();
       onSuccess(result);
     } catch {
-      setError("网络连接失败，请检查网络后重试");
+      setError(t("explore.project.dialog.error.network"));
       setSubmitting(false);
     }
   };
@@ -53,28 +55,28 @@ export function StartProjectDialog({ topic, content, open, onClose, onSuccess }:
         {/* Title */}
         <div className="text-center">
           <div className="text-3xl mb-2">🚀</div>
-          <h2 className="text-body-lg font-bold">开始一个新项目</h2>
+          <h2 className="text-body-lg font-bold">{t("explore.project.dialog.title")}</h2>
         </div>
 
         {/* Project name input */}
         <div>
-          <label className="text-body-sm text-ink-secondary block mb-1">项目名称</label>
+          <label className="text-body-sm text-ink-secondary block mb-1">{t("explore.project.dialog.name.label")}</label>
           <input
             type="text"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
             className="w-full px-3 py-2 border border-border rounded-btn text-body-sm bg-surface-raised focus:border-primary focus:outline-none"
-            placeholder="给你的项目起个名字"
+            placeholder={t("explore.project.dialog.name.placeholder")}
             disabled={submitting}
           />
         </div>
 
         {/* Milestone preview */}
         <div>
-          <p className="text-body-sm text-ink-secondary mb-2">📋 里程碑预览（来自挑战）</p>
+          <p className="text-body-sm text-ink-secondary mb-2">{t("explore.project.dialog.milestones")}</p>
           <div className="bg-surface-raised rounded-btn p-3 space-y-2 max-h-40 overflow-y-auto">
             {challenges.length === 0 ? (
-              <p className="text-body-sm text-ink-tertiary text-center">暂无挑战</p>
+              <p className="text-body-sm text-ink-tertiary text-center">{t("explore.project.dialog.milestones.empty")}</p>
             ) : (
               challenges.map((ch, i) => (
                 <div key={i} className="flex items-center gap-2 text-body-sm">
@@ -103,21 +105,21 @@ export function StartProjectDialog({ topic, content, open, onClose, onSuccess }:
             disabled={submitting || !projectName.trim()}
             className="w-full bg-primary text-white border-none rounded-btn py-2.5 font-semibold text-body-sm disabled:opacity-40 hover:opacity-90 transition-opacity"
           >
-            📋 查看项目地图
+            {t("explore.project.dialog.btn.map")}
           </button>
           <button
             onClick={() => handleStart("chat")}
             disabled={submitting || !projectName.trim()}
             className="w-full bg-surface border-2 border-primary text-primary rounded-btn py-2.5 font-semibold text-body-sm disabled:opacity-40 hover:bg-surface-raised transition-colors"
           >
-            💬 和 K 一起梳理
+            {t("explore.project.dialog.btn.chat")}
           </button>
           <button
             onClick={onClose}
             disabled={submitting}
             className="w-full text-ink-tertiary text-body-sm py-1 hover:text-ink transition-colors"
           >
-            取消
+            {t("explore.project.dialog.cancel")}
           </button>
         </div>
       </div>

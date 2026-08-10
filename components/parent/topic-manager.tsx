@@ -1,11 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { TopicCatalog, TopicSuggestion } from "@/lib/utils/types";
+import { useLocale } from "@/lib/i18n/context";
+import type { TopicCatalog, TopicSuggestion, TopicCategory } from "@/lib/utils/types";
 
 type SubTab = "catalog" | "suggestions";
 
+// Map TopicCategory data values (stored in DB, used as API payload values) to
+// their display keys. The values themselves must NOT be translated.
+const CATEGORY_KEY: Record<TopicCategory, string> = {
+  自然科学: "explore.category.sci",
+  技术编程: "explore.category.tech",
+  视觉艺术: "explore.category.art",
+  音乐表演: "explore.category.music",
+  历史长廊: "explore.category.history",
+  国学经典: "explore.category.classics",
+  诗词歌赋: "explore.category.poetry",
+  中医智慧: "explore.category.tcm",
+  中文精进: "explore.category.chinese",
+  英文探索: "explore.category.english",
+  数学思维: "explore.category.math",
+  综合能力: "explore.category.general",
+};
+
 export function TopicManager() {
+  const { t } = useLocale();
   const [subTab, setSubTab] = useState<SubTab>("catalog");
   const [topics, setTopics] = useState<TopicCatalog[]>([]);
   const [suggestions, setSuggestions] = useState<TopicSuggestion[]>([]);
@@ -57,7 +76,7 @@ export function TopicManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("确定要删除此话题？")) return;
+    if (!confirm(t("explore.manager.confirm_delete"))) return;
     await fetch(`/api/topics/${id}`, { method: "DELETE" });
     fetchTopics();
   };
@@ -84,7 +103,7 @@ export function TopicManager() {
   };
 
   if (loading) {
-    return <div className="p-6 text-ink-tertiary">加载中...</div>;
+    return <div className="p-6 text-ink-tertiary">{t("common.loading")}</div>;
   }
 
   return (
@@ -92,8 +111,8 @@ export function TopicManager() {
       {/* Sub-tabs */}
       <div className="flex gap-0 border-b border-border">
         {([
-          { key: "catalog" as SubTab, label: "📂 话题目录", count: topics.length },
-          { key: "suggestions" as SubTab, label: "💡 智能推荐", count: suggestions.length },
+          { key: "catalog" as SubTab, labelKey: "explore.manager.tab.catalog", count: topics.length },
+          { key: "suggestions" as SubTab, labelKey: "explore.manager.tab.suggestions", count: suggestions.length },
         ]).map(st => (
           <button
             key={st.key}
@@ -104,7 +123,7 @@ export function TopicManager() {
                 : "border-transparent text-ink-tertiary hover:text-ink"
             }`}
           >
-            {st.label} ({st.count})
+            {t(st.labelKey)} ({st.count})
           </button>
         ))}
       </div>
@@ -113,12 +132,12 @@ export function TopicManager() {
       {subTab === "catalog" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-body-lg font-bold">话题目录</h3>
+            <h3 className="text-body-lg font-bold">{t("explore.manager.catalog")}</h3>
             <button
               onClick={() => setShowAddForm(!showAddForm)}
               className="bg-primary text-white border-none rounded-btn px-4 py-2 font-semibold text-body-sm"
             >
-              {showAddForm ? "取消" : "+ 添加话题"}
+              {showAddForm ? t("common.cancel") : t("explore.manager.add")}
             </button>
           </div>
 
@@ -128,14 +147,14 @@ export function TopicManager() {
                 type="text"
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
-                placeholder="话题标题"
+                placeholder={t("explore.manager.title.placeholder")}
                 className="w-full px-3 py-2 border border-border rounded-btn text-body-sm bg-surface-raised"
               />
               <input
                 type="text"
                 value={newSummary}
                 onChange={e => setNewSummary(e.target.value)}
-                placeholder="一句话简介"
+                placeholder={t("explore.manager.summary.placeholder")}
                 className="w-full px-3 py-2 border border-border rounded-btn text-body-sm bg-surface-raised"
               />
               <div className="flex gap-3">
@@ -144,35 +163,36 @@ export function TopicManager() {
                   onChange={e => setNewCategory(e.target.value)}
                   className="flex-1 px-3 py-2 border border-border rounded-btn text-body-sm bg-surface-raised"
                 >
-                  <option value="">选择分类</option>
-                  <option value="自然科学">自然科学</option>
-                  <option value="技术编程">技术编程</option>
-                  <option value="视觉艺术">视觉艺术</option>
-                  <option value="音乐表演">音乐表演</option>
-                  <option value="历史长廊">历史长廊</option>
-                  <option value="国学经典">国学经典</option>
-                  <option value="诗词歌赋">诗词歌赋</option>
-                  <option value="中医智慧">中医智慧</option>
-                  <option value="中文精进">中文精进</option>
-                  <option value="英文探索">英文探索</option>
-                  <option value="数学思维">数学思维</option>
-                  <option value="综合能力">综合能力</option>
+                  <option value="">{t("explore.manager.category.select")}</option>
+                  <option value="自然科学">{t(CATEGORY_KEY["自然科学"])}</option>
+                  <option value="技术编程">{t(CATEGORY_KEY["技术编程"])}</option>
+                  <option value="视觉艺术">{t(CATEGORY_KEY["视觉艺术"])}</option>
+                  <option value="音乐表演">{t(CATEGORY_KEY["音乐表演"])}</option>
+                  <option value="历史长廊">{t(CATEGORY_KEY["历史长廊"])}</option>
+                  <option value="国学经典">{t(CATEGORY_KEY["国学经典"])}</option>
+                  <option value="诗词歌赋">{t(CATEGORY_KEY["诗词歌赋"])}</option>
+                  <option value="中医智慧">{t(CATEGORY_KEY["中医智慧"])}</option>
+                  <option value="中文精进">{t(CATEGORY_KEY["中文精进"])}</option>
+                  <option value="英文探索">{t(CATEGORY_KEY["英文探索"])}</option>
+                  <option value="数学思维">{t(CATEGORY_KEY["数学思维"])}</option>
+                  <option value="综合能力">{t(CATEGORY_KEY["综合能力"])}</option>
                 </select>
                 <select
                   value={newAgeGroup}
                   onChange={e => setNewAgeGroup(e.target.value)}
                   className="w-28 px-3 py-2 border border-border rounded-btn text-body-sm bg-surface-raised"
                 >
-                  <option value="6-9">6-9 岁</option>
-                  <option value="10-12">10-12 岁</option>
-                  <option value="13-15">13-15 岁</option>
-                  <option value="all">全年龄</option>
+                  <option value="6-9">{t("chat.age.6-9")}</option>
+                  <option value="10-12">{t("chat.age.10-12")}</option>
+                  <option value="13-15">{t("chat.age.13-15")}</option>
+                  <option value="all">{t("explore.manager.age.all")}</option>
                 </select>
                 <select
                   value={newLanguage}
                   onChange={e => setNewLanguage(e.target.value)}
                   className="w-28 px-3 py-2 border border-border rounded-btn text-body-sm bg-surface-raised"
                 >
+                  {/* Content-language labels are endonyms and stay untranslated */}
                   <option value="zh-CN">简体中文</option>
                   <option value="zh-HK">繁體中文</option>
                   <option value="en">English</option>
@@ -182,7 +202,7 @@ export function TopicManager() {
                 onClick={handleAdd}
                 className="bg-primary text-white border-none rounded-btn px-4 py-2 font-semibold text-body-sm"
               >
-                确认添加
+                {t("explore.manager.confirm_add")}
               </button>
             </div>
           )}
@@ -201,7 +221,7 @@ export function TopicManager() {
                       {topic.age_group}
                     </span>
                     <span className="text-body-xs text-ink-tertiary">{topic.language}</span>
-                    <span className="text-body-xs text-ink-tertiary">| {topic.category}</span>
+                    <span className="text-body-xs text-ink-tertiary">| {t(CATEGORY_KEY[topic.category])}</span>
                   </div>
                   <p className="text-body-sm text-ink-tertiary mt-1">{topic.summary}</p>
                 </div>
@@ -211,13 +231,13 @@ export function TopicManager() {
                     topic.source === "auto_suggested" ? "bg-accent-purple/15 text-accent-purple" :
                     "bg-accent-green/15 text-accent-green"
                   }`}>
-                    {topic.source === "seed" ? "种子" : topic.source === "auto_suggested" ? "推荐" : "手动"}
+                    {topic.source === "seed" ? t("explore.manager.source.seed") : topic.source === "auto_suggested" ? t("explore.manager.source.auto_suggested") : t("explore.manager.source.manual")}
                   </span>
                   <button
                     onClick={() => handleDelete(topic.id)}
                     className="text-body-xs text-ink-tertiary hover:text-red-500 transition-colors"
                   >
-                    删除
+                    {t("common.delete")}
                   </button>
                 </div>
               </div>
@@ -229,9 +249,9 @@ export function TopicManager() {
       {/* Suggestions tab */}
       {subTab === "suggestions" && (
         <div className="space-y-4">
-          <h3 className="text-body-lg font-bold">智能推荐审核</h3>
+          <h3 className="text-body-lg font-bold">{t("explore.manager.suggestions.review")}</h3>
           {suggestions.length === 0 ? (
-            <p className="text-ink-tertiary text-body-sm">暂无待审核的推荐</p>
+            <p className="text-ink-tertiary text-body-sm">{t("explore.manager.suggestions.empty")}</p>
           ) : (
             <div className="space-y-3">
               {suggestions.map(s => (
@@ -246,7 +266,7 @@ export function TopicManager() {
                         s.viability_score >= 0.7 ? "text-accent-green" :
                         s.viability_score >= 0.5 ? "text-accent-yellow" : "text-red-500"
                       }`}>
-                        可行性：{Math.round(s.viability_score * 100)}%
+                        {t("explore.manager.viability", { percent: String(Math.round(s.viability_score * 100)) })}
                       </span>
                     </div>
                     <div className="flex gap-2">
@@ -254,13 +274,13 @@ export function TopicManager() {
                         onClick={() => handleSuggestion(s, "approved")}
                         className="bg-accent-green text-white border-none rounded-btn px-3 py-1.5 font-semibold text-body-xs"
                       >
-                        通过
+                        {t("explore.manager.approve")}
                       </button>
                       <button
                         onClick={() => handleSuggestion(s, "rejected")}
                         className="bg-surface-raised border border-border text-ink-secondary rounded-btn px-3 py-1.5 text-body-xs"
                       >
-                        拒绝
+                        {t("explore.manager.reject")}
                       </button>
                     </div>
                   </div>

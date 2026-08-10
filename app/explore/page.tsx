@@ -3,18 +3,39 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useLocale } from "@/lib/i18n/context";
 import { TopicCard } from "@/components/parent/topic-card";
 import { TopicDetail } from "@/components/parent/topic-detail";
 import type { TopicCatalog, TopicCategory, TopicLanguage } from "@/lib/utils/types";
 
 export const dynamic = "force-dynamic";
 
-const CATEGORY_GROUPS: { label: string; icon: string; categories: TopicCategory[] }[] = [
-  { label: "探索创造", icon: "🔬", categories: ["自然科学", "技术编程", "视觉艺术", "音乐表演"] },
-  { label: "文化根基", icon: "📚", categories: ["历史长廊", "国学经典", "诗词歌赋", "中医智慧"] },
-  { label: "学业赋能", icon: "🎯", categories: ["中文精进", "英文探索", "数学思维", "综合能力"] },
+const CATEGORY_GROUPS: { labelKey: string; icon: string; categories: TopicCategory[] }[] = [
+  { labelKey: "explore.tab.create", icon: "🔬", categories: ["自然科学", "技术编程", "视觉艺术", "音乐表演"] },
+  { labelKey: "explore.tab.culture", icon: "📚", categories: ["历史长廊", "国学经典", "诗词歌赋", "中医智慧"] },
+  { labelKey: "explore.tab.academic", icon: "🎯", categories: ["中文精进", "英文探索", "数学思维", "综合能力"] },
 ];
 
+// Map TopicCategory data values (stored in DB, used as API query params) to
+// their display keys. The values themselves must NOT be translated.
+const CATEGORY_KEY: Record<TopicCategory, string> = {
+  自然科学: "explore.category.sci",
+  技术编程: "explore.category.tech",
+  视觉艺术: "explore.category.art",
+  音乐表演: "explore.category.music",
+  历史长廊: "explore.category.history",
+  国学经典: "explore.category.classics",
+  诗词歌赋: "explore.category.poetry",
+  中医智慧: "explore.category.tcm",
+  中文精进: "explore.category.chinese",
+  英文探索: "explore.category.english",
+  数学思维: "explore.category.math",
+  综合能力: "explore.category.general",
+};
+
+// P7 content-language switcher (TopicLanguage: zh-CN / zh-HK / en). This is
+// INDEPENDENT from the P8c UI language — it controls the language content is
+// generated in. Labels are endonyms and intentionally left untranslated.
 const LANGUAGES: { code: TopicLanguage; label: string; flag: string }[] = [
   { code: "zh-CN", label: "简体中文", flag: "🇨🇳" },
   { code: "zh-HK", label: "繁體中文", flag: "🇭🇰" },
@@ -30,6 +51,7 @@ export default function ExplorePage() {
 }
 
 function ExploreContent() {
+  const { t } = useLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -92,9 +114,9 @@ function ExploreContent() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/" className="text-ink-tertiary hover:text-ink transition-colors">
-          ← 返回
+          {t("explore.back")}
         </Link>
-        <h1 className="text-2xl font-bold">🔍 探索</h1>
+        <h1 className="text-2xl font-bold">{t("nav.explore")}</h1>
       </div>
 
       {/* Language switcher */}
@@ -118,7 +140,7 @@ function ExploreContent() {
       <div className="flex gap-0 mb-4 border-b border-border">
         {CATEGORY_GROUPS.map((g, i) => (
           <button
-            key={g.label}
+            key={g.labelKey}
             onClick={() => { setActiveGroup(i); setActiveCategory(null); }}
             className={`flex items-center gap-1.5 px-4 py-2 text-body-sm border-b-2 transition-colors ${
               activeGroup === i
@@ -126,7 +148,7 @@ function ExploreContent() {
                 : "border-transparent text-ink-tertiary hover:text-ink"
             }`}
           >
-            {g.icon} {g.label}
+            {g.icon} {t(g.labelKey)}
           </button>
         ))}
       </div>
@@ -141,7 +163,7 @@ function ExploreContent() {
               : "bg-surface border border-border text-ink-secondary hover:bg-surface-raised"
           }`}
         >
-          全部
+          {t("explore.all")}
         </button>
         {currentCategories.map(cat => (
           <button
@@ -153,18 +175,19 @@ function ExploreContent() {
                 : "bg-surface border border-border text-ink-secondary hover:bg-surface-raised"
             }`}
           >
-            {cat}
+            {t(CATEGORY_KEY[cat])}
           </button>
         ))}
       </div>
 
       {/* Topic grid */}
       {loading ? (
-        <div className="text-center py-12 text-ink-tertiary">加载中...</div>
+        <div className="text-center py-12 text-ink-tertiary">{t("common.loading")}</div>
       ) : topics.length === 0 ? (
         <div className="text-center py-12 text-ink-tertiary">
           <div className="text-4xl mb-3">📭</div>
-          <p>暂无话题，更多内容正在准备中</p>
+          <p>{t("explore.empty")}</p>
+          <p>{t("explore.empty.subtitle")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
