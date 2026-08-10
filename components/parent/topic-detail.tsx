@@ -107,7 +107,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
               setGenerating(false);
               clearInterval(poll);
               pollRef.current = null;
-            } else if (attempts >= 30) {
+            } else if (attempts >= 90) {
               setError(t("error.content_generation_timeout"));
               setGenerating(false);
               clearInterval(poll);
