@@ -103,9 +103,10 @@ export async function PATCH(req: NextRequest) {
   }
 
   try {
+    // Pass no params — let the API use its own defaults.
+    // Some providers (e.g. Kimi) reject unexpected temperature values.
     const response = await routed.adapter.chat({
       messages: [{ role: "user", content: "回复'OK'" }],
-      max_tokens: 10,
     });
     return NextResponse.json({ connected: true, response: response?.trim() });
   } catch (error) {

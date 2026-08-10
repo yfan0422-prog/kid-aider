@@ -22,8 +22,8 @@ export function createOpenAIAdapter(profile: ModelProfile) {
       const stream = await client.chat.completions.create({
         model: profile.model,
         messages: opts.messages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-        temperature: opts.temperature ?? profile.params.temperature,
-        max_tokens: opts.max_tokens ?? profile.params.max_tokens,
+        ...(opts.temperature !== undefined && { temperature: opts.temperature }),
+        ...(opts.max_tokens !== undefined && { max_tokens: opts.max_tokens }),
         stream: true,
       });
 
@@ -37,8 +37,8 @@ export function createOpenAIAdapter(profile: ModelProfile) {
       const response = await client.chat.completions.create({
         model: profile.model,
         messages: opts.messages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-        temperature: opts.temperature ?? profile.params.temperature,
-        max_tokens: opts.max_tokens ?? profile.params.max_tokens,
+        ...(opts.temperature !== undefined && { temperature: opts.temperature }),
+        ...(opts.max_tokens !== undefined && { max_tokens: opts.max_tokens }),
         stream: false,
       });
       return response.choices[0]?.message?.content || "";

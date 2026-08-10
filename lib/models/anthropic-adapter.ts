@@ -30,7 +30,7 @@ export function createAnthropicAdapter(profile: ModelProfile) {
           role: m.role === "assistant" ? "assistant" as const : "user" as const,
           content: m.content,
         })),
-        temperature: opts.temperature ?? profile.params.temperature,
+        ...(opts.temperature !== undefined && { temperature: opts.temperature }),
         max_tokens: opts.max_tokens ?? profile.params.max_tokens,
       });
 
@@ -52,7 +52,7 @@ export function createAnthropicAdapter(profile: ModelProfile) {
           role: m.role === "assistant" ? "assistant" as const : "user" as const,
           content: m.content,
         })),
-        temperature: opts.temperature ?? profile.params.temperature,
+        ...(opts.temperature !== undefined && { temperature: opts.temperature }),
         max_tokens: opts.max_tokens ?? profile.params.max_tokens,
       });
       const block = response.content.find(b => b.type === "text");
