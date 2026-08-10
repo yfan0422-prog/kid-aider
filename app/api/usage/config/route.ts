@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUsageConfig, updateUsageConfig } from "@/lib/db/usage-config";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const config = getUsageConfig();
   return NextResponse.json({ config });
