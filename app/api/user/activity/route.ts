@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "action_type is required" }, { status: 400 });
   }
 
-  const VALID_TYPES = new Set<string>(["login", "explore_topic", "complete_challenge", "task_done", "check_in", "reflection"]);
+  const VALID_TYPES = new Set<string>(["login", "explore_topic", "complete_challenge", "task_done", "check_in", "reflection", "create_project"]);
   if (!VALID_TYPES.has(action_type)) {
     return Response.json({ error: `invalid action_type: ${action_type}` }, { status: 400 });
   }

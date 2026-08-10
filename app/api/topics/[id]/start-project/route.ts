@@ -2,7 +2,7 @@ import { getTopic, getActiveContent } from "@/lib/db/topics";
 import { createProject, getProjectByTopic } from "@/lib/db/projects";
 import { createTrack } from "@/lib/db/tracks";
 import { createMilestone } from "@/lib/db/milestones";
-import { createSession } from "@/lib/db/sessions";
+import { createSession, getSession } from "@/lib/db/sessions";
 import { createMessage } from "@/lib/db/messages";
 import { addLog } from "@/lib/db/project-logs";
 import { recordEvent } from "@/lib/engine/evidence-collector";
@@ -44,8 +44,12 @@ export async function POST(
   // 4. Check for existing project (idempotency)
   const existing = getProjectByTopic(params.id);
   if (existing) {
-    // Return existing project — don't create duplicate
-    return Response.json({ project: existing });
+    // Return existing project with its session (for goto="chat" callers)
+    const existingSession = getSession(existing.session_id);
+    return Response.json({
+      project: existing,
+      session: existingSession ? { id: existingSession.id } : undefined,
+    });
   }
 
   // 5. Always create a session (FK constraint + future chat support)

@@ -101,6 +101,7 @@ export default function Home() {
         </div>
         <SidePanel />
       </div>
+      </div>
     </>
   );
 }
