@@ -457,6 +457,21 @@ const en: TranslationDict = {
   "settings.model.title": "Model Settings",
   "settings.model.url": "URL",
   "settings.title": "Settings",
+  "settings.account.title": "Account Manager",
+  "settings.account.current": "Current",
+  "settings.account.add": "Add Child",
+  "settings.account.name": "Name",
+  "settings.account.avatar": "Avatar",
+  "settings.account.age": "Age Group",
+  "settings.account.language": "Language",
+  "settings.account.create": "Create Profile",
+  "settings.account.edit": "Edit Profile",
+  "settings.account.last_blocked": "At least one child account is required",
+  "settings.account.delete_confirm": "Delete this child and all associated data? This cannot be undone.",
+
+  // ─── Select ────────────────────────────────────
+  "select.title": "Choose Your Profile",
+  "select.add": "New",
 
   // ─── Common ────────────────────────────────────
   "common.actions": "Actions",
@@ -497,6 +512,8 @@ const en: TranslationDict = {
   "error.audio_file_missing": "No audio file detected",
   "error.audio_file_too_large": "Audio file is too large",
   "error.bad_request": "Invalid request",
+  "error.child_not_found": "Child account not found",
+  "error.child_required": "Please select a child account",
   "error.challenge_not_found": "Challenge not found",
   "error.checkin_summary_required": "Please enter today's summary",
   "error.connection_failed": "Couldn't create a connection",
@@ -506,6 +523,7 @@ const en: TranslationDict = {
   "error.generic": "Server error. Please try again later",
   "error.invalid_action": "Invalid action",
   "error.invalid_suggestion_status": "Status must be approved or rejected",
+  "error.last_child_blocked": "At least one child account is required",
   "error.missing_id": "Missing id",
   "error.missing_required_fields": "Missing required fields",
   "error.missing_track_id": "Missing trackId",

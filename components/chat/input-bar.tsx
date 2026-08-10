@@ -3,12 +3,14 @@
 import { useState, useRef, useCallback } from "react";
 import { useChatStore } from "@/lib/store/chat-store";
 import { useLocale } from "@/lib/i18n/context";
+import { useChild } from "@/components/ui/child-provider";
 import { AgeSwitcher } from "./age-switcher";
 import { VoiceButton } from "./voice-button";
 import { getAgeConfig } from "@/lib/utils/age-config";
 
 export function InputBar() {
   const { t } = useLocale();
+  const { childId } = useChild();
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const ageGroup = useChatStore((s) => s.ageGroup);
@@ -50,7 +52,8 @@ export function InputBar() {
     streamAccRef.current = "";
 
     try {
-      const response = await fetch("/api/chat", {
+      const chatUrl = childId ? `/api/chat?child_id=${encodeURIComponent(childId)}` : "/api/chat";
+      const response = await fetch(chatUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, sessionId, ageGroup }),
@@ -156,6 +159,7 @@ export function InputBar() {
     isStreaming,
     sessionId,
     ageGroup,
+    childId,
     addMessage,
     appendStreamContent,
     clearStreamContent,

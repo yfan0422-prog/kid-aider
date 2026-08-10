@@ -457,6 +457,21 @@ const zhHK: TranslationDict = {
   "settings.model.title": "模型配置",
   "settings.model.url": "URL",
   "settings.title": "設定",
+  "settings.account.title": "帳號管理",
+  "settings.account.current": "當前",
+  "settings.account.add": "添加孩子",
+  "settings.account.name": "名字",
+  "settings.account.avatar": "頭像",
+  "settings.account.age": "年齡段",
+  "settings.account.language": "語言偏好",
+  "settings.account.create": "創建新檔案",
+  "settings.account.edit": "編輯檔案",
+  "settings.account.last_blocked": "至少需要保留一個孩子帳號",
+  "settings.account.delete_confirm": "確認刪除該孩子及所有關聯數據？此操作不可撤銷。",
+
+  // ─── 孩子選擇 select ────────────────────────────────
+  "select.title": "選擇你的小檔案",
+  "select.add": "新建",
 
   // ─── 共享組件 common ────────────────────────────────
   "common.actions": "操作",
@@ -497,6 +512,8 @@ const zhHK: TranslationDict = {
   "error.audio_file_missing": "未檢測到音頻檔案",
   "error.audio_file_too_large": "音頻檔案過大",
   "error.bad_request": "請求無效",
+  "error.child_not_found": "孩子帳號未找到",
+  "error.child_required": "請選擇孩子帳號",
   "error.challenge_not_found": "挑戰未找到",
   "error.checkin_summary_required": "請輸入今日總結",
   "error.connection_failed": "無法創建連接",
@@ -506,6 +523,7 @@ const zhHK: TranslationDict = {
   "error.generic": "伺服器錯誤，請稍後再試",
   "error.invalid_action": "無效操作",
   "error.invalid_suggestion_status": "狀態必須是 approved 或 rejected",
+  "error.last_child_blocked": "至少需要保留一個孩子帳號",
   "error.missing_id": "缺少 id",
   "error.missing_required_fields": "缺少必填欄位",
   "error.missing_track_id": "缺少 trackId",

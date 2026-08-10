@@ -457,6 +457,21 @@ const zhCN: TranslationDict = {
   "settings.model.title": "模型配置",
   "settings.model.url": "URL",
   "settings.title": "设置",
+  "settings.account.title": "账号管理",
+  "settings.account.current": "当前",
+  "settings.account.add": "添加孩子",
+  "settings.account.name": "名字",
+  "settings.account.avatar": "头像",
+  "settings.account.age": "年龄段",
+  "settings.account.language": "语言偏好",
+  "settings.account.create": "创建新档案",
+  "settings.account.edit": "编辑档案",
+  "settings.account.last_blocked": "至少需要保留一个孩子账号",
+  "settings.account.delete_confirm": "确认删除该孩子及所有关联数据？此操作不可撤销。",
+
+  // ─── 孩子选择 select ────────────────────────────────
+  "select.title": "选择你的小档案",
+  "select.add": "新建",
 
   // ─── 共享组件 common ────────────────────────────────
   "common.actions": "操作",
@@ -497,6 +512,8 @@ const zhCN: TranslationDict = {
   "error.audio_file_missing": "未检测到音频文件",
   "error.audio_file_too_large": "音频文件过大",
   "error.bad_request": "请求无效",
+  "error.child_not_found": "孩子账号未找到",
+  "error.child_required": "请选择孩子账号",
   "error.challenge_not_found": "挑战未找到",
   "error.checkin_summary_required": "请输入今日总结",
   "error.connection_failed": "无法创建连接",
@@ -506,6 +523,7 @@ const zhCN: TranslationDict = {
   "error.generic": "服务器错误，请稍后重试",
   "error.invalid_action": "无效操作",
   "error.invalid_suggestion_status": "状态必须是 approved 或 rejected",
+  "error.last_child_blocked": "至少需要保留一个孩子账号",
   "error.missing_id": "缺少 id",
   "error.missing_required_fields": "缺少必填字段",
   "error.missing_track_id": "缺少 trackId",

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useChild } from "@/components/ui/child-provider";
+import { useLocale } from "@/lib/i18n/context";
 
 const AVATARS = ["🧒", "👧", "🦸", "🧑‍🎨", "👩‍🔬", "🧑‍💻", "🌟", "🚀"];
 const AGE_GROUPS = ["6-9", "10-12", "13-15"];
@@ -18,6 +19,7 @@ interface EditModalProps {
 }
 
 function EditModal({ account, onClose, onSave }: EditModalProps) {
+  const { t } = useLocale();
   const [name, setName] = useState(account?.display_name || "");
   const [avatar, setAvatar] = useState(account?.avatar_emoji || "🧒");
   const [age, setAge] = useState(account?.age_group || "10-12");
@@ -34,10 +36,12 @@ function EditModal({ account, onClose, onSave }: EditModalProps) {
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-white rounded-card p-6 max-w-sm w-full mx-4 shadow-lg" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-body-lg font-bold text-ink mb-4">{account ? "编辑档案" : "创建新档案"}</h3>
+        <h3 className="text-body-lg font-bold text-ink mb-4">
+          {account ? t("settings.account.edit") : t("settings.account.create")}
+        </h3>
 
         {/* 名字 */}
-        <label className="text-caption text-ink-tertiary mb-1 block">名字</label>
+        <label className="text-caption text-ink-tertiary mb-1 block">{t("settings.account.name")}</label>
         <input
           type="text"
           value={name}
@@ -47,7 +51,7 @@ function EditModal({ account, onClose, onSave }: EditModalProps) {
         />
 
         {/* 头像 */}
-        <label className="text-caption text-ink-tertiary mb-1 block">头像</label>
+        <label className="text-caption text-ink-tertiary mb-1 block">{t("settings.account.avatar")}</label>
         <div className="flex gap-2 flex-wrap mb-4">
           {AVATARS.map((a) => (
             <button
@@ -63,7 +67,7 @@ function EditModal({ account, onClose, onSave }: EditModalProps) {
         </div>
 
         {/* 年龄段 */}
-        <label className="text-caption text-ink-tertiary mb-1 block">年龄段</label>
+        <label className="text-caption text-ink-tertiary mb-1 block">{t("settings.account.age")}</label>
         <div className="flex gap-2 mb-4">
           {AGE_GROUPS.map((g) => (
             <button
@@ -79,7 +83,7 @@ function EditModal({ account, onClose, onSave }: EditModalProps) {
         </div>
 
         {/* 语言 */}
-        <label className="text-caption text-ink-tertiary mb-1 block">语言偏好</label>
+        <label className="text-caption text-ink-tertiary mb-1 block">{t("settings.account.language")}</label>
         <div className="flex gap-2 mb-6">
           {LANGUAGES.map((l) => (
             <button
@@ -96,10 +100,10 @@ function EditModal({ account, onClose, onSave }: EditModalProps) {
 
         <div className="flex gap-3">
           <button onClick={onClose} className="flex-1 text-body-sm text-ink-tertiary hover:text-ink px-4 py-2 rounded-btn border border-border">
-            取消
+            {t("common.cancel")}
           </button>
           <button onClick={handleSave} disabled={saving || !name.trim()} className="flex-1 bg-primary text-white rounded-btn px-4 py-2 text-body-sm font-semibold disabled:opacity-40">
-            {saving ? "..." : "保存"}
+            {saving ? "..." : t("common.save")}
           </button>
         </div>
       </div>
@@ -109,6 +113,7 @@ function EditModal({ account, onClose, onSave }: EditModalProps) {
 
 export function AccountManager() {
   const { childAccounts, refreshAccounts, childId } = useChild();
+  const { t } = useLocale();
   const [editing, setEditing] = useState<typeof childAccounts[0] | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
@@ -144,10 +149,10 @@ export function AccountManager() {
 
   const handleDelete = async (id: string) => {
     if (childAccounts.length <= 1) {
-      setError("至少需要保留一个孩子账号");
+      setError(t("settings.account.last_blocked"));
       return;
     }
-    if (!confirm("确认删除该孩子及所有关联数据？此操作不可撤销。")) return;
+    if (!confirm(t("settings.account.delete_confirm"))) return;
 
     const res = await fetch(`/api/user/accounts?id=${id}`, { method: "DELETE" });
     if (!res.ok) {
@@ -160,7 +165,7 @@ export function AccountManager() {
 
   return (
     <div className="bg-surface border border-border rounded-card p-6">
-      <h2 className="text-body-lg font-bold text-ink mb-4">账号管理</h2>
+      <h2 className="text-body-lg font-bold text-ink mb-4">{t("settings.account.title")}</h2>
 
       {error && (
         <div className="bg-red-50 text-red-600 text-body-sm p-3 rounded-btn mb-4">
@@ -178,7 +183,7 @@ export function AccountManager() {
                 <p className="text-body-sm font-semibold text-ink">
                   {child.display_name}
                   {child.id === childId && (
-                    <span className="ml-2 text-caption text-primary">当前</span>
+                    <span className="ml-2 text-caption text-primary">{t("settings.account.current")}</span>
                   )}
                 </p>
                 <p className="text-caption text-ink-tertiary">
@@ -208,7 +213,7 @@ export function AccountManager() {
         onClick={() => setCreating(true)}
         className="mt-4 w-full border-2 border-dashed border-border rounded-card p-3 text-body-sm text-ink-tertiary hover:border-primary hover:text-primary transition-all"
       >
-        ＋ 添加孩子
+        ＋ {t("settings.account.add")}
       </button>
 
       {/* 编辑弹窗 */}

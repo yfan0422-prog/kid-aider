@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
+import { useChild } from "@/components/ui/child-provider";
 import { UserCard } from "@/components/me/user-card";
 import { DailySummary } from "@/components/me/daily-summary";
 import { BadgeCollection } from "@/components/me/badge-collection";
@@ -57,17 +58,22 @@ interface MeData {
 
 export default function MePage() {
   const { t } = useLocale();
+  const { childId, childAccounts } = useChild();
+  const currentChild = childAccounts.find((c) => c.id === childId);
   const [data, setData] = useState<MeData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!childId) return;
+    const currentChildId: string = childId;
     async function fetchAll() {
+      const qs = `child_id=${encodeURIComponent(currentChildId)}`;
       const [accRes, actRes, statsRes, badgesRes, lbRes] = await Promise.all([
-        fetch("/api/user/account"),
-        fetch("/api/user/activity"),
-        fetch("/api/user/stats"),
-        fetch("/api/user/badges"),
-        fetch("/api/leaderboard"),
+        fetch(`/api/user/account?${qs}`),
+        fetch(`/api/user/activity?${qs}`),
+        fetch(`/api/user/stats?${qs}`),
+        fetch(`/api/user/badges?${qs}`),
+        fetch(`/api/leaderboard?${qs}`),
       ]);
       const [account, activity, stats, badges, leaderboard] = await Promise.all([
         accRes.json(),
@@ -80,7 +86,7 @@ export default function MePage() {
       setLoading(false);
     }
     fetchAll();
-  }, []);
+  }, [childId]);
 
   if (loading || !data) {
     return (
@@ -92,6 +98,14 @@ export default function MePage() {
 
   return (
     <div className="min-h-screen bg-page-bg">
+      {/* 当前孩子 */}
+      {currentChild && (
+        <div className="flex items-center gap-2 px-4 py-3">
+          <span className="text-2xl">{currentChild.avatar_emoji}</span>
+          <span className="text-body-lg font-semibold text-ink">{currentChild.display_name}</span>
+        </div>
+      )}
+
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-3 border-b border-border bg-white/80 backdrop-blur-sm">
         <div className="flex items-center gap-2">
