@@ -9,9 +9,12 @@ import { getAccount } from "@/lib/db/user-account";
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   return NextResponse.json({
     check_ins: getCheckIns(params.id),
     streak: getStreak(params.id),

@@ -11,9 +11,12 @@ export const dynamic = "force-dynamic";
 import type { AgeGroup, ReflectionType } from "@/lib/utils/types";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   return NextResponse.json({ reflections: getReflections(params.id) });
 }
 
