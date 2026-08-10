@@ -407,7 +407,7 @@ export function getDb(): Database.Database {
 
 function migrateToMultiChild(db: Database.Database): void {
   // 检测迁移是否已执行（user_account 表已存在的跳过）
-  const migrated = db.pragma("user_version") as number;
+  const migrated = db.pragma("user_version", { simple: true }) as number;
   if (migrated >= 1) return;
 
   const tables = [
