@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "@/lib/i18n/context";
+import { useChild } from "@/components/ui/child-provider";
 import type { TopicCatalog, TopicContent, Challenge, StartProjectResponse } from "@/lib/utils/types";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 
 export function StartProjectDialog({ topic, content, open, onClose, onSuccess }: Props) {
   const { t } = useLocale();
+  const { childId } = useChild();
   const [projectName, setProjectName] = useState(topic.title);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function StartProjectDialog({ topic, content, open, onClose, onSuccess }:
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/topics/${topic.id}/start-project`, {
+      const res = await fetch(`/api/topics/${topic.id}/start-project?child_id=${encodeURIComponent(childId || "")}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ project_name: projectName.trim(), goto }),
