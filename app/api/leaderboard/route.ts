@@ -1,4 +1,5 @@
-import { getOrCreateAccount } from "@/lib/db/user-account";
+import { NextRequest, NextResponse } from "next/server";
+import { getAccount } from "@/lib/db/user-account";
 import { getUnlockedBadges, initBadgeDefs } from "@/lib/db/badge-defs";
 import { getRank } from "@/lib/engine/rank-engine";
 import type { RankTier } from "@/lib/utils/types";
@@ -8,9 +9,13 @@ export const dynamic = "force-dynamic";
 const TIER_ORDER: RankTier[] = ["bronze", "silver", "gold", "diamond", "legendary"];
 
 /** Local-only leaderboard: the single user's rank, points, and next-tier target. */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   initBadgeDefs();
-  const account = getOrCreateAccount();
+  const account = getAccount(childId);
+  if (!account) return NextResponse.json({ error: "child_not_found" }, { status: 404 });
   const rank = getRank(account.total_points);
   const unlocked = getUnlockedBadges(account.id);
 
@@ -21,7 +26,7 @@ export async function GET() {
     nextTier = next ? { tier: next, points_needed: rank.pointsToNext } : null;
   }
 
-  return Response.json({
+  return NextResponse.json({
     mode: "local" as const,
     rank_tier: rank.tier,
     rank_title: rank.title,

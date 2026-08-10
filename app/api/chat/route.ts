@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSession, getSession, updateSession } from "@/lib/db/sessions";
 import { createMessage, getRecentMessages } from "@/lib/db/messages";
 import { upsertRequirementNode, getRequirementNodes } from "@/lib/db/requirements";
@@ -41,6 +41,9 @@ function blockedResponse(message: string): Response {
 }
 
 export async function POST(req: NextRequest) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   const { message, sessionId, ageGroup } = await req.json() as {
     message: string;
     sessionId?: string;
@@ -171,7 +174,7 @@ export async function POST(req: NextRequest) {
   // --- P6 profile injection ---
   let profileContext = "";
   try {
-    const profile = getOrCreateChildProfile();
+    const profile = getOrCreateChildProfile(childId);
     profileContext = buildProfileContext(profile);
   } catch (err) {
     console.warn("[chat] profile read failed, falling back to empty context:", err);
@@ -330,14 +333,15 @@ export async function POST(req: NextRequest) {
       if (streamOk && messagesThisSession >= 3) {
         setTimeout(() => {
           try {
-            const p = getOrCreateChildProfile();
-            updateChildProfile(p.id, {
+            const p = getOrCreateChildProfile(childId);
+            updateChildProfile(childId, {
               total_sessions: p.total_sessions + 1,
               last_session_at: new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, ""),
             });
             createProfileUpdate({
               trigger: "session_end",
               changes: { total_sessions: p.total_sessions + 1 },
+              child_id: childId,
             });
           } catch (err) {
             console.warn("[chat] profile session-end update failed:", err);

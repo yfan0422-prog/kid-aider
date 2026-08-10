@@ -4,7 +4,7 @@ import { addLog } from "@/lib/db/project-logs";
 import { getProject } from "@/lib/db/projects";
 import { recordEvent } from "@/lib/engine/evidence-collector";
 import { awardPoints } from "@/lib/engine/points-engine";
-import { getOrCreateAccount } from "@/lib/db/user-account";
+import { getAccount } from "@/lib/db/user-account";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +22,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   const project = getProject(params.id);
   if (!project) {
     return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
@@ -38,8 +41,10 @@ export async function POST(
     summary: checkIn.summary,
   });
   // P8a: award habit points for check-in
-  const account = getOrCreateAccount();
-  awardPoints(account.id, "check_in", params.id);
+  const account = getAccount(childId);
+  if (account) {
+    awardPoints(account.id, "check_in", params.id);
+  }
   const streak = getStreak(params.id);
   return NextResponse.json({ check_in: checkIn, streak });
 }

@@ -1,8 +1,9 @@
+import { NextRequest, NextResponse } from "next/server";
 import { getTopic, getActiveContent } from "@/lib/db/topics";
 import { generateContent } from "@/lib/engine/content-generator";
 import { getOrCreateChildProfile } from "@/lib/db/child-profile";
 import { awardPoints } from "@/lib/engine/points-engine";
-import { getOrCreateAccount } from "@/lib/db/user-account";
+import { getAccount } from "@/lib/db/user-account";
 import type { TopicLanguage } from "@/lib/utils/types";
 
 export const dynamic = "force-dynamic";
@@ -14,10 +15,13 @@ function inflightKey(topicId: string, ageGroup: string, language: string): strin
   return `${topicId}|${ageGroup}|${language}`;
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   const topic = getTopic(params.id);
   if (!topic) {
-    return Response.json({ error: "error.topic_not_found" }, { status: 404 });
+    return NextResponse.json({ error: "error.topic_not_found" }, { status: 404 });
   }
 
   const { language, force_refresh } = (await req.json().catch(() => ({}))) as {
@@ -31,14 +35,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (!forceRefresh) {
     const existing = getActiveContent(params.id, topic.age_group, lang);
     if (existing) {
-      return Response.json({ content: existing, generated: false, reason: "content_exists" });
+      return NextResponse.json({ content: existing, generated: false, reason: "content_exists" });
     }
   }
 
   // Check in-flight guard — prevent concurrent generation for same combo
   const key = inflightKey(params.id, topic.age_group, lang);
   if (inFlight.has(key)) {
-    return Response.json({
+    return NextResponse.json({
       status: "generating",
       topic_id: params.id,
       language: lang,
@@ -47,7 +51,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   // Fire-and-forget: start generation, return immediately with pending status
-  const profile = getOrCreateChildProfile();
+  const profile = getOrCreateChildProfile(childId);
 
   // Mark as in-flight before starting async generation
   inFlight.add(key);
@@ -64,8 +68,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         console.log(`[generate] content generated for topic ${params.id} v${content.version}`);
         // P8a: award habit points for exploring a topic
         try {
-          const account = getOrCreateAccount();
-          awardPoints(account.id, "explore_topic", params.id);
+          const account = getAccount(childId);
+          if (account) {
+            awardPoints(account.id, "explore_topic", params.id);
+          }
         } catch (err) {
           console.error("[generate] failed to award points:", err);
         }
@@ -79,7 +85,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     },
   );
 
-  return Response.json({
+  return NextResponse.json({
     status: "generating",
     topic_id: params.id,
     language: lang,

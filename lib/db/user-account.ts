@@ -45,10 +45,10 @@ export function createAccount(
   return getAccount(id)!;
 }
 
-/** 更新孩子信息 */
+/** 更新孩子信息（包括统计字段） */
 export function updateAccount(
   id: string,
-  fields: Partial<Pick<UserAccount, "display_name" | "avatar_emoji" | "age_group" | "language">>
+  fields: Partial<Pick<UserAccount, "display_name" | "avatar_emoji" | "age_group" | "language" | "total_points" | "current_streak" | "longest_streak">>
 ): UserAccount | null {
   const db = getDb();
   const now = new Date().toISOString();
@@ -59,6 +59,9 @@ export function updateAccount(
   if (fields.avatar_emoji !== undefined) { sets.push("avatar_emoji = ?"); values.push(fields.avatar_emoji); }
   if (fields.age_group !== undefined) { sets.push("age_group = ?"); values.push(fields.age_group); }
   if (fields.language !== undefined) { sets.push("language = ?"); values.push(fields.language); }
+  if (fields.total_points !== undefined) { sets.push("total_points = ?"); values.push(fields.total_points); }
+  if (fields.current_streak !== undefined) { sets.push("current_streak = ?"); values.push(fields.current_streak); }
+  if (fields.longest_streak !== undefined) { sets.push("longest_streak = ?"); values.push(fields.longest_streak); }
 
   if (sets.length === 0) return getAccount(id);
 

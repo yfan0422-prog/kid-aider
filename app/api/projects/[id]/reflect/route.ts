@@ -5,7 +5,7 @@ import { addLog } from "@/lib/db/project-logs";
 import { buildReflectionQuestions } from "@/lib/engine/reflection-coach";
 import { recordEvent } from "@/lib/engine/evidence-collector";
 import { awardPoints } from "@/lib/engine/points-engine";
-import { getOrCreateAccount } from "@/lib/db/user-account";
+import { getAccount } from "@/lib/db/user-account";
 
 export const dynamic = "force-dynamic";
 import type { AgeGroup, ReflectionType } from "@/lib/utils/types";
@@ -21,6 +21,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   const project = getProject(params.id);
   if (!project) {
     return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
@@ -70,8 +73,10 @@ export async function POST(
   });
 
   // P8a: award habit points for reflection
-  const account = getOrCreateAccount();
-  awardPoints(account.id, "reflection", params.id);
+  const account = getAccount(childId);
+  if (account) {
+    awardPoints(account.id, "reflection", params.id);
+  }
 
   return NextResponse.json({ reflection }, { status: 201 });
 }

@@ -1,4 +1,5 @@
-import { getOrCreateAccount } from "@/lib/db/user-account";
+import { NextRequest, NextResponse } from "next/server";
+import { getAccount } from "@/lib/db/user-account";
 import { getUnlockedBadges } from "@/lib/db/badge-defs";
 import { getRank } from "@/lib/engine/rank-engine";
 import { getDb } from "@/lib/db/index";
@@ -6,9 +7,13 @@ import { initBadgeDefs } from "@/lib/db/badge-defs";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+
   initBadgeDefs();
-  const account = getOrCreateAccount();
+  const account = getAccount(childId);
+  if (!account) return NextResponse.json({ error: "child_not_found" }, { status: 404 });
   const unlocked = getUnlockedBadges(account.id);
   const rank = getRank(account.total_points);
   const db = getDb();
@@ -17,7 +22,7 @@ export async function GET() {
   const totalChallenges = (db.prepare("SELECT COUNT(*) as cnt FROM daily_activity WHERE user_id = ? AND action_type = 'complete_challenge'").get(account.id) as { cnt: number }).cnt;
   const totalProjects = (db.prepare("SELECT COUNT(*) as cnt FROM projects").get() as { cnt: number }).cnt;
 
-  return Response.json({
+  return NextResponse.json({
     total_points: account.total_points,
     current_streak: account.current_streak,
     longest_streak: account.longest_streak,

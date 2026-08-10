@@ -1,4 +1,4 @@
-import { getOrCreateAccount, updateAccountStats } from "@/lib/db/user-account";
+import { getAccount, updateAccount } from "@/lib/db/user-account";
 import {
   createActivity,
   countActionToday,
@@ -119,8 +119,8 @@ export function checkBadges(userId: string): NewBadge[] {
         break;
       }
       case "total_points": {
-        const account = getOrCreateAccount();
-        satisfied = account.total_points >= rule.threshold;
+        const account = getAccount(userId);
+        satisfied = account ? account.total_points >= rule.threshold : false;
         break;
       }
       case "projects_count": {
@@ -193,9 +193,10 @@ export function awardPoints(userId: string, actionType: ActionType, actionTarget
   });
 
   // 5. Update account totals (badges checked after, so they see today + this award)
-  const account = getOrCreateAccount();
-  const newTotal = account.total_points + points;
-  updateAccountStats(account.id, {
+  const account = getAccount(userId);
+  const prevPoints = account ? account.total_points : 0;
+  const newTotal = prevPoints + points;
+  updateAccount(userId, {
     total_points: newTotal,
     current_streak: newCurrent,
     longest_streak: newLongest,
@@ -208,7 +209,7 @@ export function awardPoints(userId: string, actionType: ActionType, actionTarget
     badgePoints += b.points;
   }
   if (badgePoints > 0) {
-    updateAccountStats(account.id, {
+    updateAccount(userId, {
       total_points: newTotal + badgePoints,
       current_streak: newCurrent,
       longest_streak: newLongest,

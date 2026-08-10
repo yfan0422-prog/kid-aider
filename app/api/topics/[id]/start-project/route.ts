@@ -1,3 +1,4 @@
+import { NextRequest, NextResponse } from "next/server";
 import { getTopic, getActiveContent } from "@/lib/db/topics";
 import { createProject, getProjectByTopic } from "@/lib/db/projects";
 import { createTrack } from "@/lib/db/tracks";
@@ -7,19 +8,21 @@ import { createMessage } from "@/lib/db/messages";
 import { addLog } from "@/lib/db/project-logs";
 import { recordEvent } from "@/lib/engine/evidence-collector";
 import { awardPoints } from "@/lib/engine/points-engine";
-import { getOrCreateAccount } from "@/lib/db/user-account";
+import { getAccount } from "@/lib/db/user-account";
 import type { AgeGroup, Challenge, TopicLanguage } from "@/lib/utils/types";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const childId = req.nextUrl.searchParams.get("child_id");
+  if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
   // 1. Validate topic
   const topic = getTopic(params.id);
   if (!topic) {
-    return Response.json({ error: "error.topic_not_found" }, { status: 404 });
+    return NextResponse.json({ error: "error.topic_not_found" }, { status: 404 });
   }
 
   // 2. Parse body
@@ -35,7 +38,7 @@ export async function POST(
   // 3. Get active content
   const content = getActiveContent(params.id, topic.age_group, language);
   if (!content) {
-    return Response.json(
+    return NextResponse.json(
       { error: "error.no_content" },
       { status: 400 }
     );
@@ -46,7 +49,7 @@ export async function POST(
   if (existing) {
     // Return existing project with its session (for goto="chat" callers)
     const existingSession = getSession(existing.session_id);
-    return Response.json({
+    return NextResponse.json({
       project: existing,
       session: existingSession ? { id: existingSession.id } : undefined,
     });
@@ -122,8 +125,10 @@ export async function POST(
 
   // 11. Award points
   try {
-    const account = getOrCreateAccount();
-    awardPoints(account.id, "create_project", params.id);
+    const account = getAccount(childId);
+    if (account) {
+      awardPoints(account.id, "create_project", params.id);
+    }
   } catch (err) {
     console.error("[start-project] failed to award points:", err);
   }
@@ -136,7 +141,7 @@ export async function POST(
     milestone_count: challenges.length,
   });
 
-  return Response.json(
+  return NextResponse.json(
     { project, session: sessionResponse },
     { status: 201 }
   );
