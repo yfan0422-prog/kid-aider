@@ -272,15 +272,60 @@ function extractJsonObject(text: string): unknown {
     else if (fenced[i] === "}") {
       depth--;
       if (depth === 0) {
+        const raw = fenced.slice(start, i + 1);
         try {
-          return JSON.parse(fenced.slice(start, i + 1));
+          return JSON.parse(raw);
         } catch {
-          return null;
+          // LLMs often emit literal newlines inside JSON strings.
+          // Attempt to escape them and retry.
+          try {
+            return JSON.parse(escapeNewlinesInJsonStrings(raw));
+          } catch {
+            return null;
+          }
         }
       }
     }
   }
   return null;
+}
+
+/**
+ * Escape literal newlines that appear inside JSON string values.
+ * Walks the JSON token stream: when inside a string (tracked by
+ * unescaped double-quote pairs), replaces literal \n and \r with
+ * their escaped forms.
+ */
+function escapeNewlinesInJsonStrings(json: string): string {
+  const out: string[] = [];
+  let inString = false;
+  let escape = false;
+  for (let i = 0; i < json.length; i++) {
+    const ch = json[i];
+    if (escape) {
+      out.push(ch);
+      escape = false;
+      continue;
+    }
+    if (ch === "\\") {
+      out.push(ch);
+      escape = true;
+      continue;
+    }
+    if (ch === '"') {
+      inString = !inString;
+      out.push(ch);
+      continue;
+    }
+    if (inString && ch === "\n") {
+      out.push("\\n");
+    } else if (inString && ch === "\r") {
+      out.push("\\r");
+    } else {
+      out.push(ch);
+    }
+  }
+  return out.join("");
 }
 
 function normalizeGeneratedContent(parsed: unknown): GeneratedContent | null {
