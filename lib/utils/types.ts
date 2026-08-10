@@ -232,6 +232,7 @@ export interface EmotionLog {
 
 export interface ChildProfile {
   id: string;
+  child_id: string;  // P9：所属子账号
   ability_creativity: number;   // 0.0-1.0
   ability_logical: number;
   ability_focus: number;
