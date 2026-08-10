@@ -120,7 +120,6 @@ ${eventsJson}
         { role: "system", content: prompt },
         { role: "user", content: `请评估孩子的${DIMENSION_LABELS[dimension]}。` },
       ],
-      temperature: 0.3,
     });
 
     if (!response) throw new Error("No AI response");

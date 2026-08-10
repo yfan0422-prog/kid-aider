@@ -116,7 +116,7 @@ async function classifyByLLM(opts: ClassifyOpts): Promise<RuleEmotion | null> {
 
   try {
     const result = await Promise.race([
-      model.adapter.chat({ messages, temperature: 0.3, max_tokens: 128 }),
+      model.adapter.chat({ messages, max_tokens: 128 }),
       new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
     ]);
 

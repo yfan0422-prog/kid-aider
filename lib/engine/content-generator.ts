@@ -355,7 +355,6 @@ export async function generateContent(
     // field internally. The return value is a plain string, not { content }.
     const content = await routed.adapter.chat({
       messages: [{ role: "system", content: prompt }],
-      temperature: 0.7,
       max_tokens: 2048,
     });
 

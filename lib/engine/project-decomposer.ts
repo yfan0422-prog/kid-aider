@@ -90,7 +90,6 @@ ${pack.content}
         { role: "system", content: decomposePrompt },
         { role: "user", content: "请拆解这个方案包。" },
       ],
-      temperature: 0.3,
     });
 
     if (!response) return null;

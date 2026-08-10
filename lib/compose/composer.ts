@@ -61,7 +61,6 @@ solution_pack:
         { role: "system", content: composePrompt },
         { role: "user", content: "请生成方案包。" },
       ],
-      temperature: 0.3,
     });
 
     if (!response) return null;
