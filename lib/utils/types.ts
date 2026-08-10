@@ -58,6 +58,7 @@ export interface ModelProfile {
   assigned_roles: ModelRole[];
   params: { temperature: number; max_tokens: number };
   is_default: boolean;
+  enabled: boolean;
   created_at: string;
   updated_at: string;
 }

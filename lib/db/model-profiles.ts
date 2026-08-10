@@ -11,6 +11,7 @@ interface CreateAttrs {
   model: string;
   assigned_roles?: ModelRole[];
   params?: { temperature: number; max_tokens: number };
+  enabled?: boolean;
 }
 
 export function createModelProfile(attrs: CreateAttrs): ModelProfile {
@@ -28,13 +29,14 @@ export function createModelProfile(attrs: CreateAttrs): ModelProfile {
     assigned_roles: attrs.assigned_roles || ["dialogue"],
     params: attrs.params || { temperature: 0.7, max_tokens: 2048 },
     is_default: existingCount === 0,
+    enabled: attrs.enabled !== undefined ? attrs.enabled : true,
     created_at: now,
     updated_at: now,
   };
   db.prepare(
-    `INSERT INTO model_profiles (id, name, provider, base_url, api_key, model, assigned_roles, params, is_default, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(profile.id, profile.name, profile.provider, profile.base_url, profile.api_key, profile.model, JSON.stringify(profile.assigned_roles), JSON.stringify(profile.params), profile.is_default ? 1 : 0, profile.created_at, profile.updated_at);
+    `INSERT INTO model_profiles (id, name, provider, base_url, api_key, model, assigned_roles, params, is_default, enabled, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(profile.id, profile.name, profile.provider, profile.base_url, profile.api_key, profile.model, JSON.stringify(profile.assigned_roles), JSON.stringify(profile.params), profile.is_default ? 1 : 0, profile.enabled ? 1 : 0, profile.created_at, profile.updated_at);
   return profile;
 }
 
@@ -52,18 +54,18 @@ export function getModelProfile(id: string): ModelProfile | undefined {
 
 export function getDefaultProfile(role?: ModelRole): ModelProfile | undefined {
   const db = getDb();
-  // Prefer profiles explicitly marked as default
-  let rows = db.prepare("SELECT * FROM model_profiles WHERE is_default = 1").all() as Array<Record<string, unknown>>;
-  // Fall back to all profiles if no explicit default
+  // Prefer profiles explicitly marked as default (only enabled ones)
+  let rows = db.prepare("SELECT * FROM model_profiles WHERE is_default = 1 AND enabled = 1").all() as Array<Record<string, unknown>>;
+  // Fall back to all enabled profiles if no explicit default
   if (rows.length === 0) {
-    rows = db.prepare("SELECT * FROM model_profiles ORDER BY created_at ASC").all() as Array<Record<string, unknown>>;
+    rows = db.prepare("SELECT * FROM model_profiles WHERE enabled = 1 ORDER BY created_at ASC").all() as Array<Record<string, unknown>>;
   }
   const profiles = rows.map(deserializeProfile);
   if (!role) return profiles[0];
   return profiles.find(p => p.assigned_roles.includes(role)) || profiles[0];
 }
 
-export function updateModelProfile(id: string, attrs: Partial<CreateAttrs & { is_default: boolean }>): void {
+export function updateModelProfile(id: string, attrs: Partial<CreateAttrs & { is_default: boolean; enabled: boolean }>): void {
   const db = getDb();
   const fields: string[] = [];
   const values: unknown[] = [];
@@ -75,8 +77,8 @@ export function updateModelProfile(id: string, attrs: Partial<CreateAttrs & { is
       } else if (k === "assigned_roles" || k === "params") {
         fields.push(`${k} = ?`);
         values.push(JSON.stringify(v));
-      } else if (k === "is_default") {
-        fields.push("is_default = ?");
+      } else if (k === "is_default" || k === "enabled") {
+        fields.push(`${k} = ?`);
         values.push(v ? 1 : 0);
       } else {
         fields.push(`${k} = ?`);
@@ -102,5 +104,6 @@ function deserializeProfile(row: Record<string, unknown>): ModelProfile {
     assigned_roles: JSON.parse(row.assigned_roles as string),
     params: JSON.parse(row.params as string),
     is_default: Boolean(row.is_default),
+    enabled: row.enabled === undefined ? true : Boolean(row.enabled),
   } as ModelProfile;
 }

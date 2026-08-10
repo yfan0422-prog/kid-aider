@@ -67,6 +67,7 @@ export function getDb(): Database.Database {
       assigned_roles TEXT NOT NULL DEFAULT '["dialogue"]',
       params TEXT NOT NULL DEFAULT '{"temperature":0.7,"max_tokens":2048}',
       is_default INTEGER DEFAULT 0,
+      enabled INTEGER DEFAULT 1,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
@@ -398,6 +399,9 @@ export function getDb(): Database.Database {
   try { db.exec("ALTER TABLE projects ADD COLUMN source TEXT DEFAULT 'funnel'"); } catch {}
   try { db.exec("ALTER TABLE projects ADD COLUMN source_topic_id TEXT"); } catch {}
   try { db.exec("ALTER TABLE milestones ADD COLUMN challenge_json TEXT"); } catch {}
+
+  // Model profile enable/disable toggle
+  try { db.exec("ALTER TABLE model_profiles ADD COLUMN enabled INTEGER DEFAULT 1"); } catch {}
 
   // 多子账号迁移（P9）
   try { migrateToMultiChild(db); } catch { /* migration failure is non-fatal */ }

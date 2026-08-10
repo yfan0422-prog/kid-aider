@@ -53,7 +53,7 @@ export async function PUT(req: NextRequest) {
   }
 
   // Whitelist allowed fields to prevent arbitrary column injection
-  const ALLOWED_FIELDS = ["name", "provider", "base_url", "api_key", "model", "assigned_roles", "params", "is_default"];
+  const ALLOWED_FIELDS = ["name", "provider", "base_url", "api_key", "model", "assigned_roles", "params", "is_default", "enabled"];
   const safe: Record<string, unknown> = {};
   for (const key of ALLOWED_FIELDS) {
     if (key in attrs) safe[key] = (attrs as Record<string, unknown>)[key];

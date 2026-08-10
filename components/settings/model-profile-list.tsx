@@ -57,6 +57,15 @@ export function ModelProfileList() {
     fetchProfiles();
   };
 
+  const handleToggle = async (id: string, enabled: boolean) => {
+    await fetch(`/api/config/models?id=${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: !enabled }),
+    });
+    fetchProfiles();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -96,15 +105,18 @@ export function ModelProfileList() {
       )}
 
       {profiles.map((p) => (
-        <div key={p.id} className="bg-surface border border-border rounded-card p-5 shadow-sm">
+        <div key={p.id} className={`bg-surface border border-border rounded-card p-5 shadow-sm transition-opacity ${p.enabled ? "" : "opacity-60"}`}>
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="font-semibold text-body">{p.name}</h3>
               <p className="text-body-sm text-ink-tertiary">{p.provider} · {p.model}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               {p.is_default && (
                 <span className="text-xs bg-brand-soft text-[#B26A00] rounded-full px-2.5 py-1 font-semibold">{t("settings.model.default")}</span>
+              )}
+              {!p.enabled && (
+                <span className="text-xs bg-[#FEE2E2] text-[#991B1B] rounded-full px-2.5 py-1 font-semibold">{t("settings.model.disabled")}</span>
               )}
               <button onClick={() => { setShowForm(false); setEditingId(p.id); }}
                 className="text-ink-tertiary hover:text-primary text-sm transition-colors">
@@ -118,6 +130,23 @@ export function ModelProfileList() {
           </div>
           <div className="flex items-center gap-2 text-body-sm text-ink-tertiary mb-3">
             <span>{t("settings.model.key")}: {p.api_key}</span>
+          </div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-body-sm text-ink-secondary">{t("settings.model.enabled")}</span>
+            <button
+              onClick={() => handleToggle(p.id, p.enabled)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                p.enabled ? "bg-primary" : "bg-[#D1D5DB]"
+              }`}
+              role="switch"
+              aria-checked={p.enabled}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  p.enabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
           </div>
           <ConnectivityTest profileId={p.id} />
         </div>
