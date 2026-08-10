@@ -1,0 +1,15 @@
+[Unit]
+Description=Kid-Aider 儿童创意启发助手
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/kid-aider
+ExecStart=/opt/kid-aider/start_prod.sh
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
