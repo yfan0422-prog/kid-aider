@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 
 interface LogData {
   usage_summary: {
@@ -16,14 +17,14 @@ interface LogData {
   }>;
 }
 
-const ACTION_LABELS: Record<string, string> = {
-  task_done: "✅ 任务完成", task_undo: "↩️ 撤销任务",
-  check_in: "📅 打卡", reflection: "💭 复盘",
-  project_complete: "🎉 项目完成", project_resume: "🔄 项目恢复",
-  project_create: "🆕 项目创建",
-};
-
 export function SystemLog() {
+  const { t, locale } = useLocale();
+  const ACTION_LABELS: Record<string, string> = {
+    task_done: `✅ ${t("project.log.task_done")}`, task_undo: `↩️ ${t("parent.logs.action.task_undo")}`,
+    check_in: `📅 ${t("project.log.check_in")}`, reflection: `💭 ${t("project.log.reflection")}`,
+    project_complete: `🎉 ${t("parent.logs.action.project_complete")}`, project_resume: `🔄 ${t("parent.logs.action.project_resume")}`,
+    project_create: `🆕 ${t("parent.logs.action.project_create")}`,
+  };
   const [data, setData] = useState<LogData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,38 +45,38 @@ export function SystemLog() {
   }
 
   if (!data) {
-    return <p className="text-ink-tertiary text-body-sm text-center py-8">加载失败</p>;
+    return <p className="text-ink-tertiary text-body-sm text-center py-8">{t("common.load_failed")}</p>;
   }
 
   return (
     <div className="space-y-6">
       {/* Usage summary */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">📊 使用摘要</h2>
+        <h2 className="text-body-lg font-bold mb-3">📊 {t("parent.logs.summary")}</h2>
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <p className="text-2xl font-bold text-primary">{data.usage_summary.total_hours}</p>
-            <p className="text-body-sm text-ink-tertiary">总小时数</p>
+            <p className="text-body-sm text-ink-tertiary">{t("parent.logs.total_hours")}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-primary">{data.usage_summary.active_days}</p>
-            <p className="text-body-sm text-ink-tertiary">活跃天数</p>
+            <p className="text-body-sm text-ink-tertiary">{t("parent.logs.active_days")}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-primary">{data.usage_summary.avg_min_per_day}</p>
-            <p className="text-body-sm text-ink-tertiary">日均分钟</p>
+            <p className="text-body-sm text-ink-tertiary">{t("parent.logs.avg_minutes")}</p>
           </div>
         </div>
       </section>
 
       {/* Recent operation logs */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">📋 最近操作</h2>
+        <h2 className="text-body-lg font-bold mb-3">📋 {t("parent.logs.recent_ops")}</h2>
         <div className="space-y-1.5 max-h-60 overflow-y-auto">
           {data.recent_logs.map(log => (
             <div key={log.id} className="flex items-center gap-2 text-body-sm">
               <span className="text-ink-tertiary w-32 shrink-0">
-                {new Date(log.created_at).toLocaleString("zh-CN")}
+                {new Date(log.created_at).toLocaleString(locale)}
               </span>
               <span>{ACTION_LABELS[log.action] || log.action}</span>
               <span className="text-ink-tertiary">{log.detail}</span>
@@ -83,22 +84,22 @@ export function SystemLog() {
             </div>
           ))}
           {data.recent_logs.length === 0 && (
-            <p className="text-ink-tertiary text-body-sm text-center py-4">暂无操作记录</p>
+            <p className="text-ink-tertiary text-body-sm text-center py-4">{t("parent.logs.no_ops")}</p>
           )}
         </div>
       </section>
 
       {/* Recent AI calls */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">🤖 最近 AI 调用</h2>
+        <h2 className="text-body-lg font-bold mb-3">🤖 {t("parent.logs.recent_ai")}</h2>
         <div className="space-y-1.5">
           {data.recent_ai_calls.map(call => (
             <div key={call.id} className="text-body-sm text-ink-tertiary">
-              {new Date(call.created_at).toLocaleString("zh-CN")} — {call.role}
+              {new Date(call.created_at).toLocaleString(locale)} — {call.role}
             </div>
           ))}
           {data.recent_ai_calls.length === 0 && (
-            <p className="text-ink-tertiary text-body-sm text-center py-4">暂无调用记录</p>
+            <p className="text-ink-tertiary text-body-sm text-center py-4">{t("parent.logs.no_ai_calls")}</p>
           )}
         </div>
       </section>

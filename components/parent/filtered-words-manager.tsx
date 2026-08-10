@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import type { FilteredWord } from "@/lib/utils/types";
 
 export function FilteredWordsManager() {
+  const { t } = useLocale();
   const [words, setWords] = useState<FilteredWord[]>([]);
   const [newWord, setNewWord] = useState("");
   const [loading, setLoading] = useState(true);
@@ -49,14 +51,14 @@ export function FilteredWordsManager() {
           value={newWord}
           onChange={e => setNewWord(e.target.value)}
           onKeyDown={e => e.key === "Enter" && addWord()}
-          placeholder="添加敏感词..."
+          placeholder={t("parent.filter.placeholder")}
           className="flex-1 border border-border rounded-btn px-3 py-1.5 text-body-sm"
         />
         <button
           onClick={addWord}
           className="bg-primary text-white rounded-btn px-4 py-1.5 text-body-sm font-semibold"
         >
-          添加
+          {t("parent.filter.add")}
         </button>
       </div>
       <div className="flex flex-wrap gap-1.5">

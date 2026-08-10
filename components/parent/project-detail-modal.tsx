@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 
 interface DetailData {
   project: { id: string; title: string; status: string; created_at: string };
@@ -19,13 +20,13 @@ interface Props {
   onClose: () => void;
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  child: "👦 孩子",
-  guide: "🤖 引导",
-  system: "⚙️ 系统",
-};
-
 export function ProjectDetailModal({ projectId, onClose }: Props) {
+  const { t } = useLocale();
+  const ROLE_LABELS: Record<string, string> = {
+    child: `👦 ${t("parent.detail.role.child")}`,
+    guide: `🤖 ${t("parent.detail.role.guide")}`,
+    system: `⚙️ ${t("parent.detail.role.system")}`,
+  };
   const [data, setData] = useState<DetailData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +48,7 @@ export function ProjectDetailModal({ projectId, onClose }: Props) {
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : !data ? (
-          <p className="text-ink-tertiary text-center py-8">加载失败</p>
+          <p className="text-ink-tertiary text-center py-8">{t("common.load_failed")}</p>
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -57,7 +58,7 @@ export function ProjectDetailModal({ projectId, onClose }: Props) {
 
             {/* Project structure */}
             <section>
-              <h3 className="text-body font-bold mb-2">📋 项目结构</h3>
+              <h3 className="text-body font-bold mb-2">📋 {t("parent.detail.structure")}</h3>
               {data.structure.map(track => (
                 <div key={track.id} className="mb-3">
                   <p className="text-body-sm font-semibold text-ink mb-1">
@@ -68,9 +69,9 @@ export function ProjectDetailModal({ projectId, onClose }: Props) {
                       <p className="text-body-sm text-ink-tertiary mb-0.5">
                         {m.status === "done" ? "✅" : "○"} {m.title}
                       </p>
-                      {m.tasks.map(t => (
-                        <p key={t.id} className="ml-4 text-body-sm text-ink-tertiary">
-                          {t.status === "done" ? "✓" : "·"} {t.title} (难度 {t.difficulty})
+                      {m.tasks.map(task => (
+                        <p key={task.id} className="ml-4 text-body-sm text-ink-tertiary">
+                          {task.status === "done" ? "✓" : "·"} {task.title} ({t("project.detail.task.difficulty")} {task.difficulty})
                         </p>
                       ))}
                     </div>
@@ -81,7 +82,7 @@ export function ProjectDetailModal({ projectId, onClose }: Props) {
 
             {/* Conversation */}
             <section>
-              <h3 className="text-body font-bold mb-2">💬 对话记录</h3>
+              <h3 className="text-body font-bold mb-2">💬 {t("parent.detail.conversation")}</h3>
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {data.messages.slice(-30).map((m, i) => (
                   <div key={i} className="text-body-sm">
@@ -90,7 +91,7 @@ export function ProjectDetailModal({ projectId, onClose }: Props) {
                   </div>
                 ))}
                 {data.messages.length === 0 && (
-                  <p className="text-ink-tertiary text-body-sm">暂无对话</p>
+                  <p className="text-ink-tertiary text-body-sm">{t("parent.detail.no_conversation")}</p>
                 )}
               </div>
             </section>

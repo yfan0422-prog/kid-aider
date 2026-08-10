@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import type { UsageConfig } from "@/lib/utils/types";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 const DURATION_OPTIONS = [30, 60, 90, 120, 0]; // 0 = unlimited
 
 export function UsageControl({ config, onConfigChange }: Props) {
+  const { t } = useLocale();
   const [saving, setSaving] = useState(false);
 
   if (!config) {
@@ -39,7 +41,7 @@ export function UsageControl({ config, onConfigChange }: Props) {
     <div className="space-y-6">
       {/* Daily limit */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">⏱ 每日使用时长</h2>
+        <h2 className="text-body-lg font-bold mb-3">⏱ {t("parent.usage.daily")}</h2>
         <div className="flex items-center gap-2 mb-2">
           {DURATION_OPTIONS.map(min => (
             <button
@@ -52,18 +54,18 @@ export function UsageControl({ config, onConfigChange }: Props) {
                   : "border-border text-ink-tertiary hover:text-ink"
               }`}
             >
-              {min === 0 ? "不限" : `${min} 分钟`}
+              {min === 0 ? t("parent.usage.unlimited") : t("parent.usage.minutes", { min: String(min) })}
             </button>
           ))}
         </div>
         <p className="text-body-sm text-ink-tertiary">
-          到达限制后将温和提示，不强制锁屏
+          {t("parent.usage.limit_note")}
         </p>
       </section>
 
       {/* Quiet hours */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">🌙 免打扰时段</h2>
+        <h2 className="text-body-lg font-bold mb-3">🌙 {t("parent.usage.quiet")}</h2>
         <div className="flex items-center gap-3">
           <input
             type="time"
@@ -72,7 +74,7 @@ export function UsageControl({ config, onConfigChange }: Props) {
             disabled={saving}
             className="border border-border rounded-btn px-3 py-1.5 text-body-sm"
           />
-          <span className="text-ink-tertiary text-body-sm">至</span>
+          <span className="text-ink-tertiary text-body-sm">{t("parent.usage.quiet.to")}</span>
           <input
             type="time"
             value={config.quiet_end || ""}
@@ -82,13 +84,13 @@ export function UsageControl({ config, onConfigChange }: Props) {
           />
         </div>
         <p className="text-body-sm text-ink-tertiary mt-2">
-          时段内阻止新会话，不打断进行中的对话
+          {t("parent.usage.quiet.note")}
         </p>
       </section>
 
       {/* Content filter toggle */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">🛡 内容过滤</h2>
+        <h2 className="text-body-lg font-bold mb-3">🛡 {t("parent.usage.filter")}</h2>
         <div className="flex items-center gap-3">
           <button
             onClick={() => update({ filter_enabled: config.filter_enabled ? 0 : 1 })}
@@ -104,11 +106,11 @@ export function UsageControl({ config, onConfigChange }: Props) {
             />
           </button>
           <span className="text-body-sm font-semibold">
-            {config.filter_enabled ? "已开启" : "已关闭"}
+            {config.filter_enabled ? t("parent.usage.on") : t("parent.usage.off")}
           </span>
         </div>
         <p className="text-body-sm text-ink-tertiary mt-2">
-          AI 输出命中敏感词时替换为安全提示
+          {t("parent.usage.filter.note")}
         </p>
       </section>
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { UsageControl } from "@/components/parent/usage-control";
 import { FilteredWordsManager } from "@/components/parent/filtered-words-manager";
 import { ProjectManager } from "@/components/parent/project-manager";
@@ -15,6 +16,7 @@ import type { UsageConfig } from "@/lib/utils/types";
 type Tab = "control" | "models" | "projects" | "profile" | "content" | "data" | "logs";
 
 export default function ParentPage() {
+  const { t } = useLocale();
   const [tab, setTab] = useState<Tab>("control");
   const [config, setConfig] = useState<UsageConfig | null>(null);
 
@@ -25,13 +27,13 @@ export default function ParentPage() {
   }, []);
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
-    { key: "control", label: "控制", icon: "🔧" },
-    { key: "models", label: "模型", icon: "🤖" },
-    { key: "projects", label: "项目", icon: "📁" },
-    { key: "profile", label: "画像", icon: "🧠" },
-    { key: "content", label: "内容", icon: "📰" },
-    { key: "data", label: "数据", icon: "📊" },
-    { key: "logs", label: "日志", icon: "📋" },
+    { key: "control", label: t("parent.tab.usage"), icon: "🔧" },
+    { key: "models", label: t("parent.tab.models"), icon: "🤖" },
+    { key: "projects", label: t("parent.tab.projects"), icon: "📁" },
+    { key: "profile", label: t("parent.tab.profile"), icon: "🧠" },
+    { key: "content", label: t("parent.tab.content"), icon: "📰" },
+    { key: "data", label: t("parent.tab.data"), icon: "📊" },
+    { key: "logs", label: t("parent.tab.logs"), icon: "📋" },
   ];
 
   return (
@@ -39,9 +41,9 @@ export default function ParentPage() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-4">
         <Link href="/" className="text-ink-tertiary hover:text-ink transition-colors">
-          ← 返回
+          {t("parent.back")}
         </Link>
-        <h1 className="text-2xl font-bold">👨‍👩‍👧 家长控制</h1>
+        <h1 className="text-2xl font-bold">👨‍👩‍👧 {t("parent.title")}</h1>
       </div>
 
       {/* Restrictions toggle */}
@@ -49,7 +51,7 @@ export default function ParentPage() {
         <div className="flex items-center gap-3 mb-6 p-3 bg-surface border border-border rounded-card">
           <span className="text-lg">{config.restrictions_paused ? "🔓" : "🔒"}</span>
           <span className="text-body-sm font-semibold">
-            {config.restrictions_paused ? "限制已暂停" : "限制已开启"}
+            {config.restrictions_paused ? t("parent.restrictions.paused") : t("parent.restrictions.active")}
           </span>
           <button
             onClick={async () => {
@@ -63,24 +65,24 @@ export default function ParentPage() {
             }}
             className="ml-auto text-body-sm text-primary hover:underline"
           >
-            {config.restrictions_paused ? "恢复限制" : "暂停限制"}
+            {config.restrictions_paused ? t("parent.restrictions.resume") : t("parent.restrictions.pause")}
           </button>
         </div>
       )}
 
       {/* Tab bar */}
       <div className="flex gap-0 mb-6 border-b border-border">
-        {tabs.map(t => (
+        {tabs.map(tabItem => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+            key={tabItem.key}
+            onClick={() => setTab(tabItem.key)}
             className={`flex items-center gap-1.5 px-4 py-2 text-body-sm border-b-2 transition-colors ${
-              tab === t.key
+              tab === tabItem.key
                 ? "border-primary text-primary font-semibold"
                 : "border-transparent text-ink-tertiary hover:text-ink"
             }`}
           >
-            {t.icon} {t.label}
+            {tabItem.icon} {tabItem.label}
           </button>
         ))}
       </div>
@@ -90,7 +92,7 @@ export default function ParentPage() {
         <div className="space-y-6">
           <UsageControl config={config} onConfigChange={setConfig} />
           <section className="bg-surface border border-border rounded-card p-5">
-            <h2 className="text-body-lg font-bold mb-3">🚫 敏感词管理</h2>
+            <h2 className="text-body-lg font-bold mb-3">🚫 {t("parent.tab.filter")}</h2>
             <FilteredWordsManager />
           </section>
         </div>

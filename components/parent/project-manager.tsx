@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import { ProjectDetailModal } from "./project-detail-modal";
 
 interface ParentProject {
@@ -13,13 +14,6 @@ interface ParentProject {
   updated_at: string;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  active: "进行中",
-  paused: "已暂停",
-  completed: "已完成",
-  archived: "已归档",
-};
-
 const STATUS_COLORS: Record<string, string> = {
   active: "text-green-600",
   paused: "text-yellow-600",
@@ -28,6 +22,13 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function ProjectManager() {
+  const { t, locale } = useLocale();
+  const STATUS_LABELS: Record<string, string> = {
+    active: t("project.status.active"),
+    paused: t("project.status.paused"),
+    completed: t("project.status.completed"),
+    archived: t("parent.projects.status.archived"),
+  };
   const [projects, setProjects] = useState<ParentProject[]>([]);
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
@@ -73,14 +74,14 @@ export function ProjectManager() {
               filter === s ? "border-primary bg-primary/5 text-primary" : "border-border text-ink-tertiary"
             }`}
           >
-            {s === "" ? "全部" : STATUS_LABELS[s]}
+            {s === "" ? t("explore.all") : STATUS_LABELS[s]}
           </button>
         ))}
       </div>
 
       {/* Project list */}
       {projects.length === 0 ? (
-        <p className="text-ink-tertiary text-body-sm text-center py-8">暂无项目</p>
+        <p className="text-ink-tertiary text-body-sm text-center py-8">{t("parent.projects.empty")}</p>
       ) : (
         <div className="space-y-3">
           {projects.map(p => (
@@ -90,8 +91,8 @@ export function ProjectManager() {
                   <h3 className="text-body font-bold text-ink">{p.title}</h3>
                   <div className="flex items-center gap-3 mt-1 text-body-sm text-ink-tertiary">
                     <span className={STATUS_COLORS[p.status]}>● {STATUS_LABELS[p.status]}</span>
-                    <span>任务 {p.tasks_done}/{p.tasks_total}</span>
-                    <span>{new Date(p.created_at).toLocaleDateString("zh-CN")}</span>
+                    <span>{t("parent.projects.tasks_progress", { done: String(p.tasks_done), total: String(p.tasks_total) })}</span>
+                    <span>{new Date(p.created_at).toLocaleDateString(locale)}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -99,21 +100,21 @@ export function ProjectManager() {
                     onClick={() => setDetailId(p.id)}
                     className="text-body-sm text-primary hover:underline px-2"
                   >
-                    详情
+                    {t("parent.projects.detail")}
                   </button>
                   {p.status !== "archived" ? (
                     <button
                       onClick={() => changeStatus(p.id, "archived")}
                       className="text-body-sm text-ink-tertiary hover:text-ink px-2"
                     >
-                      归档
+                      {t("parent.projects.archive")}
                     </button>
                   ) : (
                     <button
                       onClick={() => changeStatus(p.id, "paused")}
                       className="text-body-sm text-ink-tertiary hover:text-ink px-2"
                     >
-                      恢复
+                      {t("parent.projects.restore")}
                     </button>
                   )}
                 </div>

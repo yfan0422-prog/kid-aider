@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import { RadarChart } from "@/components/growth/radar-chart";
 import type { ChildProfile } from "@/lib/utils/types";
 
 const ABILITY_DIMS = ["creativity", "logical", "focus", "expression", "curiosity"];
 
 export function ProfileView() {
+  const { t, locale } = useLocale();
   const [profile, setProfile] = useState<ChildProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -32,11 +34,11 @@ export function ProfileView() {
   };
 
   if (loading) {
-    return <div className="p-6 text-ink-tertiary">加载中...</div>;
+    return <div className="p-6 text-ink-tertiary">{t("common.loading")}</div>;
   }
 
   if (!profile) {
-    return <div className="p-6 text-ink-tertiary">暂无数据</div>;
+    return <div className="p-6 text-ink-tertiary">{t("common.empty")}</div>;
   }
 
   const abilityData: Record<string, number> = {
@@ -48,20 +50,20 @@ export function ProfileView() {
   };
 
   const abilityLabels: Record<string, string> = {
-    creativity: "创造力",
-    logical: "逻辑力",
-    focus: "专注力",
-    expression: "表达力",
-    curiosity: "好奇心",
+    creativity: t("parent.profile.ability.creativity"),
+    logical: t("parent.profile.ability.logical"),
+    focus: t("parent.profile.ability.focus"),
+    expression: t("parent.profile.ability.expression"),
+    curiosity: t("parent.profile.ability.curiosity"),
   };
 
   const interests = JSON.parse(profile.interest_tags || "[]") as string[];
   const emotionBaseline = JSON.parse(profile.emotion_baseline || "{}") as Record<string, number>;
 
   const trendLabels: Record<string, string> = {
-    rising: "📈 上升",
-    stable: "➡️ 平稳",
-    declining: "📉 下降",
+    rising: `📈 ${t("parent.data.rising")}`,
+    stable: `➡️ ${t("parent.data.stable")}`,
+    declining: `📉 ${t("parent.data.declining")}`,
   };
 
   const emotionEmoji: Record<string, string> = {
@@ -74,9 +76,9 @@ export function ProfileView() {
 
   return (
     <div className="space-y-6">
-      {/* 能力雷达图 */}
+      {/* Ability radar */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-4">📡 能力雷达</h2>
+        <h2 className="text-body-lg font-bold mb-4">📡 {t("growth.radar.title")}</h2>
         <RadarChart
           data={abilityData}
           labels={abilityLabels}
@@ -85,9 +87,9 @@ export function ProfileView() {
         />
       </section>
 
-      {/* 兴趣标签 */}
+      {/* Interest tags */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">🏷️ 兴趣标签</h2>
+        <h2 className="text-body-lg font-bold mb-3">🏷️ {t("parent.profile.interests")}</h2>
         {interests.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {interests.map(tag => (
@@ -97,13 +99,13 @@ export function ProfileView() {
             ))}
           </div>
         ) : (
-          <p className="text-ink-tertiary text-body-sm">数据积累中，多聊聊就能发现兴趣方向</p>
+          <p className="text-ink-tertiary text-body-sm">{t("parent.profile.interests.empty")}</p>
         )}
       </section>
 
-      {/* 情绪基线 */}
+      {/* Emotion baseline */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">💭 情绪分布</h2>
+        <h2 className="text-body-lg font-bold mb-3">💭 {t("parent.profile.emotions")}</h2>
         {Object.keys(emotionBaseline).length > 0 ? (
           <div className="space-y-2">
             {Object.entries(emotionBaseline).map(([emotion, ratio]) => (
@@ -122,48 +124,48 @@ export function ProfileView() {
             ))}
           </div>
         ) : (
-          <p className="text-ink-tertiary text-body-sm">情绪数据积累中（需 ≥10 条记录）</p>
+          <p className="text-ink-tertiary text-body-sm">{t("parent.profile.emotions.empty")}</p>
         )}
       </section>
 
-      {/* 互动统计 */}
+      {/* Interaction stats */}
       <section className="bg-surface border border-border rounded-card p-5">
-        <h2 className="text-body-lg font-bold mb-3">📊 互动统计</h2>
+        <h2 className="text-body-lg font-bold mb-3">📊 {t("parent.profile.stats")}</h2>
         <div className="grid grid-cols-2 gap-4 text-body-sm">
           <div>
-            <span className="text-ink-tertiary">总对话次数</span>
+            <span className="text-ink-tertiary">{t("parent.data.sessions")}</span>
             <p className="text-body-lg font-bold">{profile.total_sessions}</p>
           </div>
           <div>
-            <span className="text-ink-tertiary">平均时长</span>
+            <span className="text-ink-tertiary">{t("parent.data.avgDuration")}</span>
             <p className="text-body-lg font-bold">
-              {profile.avg_session_minutes ? `${Math.round(profile.avg_session_minutes)} 分钟` : "—"}
+              {profile.avg_session_minutes ? `${Math.round(profile.avg_session_minutes)} ${t("explore.challenge.minutes")}` : "—"}
             </p>
           </div>
           <div>
-            <span className="text-ink-tertiary">最近活跃</span>
+            <span className="text-ink-tertiary">{t("parent.data.last_active")}</span>
             <p className="text-body-lg font-bold">
               {profile.last_session_at
-                ? new Date(profile.last_session_at).toLocaleDateString("zh-CN")
+                ? new Date(profile.last_session_at).toLocaleDateString(locale)
                 : "—"}
             </p>
           </div>
           <div>
-            <span className="text-ink-tertiary">参与趋势</span>
+            <span className="text-ink-tertiary">{t("parent.data.engagement")}</span>
             <p className="text-body-lg font-bold">{trendLabels[profile.engagement_trend] || "—"}</p>
           </div>
         </div>
       </section>
 
-      {/* 深度分析触发 */}
+      {/* Deep analysis trigger */}
       <section className="bg-surface border border-border rounded-card p-5">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-body-lg font-bold">🔬 深度分析</h2>
+            <h2 className="text-body-lg font-bold">🔬 {t("parent.profile.deep_analysis")}</h2>
             <p className="text-body-sm text-ink-tertiary mt-1">
               {profile.deep_analysis_at
-                ? `上次分析：${new Date(profile.deep_analysis_at).toLocaleString("zh-CN")}`
-                : "尚未执行"}
+                ? t("parent.profile.last_analysis", { date: new Date(profile.deep_analysis_at).toLocaleString(locale) })
+                : t("parent.profile.not_analyzed")}
             </p>
           </div>
           <button
@@ -171,7 +173,7 @@ export function ProfileView() {
             disabled={analyzing}
             className="bg-primary text-white border-none rounded-btn px-5 py-2.5 font-semibold text-body-sm disabled:opacity-40"
           >
-            {analyzing ? "分析中..." : "立即分析"}
+            {analyzing ? t("parent.profile.analyzing") : t("parent.profile.analyze_now")}
           </button>
         </div>
       </section>

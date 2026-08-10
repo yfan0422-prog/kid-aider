@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import type { ModelProvider, ModelRole } from "@/lib/utils/types";
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function ModelProfileForm({ onSave, onCancel, initial }: Props) {
+  const { t } = useLocale();
   const [name, setName] = useState(initial?.name || "");
   const [provider, setProvider] = useState<ModelProvider>((initial?.provider as ModelProvider) || "openai");
   const [baseUrl, setBaseUrl] = useState(initial?.base_url || "");
@@ -35,34 +37,34 @@ export function ModelProfileForm({ onSave, onCancel, initial }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-body-sm font-semibold mb-1.5">档案名称</label>
+        <label className="block text-body-sm font-semibold mb-1.5">{t("settings.model.name")}</label>
         <input type="text" value={name} onChange={e => setName(e.target.value)}
           className="w-full bg-surface border-2 border-border rounded-btn px-4 py-3 text-body focus:border-primary focus:outline-none transition-colors"
-          placeholder="例如：Kimi-主力" required />
+          placeholder={t("settings.model.name.placeholder")} required />
       </div>
       <div>
-        <label className="block text-body-sm font-semibold mb-1.5">协议</label>
+        <label className="block text-body-sm font-semibold mb-1.5">{t("settings.model.provider")}</label>
         <select value={provider} onChange={e => setProvider(e.target.value as ModelProvider)}
           className="w-full bg-surface border-2 border-border rounded-btn px-4 py-3 text-body focus:border-primary focus:outline-none transition-colors">
-          <option value="openai">OpenAI 兼容</option>
+          <option value="openai">{t("settings.model.provider.openai")}</option>
           <option value="anthropic">Anthropic</option>
         </select>
       </div>
       <div>
-        <label className="block text-body-sm font-semibold mb-1.5">Base URL</label>
+        <label className="block text-body-sm font-semibold mb-1.5">{t("settings.model.url")}</label>
         <input type="url" value={baseUrl} onChange={e => setBaseUrl(e.target.value)}
           className="w-full bg-surface border-2 border-border rounded-btn px-4 py-3 text-body focus:border-primary focus:outline-none transition-colors"
           placeholder="https://api.openai.com/v1" required />
       </div>
       <div>
-        <label className="block text-body-sm font-semibold mb-1.5">API Key</label>
+        <label className="block text-body-sm font-semibold mb-1.5">{t("settings.model.key")}</label>
         <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)}
           className="w-full bg-surface border-2 border-border rounded-btn px-4 py-3 text-body focus:border-primary focus:outline-none transition-colors"
           placeholder="sk-……" required />
-        <p className="text-caption text-ink-tertiary mt-1">Key 仅存储在本地，加密保存</p>
+        <p className="text-caption text-ink-tertiary mt-1">{t("settings.model.key.hint")}</p>
       </div>
       <div>
-        <label className="block text-body-sm font-semibold mb-1.5">模型名</label>
+        <label className="block text-body-sm font-semibold mb-1.5">{t("settings.model.model")}</label>
         <input type="text" value={model} onChange={e => setModel(e.target.value)}
           className="w-full bg-surface border-2 border-border rounded-btn px-4 py-3 text-body focus:border-primary focus:outline-none transition-colors"
           placeholder="gpt-4o / deepseek-chat / claude-sonnet-5" required />
@@ -70,11 +72,11 @@ export function ModelProfileForm({ onSave, onCancel, initial }: Props) {
       <div className="flex gap-3 pt-2">
         <button type="submit"
           className="flex-1 bg-primary text-white border-none rounded-btn px-5 py-3 font-semibold text-body hover:bg-primary-dark transition-colors">
-          保存
+          {t("settings.model.save")}
         </button>
         <button type="button" onClick={onCancel}
           className="flex-1 bg-surface text-ink-secondary border-2 border-border rounded-btn px-5 py-3 font-semibold text-body hover:bg-surface-raised transition-colors">
-          取消
+          {t("common.cancel")}
         </button>
       </div>
     </form>
