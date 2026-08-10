@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 
 interface UserCardProps {
   displayName: string;
@@ -23,6 +24,7 @@ export function UserCard({
   totalPoints,
   pointsToNext,
 }: UserCardProps) {
+  const { t } = useLocale();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(displayName);
 
@@ -82,20 +84,20 @@ export function UserCard({
                 onClick={handleSave}
                 className="bg-primary text-white border-none rounded-btn px-3 py-1.5 text-body-sm font-semibold"
               >
-                保存
+                {t("common.save")}
               </button>
               <button
                 onClick={() => { setName(displayName); setEditing(false); }}
                 className="text-ink-tertiary text-body-sm"
               >
-                取消
+                {t("common.cancel")}
               </button>
             </div>
           ) : (
             <h2
               className="text-body-lg font-bold cursor-pointer hover:text-primary transition-colors"
               onClick={() => setEditing(true)}
-              title="点击编辑名称"
+              title={t("me.name.edit_hint")}
             >
               {name} ✏️
             </h2>
@@ -110,14 +112,14 @@ export function UserCard({
         </div>
         <div className="text-right shrink-0">
           <div className="text-body-2xl font-bold text-primary">{totalPoints}</div>
-          <div className="text-body-xs text-ink-tertiary">总积分</div>
+          <div className="text-body-xs text-ink-tertiary">{t("me.total_points")}</div>
         </div>
       </div>
 
       {/* Progress bar */}
       <div>
         <div className="flex justify-between text-body-xs text-ink-tertiary mb-1">
-          <span>段位进度</span>
+          <span>{t("me.rank.progress")}</span>
           <span>{progressPct}%</span>
         </div>
         <div className="h-2 bg-surface-raised rounded-full overflow-hidden">
@@ -128,7 +130,7 @@ export function UserCard({
         </div>
         {pointsToNext !== null && (
           <p className="text-body-xs text-ink-tertiary mt-1">
-            距离下一段位还差 {pointsToNext} 分
+            {t("me.rank.next", { points: String(pointsToNext) })}
           </p>
         )}
       </div>
@@ -136,9 +138,9 @@ export function UserCard({
       {/* Streak */}
       <div className="flex items-center gap-2 text-body-sm">
         <span>🔥</span>
-        <span className="text-ink-secondary">连续打卡</span>
+        <span className="text-ink-secondary">{t("project.checkin.streak")}</span>
         <span className="font-bold text-primary">{currentStreak}</span>
-        <span className="text-ink-secondary">天</span>
+        <span className="text-ink-secondary">{t("project.checkin.day")}</span>
       </div>
     </div>
   );

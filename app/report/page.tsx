@@ -2,17 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { RadarChart } from "@/components/growth/radar-chart";
 import { TrendLine } from "@/components/growth/trend-line";
-
-const DIM_LABELS: Record<string, string> = {
-  clarification: "需求澄清",
-  decomposition: "分解力",
-  execution: "执行力",
-  reflection: "反思力",
-  creativity: "创造力",
-  persistence: "坚持力",
-};
 
 const DIM_COLORS: Record<string, string> = {
   clarification: "#6366f1",
@@ -38,6 +30,15 @@ interface ReportData {
 }
 
 export default function ReportPage() {
+  const { t } = useLocale();
+  const DIM_LABELS: Record<string, string> = {
+    clarification: t("growth.dimension.clarification"),
+    decomposition: t("growth.dimension.decomposition"),
+    execution: t("growth.dimension.execution"),
+    reflection: t("growth.dimension.reflection"),
+    creativity: t("growth.dimension.creativity"),
+    persistence: t("growth.dimension.persistence"),
+  };
   const [data, setData] = useState<ReportData | null>(null);
   const [weeks, setWeeks] = useState(4);
   const [loading, setLoading] = useState(true);
@@ -70,9 +71,9 @@ export default function ReportPage() {
       <div className="flex items-center justify-between mb-6 no-print">
         <div className="flex items-center gap-4">
           <Link href="/" className="text-ink-tertiary hover:text-ink transition-colors">
-            ← 返回
+            {t("report.back")}
           </Link>
-          <h1 className="text-2xl font-bold">📊 成长报告</h1>
+          <h1 className="text-2xl font-bold">📊 {t("report.title")}</h1>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -80,15 +81,15 @@ export default function ReportPage() {
             onChange={e => setWeeks(Number(e.target.value))}
             className="bg-surface border border-border rounded-btn px-3 py-1.5 text-body-sm"
           >
-            <option value={4}>最近 4 周</option>
-            <option value={8}>最近 8 周</option>
-            <option value={52}>全部</option>
+            <option value={4}>{t("report.weeks.4")}</option>
+            <option value={8}>{t("report.weeks.8")}</option>
+            <option value={52}>{t("report.weeks.all")}</option>
           </select>
           <button
             onClick={handleExport}
             className="bg-primary text-white border-none rounded-btn px-4 py-1.5 font-semibold text-body-sm"
           >
-            📄 导出 PDF
+            {t("report.export")}
           </button>
         </div>
       </div>
@@ -103,23 +104,23 @@ export default function ReportPage() {
         <div className="space-y-6">
           {/* Time range */}
           <p className="text-body-sm text-ink-tertiary">
-            数据范围：{data.time_range.start} ~ {data.time_range.end}
+            {t("report.range", { start: data.time_range.start, end: data.time_range.end })}
           </p>
 
           {/* Radar chart */}
           <section className="bg-surface border border-border rounded-card p-6">
-            <h2 className="text-body-lg font-bold mb-4">能力画像</h2>
+            <h2 className="text-body-lg font-bold mb-4">{t("report.competency")}</h2>
             {Object.keys(latestScores).length > 0 ? (
               <RadarChart data={latestScores} labels={DIM_LABELS} size={300} />
             ) : (
-              <p className="text-ink-tertiary text-body-sm text-center py-8">暂无能力数据</p>
+              <p className="text-ink-tertiary text-body-sm text-center py-8">{t("report.radar.empty")}</p>
             )}
           </section>
 
           {/* Trend line */}
           {data.trends.length > 1 && (
             <section className="bg-surface border border-border rounded-card p-6 trend-section">
-              <h2 className="text-body-lg font-bold mb-4">能力趋势</h2>
+              <h2 className="text-body-lg font-bold mb-4">{t("report.timeline")}</h2>
               <TrendLine
                 trends={data.trends}
                 dimensions={allDims}
@@ -131,31 +132,34 @@ export default function ReportPage() {
 
           {/* Summary */}
           <section className="bg-surface border border-border rounded-card p-6">
-            <h2 className="text-body-lg font-bold mb-4">项目摘要</h2>
+            <h2 className="text-body-lg font-bold mb-4">{t("report.summary")}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 bg-page rounded-btn">
                 <p className="text-2xl font-bold text-primary">{data.summary.completed_projects}</p>
-                <p className="text-body-xs text-ink-tertiary">已完成项目</p>
+                <p className="text-body-xs text-ink-tertiary">{t("report.summary.completed_projects")}</p>
               </div>
               <div className="text-center p-3 bg-page rounded-btn">
                 <p className="text-2xl font-bold text-primary">{data.summary.total_projects}</p>
-                <p className="text-body-xs text-ink-tertiary">总项目</p>
+                <p className="text-body-xs text-ink-tertiary">{t("report.summary.total_projects")}</p>
               </div>
               <div className="text-center p-3 bg-page rounded-btn">
                 <p className="text-2xl font-bold text-primary">
                   {Math.round(data.summary.task_completion_rate * 100)}%
                 </p>
-                <p className="text-body-xs text-ink-tertiary">任务完成率</p>
+                <p className="text-body-xs text-ink-tertiary">{t("report.summary.completion_rate")}</p>
               </div>
               <div className="text-center p-3 bg-page rounded-btn">
                 <p className="text-2xl font-bold text-primary">{data.summary.badges_earned}</p>
-                <p className="text-body-xs text-ink-tertiary">获得徽章</p>
+                <p className="text-body-xs text-ink-tertiary">{t("report.summary.badges_earned")}</p>
               </div>
             </div>
             <div className="mt-3 text-body-sm text-ink-tertiary">
-              当前连续打卡：{data.summary.current_streak} 天
+              {t("report.summary.streak", { days: String(data.summary.current_streak) })}
               {" · "}
-              完成 {data.summary.total_tasks_done}/{data.summary.total_tasks} 任务
+              {t("report.summary.tasks", {
+                done: String(data.summary.total_tasks_done),
+                total: String(data.summary.total_tasks),
+              })}
             </div>
           </section>
         </div>

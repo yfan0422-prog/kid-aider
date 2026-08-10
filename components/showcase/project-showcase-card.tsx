@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
+
 interface ShowcaseCardProps {
   project: {
     id: string;
@@ -13,6 +15,7 @@ interface ShowcaseCardProps {
 }
 
 export function ProjectShowcaseCard({ project, onToggleFeatured }: ShowcaseCardProps) {
+  const { t } = useLocale();
   return (
     <div
       className={`relative bg-surface border rounded-card p-5 transition-all ${
@@ -22,14 +25,14 @@ export function ProjectShowcaseCard({ project, onToggleFeatured }: ShowcaseCardP
       }`}
     >
       {project.isFeatured && (
-        <span className="absolute top-2 right-2 text-yellow-500 text-sm">★ 精选</span>
+        <span className="absolute top-2 right-2 text-yellow-500 text-sm">{t("showcase.card.featured")}</span>
       )}
 
       <h3 className="text-body font-bold text-ink mb-3">{project.title}</h3>
 
       <div className="flex items-center gap-4 text-body-sm text-ink-tertiary mb-3">
-        <span>📅 {project.days} 天</span>
-        <span>✅ {project.tasksDone} 任务</span>
+        <span>📅 {t("showcase.days", { days: String(project.days) })}</span>
+        <span>✅ {t("showcase.tasks", { tasks: String(project.tasksDone) })}</span>
       </div>
 
       {project.badges.length > 0 && (
@@ -50,7 +53,7 @@ export function ProjectShowcaseCard({ project, onToggleFeatured }: ShowcaseCardP
             : "border-border text-ink-tertiary hover:text-ink"
         }`}
       >
-        {project.isFeatured ? "取消精选" : "置为精选"}
+        {project.isFeatured ? t("showcase.unfeature") : t("showcase.feature")}
       </button>
     </div>
   );

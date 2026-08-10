@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
+
 interface BadgeItem {
   id: string;
   name: string;
@@ -24,14 +26,15 @@ const RARITY_COLORS: Record<string, string> = {
   legendary: "bg-accent-yellow/10 border-accent-yellow/30",
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  explore: "🔍 探索",
-  project: "🚀 项目",
-  streak: "🔥 连击",
-  special: "✨ 特殊",
-};
-
 export function BadgeCollection({ badges }: BadgeCollectionProps) {
+  const { t } = useLocale();
+  const CATEGORY_LABELS: Record<string, string> = {
+    explore: t("me.badges.category.explore"),
+    project: t("me.badges.category.project"),
+    streak: t("me.badges.category.streak"),
+    special: t("me.badges.category.special"),
+  };
+
   // Preserve first-seen order; avoids Set-spread (tsconfig target is ES5, no downlevelIteration)
   const categories: string[] = [];
   for (const b of badges) {
@@ -40,7 +43,7 @@ export function BadgeCollection({ badges }: BadgeCollectionProps) {
 
   return (
     <div className="bg-surface border border-border rounded-card p-6 space-y-4">
-      <h3 className="text-body-lg font-bold">🏅 徽章收集</h3>
+      <h3 className="text-body-lg font-bold">🏅 {t("me.badges.collection")}</h3>
 
       {categories.map(cat => {
         const catBadges = badges.filter(b => b.category === cat);
@@ -64,7 +67,7 @@ export function BadgeCollection({ badges }: BadgeCollectionProps) {
                       ? `${RARITY_COLORS[b.rarity] ?? RARITY_COLORS.common}`
                       : "bg-surface-raised border-border opacity-50 grayscale"
                   }`}
-                  title={b.unlocked ? `${b.name}: ${b.description}` : `${b.description} (未解锁)`}
+                  title={b.unlocked ? `${b.name}: ${b.description}` : `${b.description} (${t("me.badges.locked")})`}
                 >
                   <span className="text-2xl">{b.icon}</span>
                   <span className="text-body-xs mt-1 text-center leading-tight">{b.name}</span>

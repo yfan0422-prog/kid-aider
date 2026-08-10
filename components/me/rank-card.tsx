@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
+
 interface RankCardProps {
   rankIcon: string;
   rankTitle: string;
@@ -11,9 +13,10 @@ interface RankCardProps {
 }
 
 export function RankCard({ rankIcon, rankTitle, rankTier, rankText, totalPoints, badgesCount, nextTier }: RankCardProps) {
+  const { t } = useLocale();
   return (
     <div className="bg-surface border border-border rounded-card p-6 space-y-4">
-      <h3 className="text-body-lg font-bold">🏆 段位排名</h3>
+      <h3 className="text-body-lg font-bold">🏆 {t("me.rank.ranking")}</h3>
 
       <div className="text-center py-4">
         <div className="text-5xl mb-2">{rankIcon}</div>
@@ -28,17 +31,17 @@ export function RankCard({ rankIcon, rankTitle, rankTier, rankText, totalPoints,
       <div className="grid grid-cols-2 gap-3 text-center">
         <div className="bg-surface-raised rounded-btn p-3">
           <div className="text-body-xl font-bold text-primary">{totalPoints}</div>
-          <div className="text-body-xs text-ink-tertiary">总积分</div>
+          <div className="text-body-xs text-ink-tertiary">{t("me.total_points")}</div>
         </div>
         <div className="bg-surface-raised rounded-btn p-3">
           <div className="text-body-xl font-bold text-accent-purple">{badgesCount}</div>
-          <div className="text-body-xs text-ink-tertiary">徽章数</div>
+          <div className="text-body-xs text-ink-tertiary">{t("me.badges.count")}</div>
         </div>
       </div>
 
       {nextTier && (
         <p className="text-body-sm text-ink-tertiary text-center">
-          距离 {nextTier.tier} 还差 {nextTier.points_needed} 分
+          {t("me.rank.next_tier", { tier: nextTier.tier, points: String(nextTier.points_needed) })}
         </p>
       )}
     </div>

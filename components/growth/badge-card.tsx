@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
 import type { Badge } from "@/lib/utils/types";
 
 interface BadgeCardProps {
@@ -7,9 +8,10 @@ interface BadgeCardProps {
 }
 
 export function BadgeCard({ badge }: BadgeCardProps) {
+  const { t, locale } = useLocale();
   const earned = !!badge.earned_at;
   const earnedDate = badge.earned_at
-    ? new Date(badge.earned_at).toLocaleDateString("zh-CN")
+    ? new Date(badge.earned_at).toLocaleDateString(locale)
     : null;
 
   return (
@@ -25,10 +27,10 @@ export function BadgeCard({ badge }: BadgeCardProps) {
         {badge.label}
       </span>
       {badge.tier === "gold" && earned && (
-        <span className="text-[10px] text-yellow-500 mt-0.5">★ 金</span>
+        <span className="text-[10px] text-yellow-500 mt-0.5">{t("growth.badge.tier.gold")}</span>
       )}
       {badge.tier === "silver" && earned && (
-        <span className="text-[10px] text-slate-400 mt-0.5">· 银</span>
+        <span className="text-[10px] text-slate-400 mt-0.5">{t("growth.badge.tier.silver")}</span>
       )}
       {earnedDate && (
         <span className="text-[10px] text-ink-tertiary mt-0.5">{earnedDate}</span>

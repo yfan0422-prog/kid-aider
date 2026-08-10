@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
 import type { Badge } from "@/lib/utils/types";
 import { BadgeCard } from "./badge-card";
 
@@ -7,16 +8,17 @@ interface BadgeWallProps {
   badges: Badge[];
 }
 
-const DIMENSION_LABELS: Record<string, string> = {
-  clarification: "需求澄清力",
-  decomposition: "分解力",
-  execution: "执行力",
-  reflection: "反思力",
-  creativity: "创造力",
-  persistence: "坚持力",
-};
-
 export function BadgeWall({ badges }: BadgeWallProps) {
+  const { t } = useLocale();
+  const DIMENSION_LABELS: Record<string, string> = {
+    clarification: t("growth.dimension.clarification"),
+    decomposition: t("growth.dimension.decomposition"),
+    execution: t("growth.dimension.execution"),
+    reflection: t("growth.dimension.reflection"),
+    creativity: t("growth.dimension.creativity"),
+    persistence: t("growth.dimension.persistence"),
+  };
+
   // Group by category, then dimension
   const competencyBadges = badges.filter(b => b.category === "competency");
   const achievementBadges = badges.filter(b => b.category === "achievement");
@@ -48,7 +50,7 @@ export function BadgeWall({ badges }: BadgeWallProps) {
       {/* Achievement badges */}
       {achievementBadges.length > 0 && (
         <div>
-          <h4 className="text-body-sm font-semibold text-ink-secondary mb-2">成就徽章</h4>
+          <h4 className="text-body-sm font-semibold text-ink-secondary mb-2">{t("growth.badges.achievement")}</h4>
           <div className="grid grid-cols-3 gap-2">
             {achievementBadges.map(b => (
               <BadgeCard key={b.id} badge={b} />

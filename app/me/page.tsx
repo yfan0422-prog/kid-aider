@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { UserCard } from "@/components/me/user-card";
 import { DailySummary } from "@/components/me/daily-summary";
 import { BadgeCollection } from "@/components/me/badge-collection";
@@ -55,6 +56,7 @@ interface MeData {
 }
 
 export default function MePage() {
+  const { t } = useLocale();
   const [data, setData] = useState<MeData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -83,7 +85,7 @@ export default function MePage() {
   if (loading || !data) {
     return (
       <div className="min-h-screen bg-page-bg flex items-center justify-center">
-        <div className="text-ink-tertiary">加载中...</div>
+        <div className="text-ink-tertiary">{t("common.loading")}</div>
       </div>
     );
   }
@@ -94,9 +96,9 @@ export default function MePage() {
       <header className="flex items-center justify-between px-5 py-3 border-b border-border bg-white/80 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <Link href="/" className="text-ink-tertiary hover:text-primary transition-colors">
-            ← 返回
+            {t("me.back")}
           </Link>
-          <h1 className="text-body-lg font-bold text-ink">我的</h1>
+          <h1 className="text-body-lg font-bold text-ink">{t("me.title")}</h1>
         </div>
       </header>
 

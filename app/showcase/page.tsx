@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { ProjectShowcaseCard } from "@/components/showcase/project-showcase-card";
 
 interface ShowcaseProject {
@@ -14,6 +15,7 @@ interface ShowcaseProject {
 }
 
 export default function ShowcasePage() {
+  const { t } = useLocale();
   const [projects, setProjects] = useState<ShowcaseProject[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -72,9 +74,9 @@ export default function ShowcasePage() {
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center gap-4 mb-6">
         <Link href="/" className="text-ink-tertiary hover:text-ink transition-colors">
-          ← 返回
+          {t("showcase.back")}
         </Link>
-        <h1 className="text-2xl font-bold">🌟 我的作品墙</h1>
+        <h1 className="text-2xl font-bold">🌟 {t("showcase.title")}</h1>
       </div>
 
       {loading && (
@@ -85,15 +87,15 @@ export default function ShowcasePage() {
 
       {!loading && projects.length === 0 && (
         <div className="text-center py-20">
-          <p className="text-ink-tertiary text-body-lg mb-2">还没有完成的项目</p>
+          <p className="text-ink-tertiary text-body-lg mb-2">{t("showcase.empty")}</p>
           <p className="text-ink-tertiary text-body-sm">
-            完成一个项目后，它会出现在这里！
+            {t("showcase.empty.tip")}
           </p>
           <Link
             href="/projects"
             className="inline-block mt-4 text-primary hover:underline"
           >
-            去看看我的项目 →
+            {t("showcase.empty.go_projects")}
           </Link>
         </div>
       )}
@@ -103,7 +105,7 @@ export default function ShowcasePage() {
           {/* Featured section */}
           {featuredProjects.length > 0 && (
             <section>
-              <h2 className="text-body-lg font-bold text-ink mb-3">★ 精选作品</h2>
+              <h2 className="text-body-lg font-bold text-ink mb-3">{t("showcase.featured")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {featuredProjects.map(p => (
                   <ProjectShowcaseCard
@@ -119,7 +121,7 @@ export default function ShowcasePage() {
           {/* All projects */}
           <section>
             <h2 className="text-body-lg font-bold text-ink mb-3">
-              {featuredProjects.length > 0 ? "全部作品" : ""}
+              {featuredProjects.length > 0 ? t("showcase.all") : ""}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {regularProjects.map(p => (

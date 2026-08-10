@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
+
 interface Activity {
   id: string;
   action_type: string;
@@ -15,29 +17,30 @@ interface DailySummaryProps {
   activities: Activity[];
 }
 
-const ACTION_LABELS: Record<string, { icon: string; label: string }> = {
-  login: { icon: "👋", label: "每日登录" },
-  explore_topic: { icon: "🔍", label: "探索话题" },
-  complete_challenge: { icon: "🎯", label: "完成挑战" },
-  task_done: { icon: "✅", label: "完成任务" },
-  check_in: { icon: "📋", label: "项目打卡" },
-  reflection: { icon: "📝", label: "复盘反思" },
-};
-
 export function DailySummary({ todayPoints, streak, activities }: DailySummaryProps) {
+  const { t } = useLocale();
+  const ACTION_LABELS: Record<string, { icon: string; label: string }> = {
+    login: { icon: "👋", label: t("me.activity.type.login") },
+    explore_topic: { icon: "🔍", label: t("me.activity.type.explore_topic") },
+    complete_challenge: { icon: "🎯", label: t("me.activity.type.complete_challenge") },
+    task_done: { icon: "✅", label: t("me.activity.type.task_done") },
+    check_in: { icon: "📋", label: t("me.activity.type.check_in") },
+    reflection: { icon: "📝", label: t("me.activity.type.reflection") },
+  };
+
   return (
     <div className="bg-surface border border-border rounded-card p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-body-lg font-bold">📊 今日动态</h3>
+        <h3 className="text-body-lg font-bold">📊 {t("me.activity.dynamics")}</h3>
         <div className="text-right">
           <span className="text-body-2xl font-bold text-primary">{todayPoints}</span>
-          <span className="text-body-xs text-ink-tertiary ml-1">分</span>
+          <span className="text-body-xs text-ink-tertiary ml-1">{t("me.points.unit")}</span>
         </div>
       </div>
 
       {activities.length === 0 ? (
         <p className="text-ink-tertiary text-body-sm py-4 text-center">
-          今天还没有活动记录，去探索或完成项目吧！
+          {t("me.activity.empty.tip")}
         </p>
       ) : (
         <div className="space-y-2">
@@ -59,8 +62,8 @@ export function DailySummary({ todayPoints, streak, activities }: DailySummaryPr
 
       {/* Streak summary */}
       <div className="flex items-center gap-4 text-body-sm text-ink-secondary pt-1 border-t border-border">
-        <span>🔥 当前连击 <span className="font-bold text-primary">{streak.current}</span> 天</span>
-        <span>🏅 最长 <span className="font-bold text-primary">{streak.longest}</span> 天</span>
+        <span>🔥 {t("me.streak.current")} <span className="font-bold text-primary">{streak.current}</span> {t("project.checkin.day")}</span>
+        <span>🏅 {t("me.streak.longest")} <span className="font-bold text-primary">{streak.longest}</span> {t("project.checkin.day")}</span>
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
+
 interface TrendPoint {
   week_start: string;
   scores: Record<string, number>;
@@ -31,10 +33,11 @@ export function TrendLine({
   width = 600,
   height = 240,
 }: TrendLineProps) {
+  const { t } = useLocale();
   if (trends.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-ink-tertiary text-body-sm">
-        暂无趋势数据
+        {t("growth.trend.empty")}
       </div>
     );
   }
