@@ -45,10 +45,10 @@ export function ModelProfileList() {
     api_key: string; model: string; assigned_roles: ModelRole[];
     params: { temperature: number; max_tokens: number };
   }) => {
-    const body: Record<string, unknown> = { ...formData };
+    const body: Record<string, unknown> = { id, ...formData };
     // Don't send empty api_key on update (leave unchanged)
     if (!body.api_key) delete body.api_key;
-    await fetch(`/api/config/models?id=${id}`, {
+    await fetch("/api/config/models", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -58,10 +58,10 @@ export function ModelProfileList() {
   };
 
   const handleToggle = async (id: string, enabled: boolean) => {
-    const res = await fetch(`/api/config/models?id=${id}`, {
+    const res = await fetch("/api/config/models", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ enabled: !enabled }),
+      body: JSON.stringify({ id, enabled: !enabled }),
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
