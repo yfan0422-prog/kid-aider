@@ -7,6 +7,7 @@ interface CreateProjectAttrs {
   title: string;
   source?: string;
   source_topic_id?: string;
+  child_id?: string;
 }
 
 export function createProject(attrs: CreateProjectAttrs): Project {
@@ -14,9 +15,9 @@ export function createProject(attrs: CreateProjectAttrs): Project {
   const now = new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "");
   const id = uuid();
   db.prepare(
-    `INSERT INTO projects (id, session_id, title, status, source, source_topic_id, created_at, updated_at)
-     VALUES (?, ?, ?, 'active', ?, ?, ?, ?)`
-  ).run(id, attrs.session_id, attrs.title, attrs.source || "funnel", attrs.source_topic_id || null, now, now);
+    `INSERT INTO projects (id, session_id, title, status, source, source_topic_id, child_id, created_at, updated_at)
+     VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?)`
+  ).run(id, attrs.session_id, attrs.title, attrs.source || "funnel", attrs.source_topic_id || null, attrs.child_id || null, now, now);
   return getProject(id)!;
 }
 

@@ -73,6 +73,7 @@ export async function POST(
     title: projectName,
     source: "topic",
     source_topic_id: params.id,
+    child_id: childId,
   });
 
   // 8. Create single track
