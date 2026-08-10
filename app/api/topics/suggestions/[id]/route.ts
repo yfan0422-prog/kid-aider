@@ -13,13 +13,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   };
 
   if (status !== "approved" && status !== "rejected") {
-    return Response.json({ error: "status must be 'approved' or 'rejected'" }, { status: 400 });
+    return Response.json({ error: "error.invalid_suggestion_status" }, { status: 400 });
   }
 
   if (status === "approved") {
     if (!topic_title || !topic_summary || !category || !age_group) {
       return Response.json(
-        { error: "approved suggestions require topic_title, topic_summary, category, and age_group" },
+        { error: "error.approval_fields_required" },
         { status: 400 }
       );
     }

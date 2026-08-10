@@ -38,7 +38,7 @@ export function ConnectivityTest({ profileId }: Props) {
       </button>
       {result && (
         <span className={`text-sm font-medium ${result.connected ? "text-accent-green" : "text-[#FF6B6B]"}`}>
-          {result.connected ? `✅ ${t("settings.model.test.success.short")}` : `❌ ${result.error || t("settings.model.test.fail")}`}
+          {result.connected ? `✅ ${t("settings.model.test.success.short")}` : `❌ ${t(result.error || "settings.model.test.fail")}`}
         </span>
       )}
     </div>

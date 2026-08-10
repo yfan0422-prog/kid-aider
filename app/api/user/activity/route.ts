@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   };
 
   if (!action_type) {
-    return Response.json({ error: "action_type is required" }, { status: 400 });
+    return Response.json({ error: "error.action_type_required" }, { status: 400 });
   }
 
   const VALID_TYPES = new Set<string>(["login", "explore_topic", "complete_challenge", "task_done", "check_in", "reflection", "create_project"]);

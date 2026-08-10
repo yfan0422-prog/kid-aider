@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       // Don't surface partial data as success — return a clean error instead
       console.error("[competency] snapshot generation failed:", error);
       return NextResponse.json(
-        { error: "快照生成失败，请稍后重试" },
+        { error: "error.snapshot_generation_failed" },
         { status: 500 }
       );
     }
@@ -88,5 +88,5 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ error: "invalid action" }, { status: 400 });
+  return NextResponse.json({ error: "error.invalid_action" }, { status: 400 });
 }

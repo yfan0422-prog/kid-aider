@@ -16,7 +16,7 @@ export async function POST(
 ) {
   const project = getProject(params.id);
   if (!project) {
-    return NextResponse.json({ error: "项目不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
   }
   const { name, type } = await req.json() as { name: string; type: TrackType };
   const track = createTrack({ project_id: params.id, name, type });
@@ -30,7 +30,7 @@ export async function DELETE(
   void params;
   const trackId = req.nextUrl.searchParams.get("trackId");
   if (!trackId) {
-    return NextResponse.json({ error: "缺少 trackId" }, { status: 400 });
+    return NextResponse.json({ error: "error.missing_track_id" }, { status: 400 });
   }
   deleteTrack(trackId);
   return NextResponse.json({ success: true });

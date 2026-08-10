@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const project = getProject(params.id);
   if (!project) {
-    return NextResponse.json({ error: "项目不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
   }
   const ageGroup = (req.nextUrl.searchParams.get("ageGroup") || "10-12") as AgeGroup;
   const resume = await buildResume(project, ageGroup);

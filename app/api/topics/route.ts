@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   const { title, summary, cover_image, category, age_group, language, interest_tag } = body;
 
   if (!title || !summary || !category || !age_group) {
-    return Response.json({ error: "title, summary, category, age_group are required" }, { status: 400 });
+    return Response.json({ error: "error.topic_fields_required" }, { status: 400 });
   }
 
   const topic = createTopic({

@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
   const routed = routeModel("dialogue");
   if (!routed) {
     return new Response(
-      JSON.stringify({ error: "没有配置模型。请先在设置中添加模型档案。" }),
+      JSON.stringify({ error: "error.model_not_configured" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }

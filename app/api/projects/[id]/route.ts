@@ -12,7 +12,7 @@ export async function GET(
 ) {
   const project = getProject(params.id);
   if (!project) {
-    return NextResponse.json({ error: "项目不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
   }
 
   const tracks = getTracks(project.id);
@@ -33,7 +33,7 @@ export async function PUT(
 ) {
   const project = getProject(params.id);
   if (!project) {
-    return NextResponse.json({ error: "项目不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
   }
   const body = await req.json() as { title?: string; status?: string };
   const prevStatus = project.status;
@@ -57,7 +57,7 @@ export async function DELETE(
 ) {
   const project = getProject(params.id);
   if (!project) {
-    return NextResponse.json({ error: "项目不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
   }
   deleteProject(params.id);
   return NextResponse.json({ success: true });

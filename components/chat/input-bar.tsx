@@ -59,7 +59,7 @@ export function InputBar() {
       // Surface server errors
       if (!response.ok) {
         const errBody = await response.json().catch(() => ({}));
-        const errMsg = (errBody as { error?: string }).error || t("chat.input.error.request_failed");
+        const errMsg = t((errBody as { error?: string }).error || "chat.input.error.request_failed");
         addMessage({
           id: crypto.randomUUID(),
           session_id: effectiveSessionId,
@@ -105,7 +105,7 @@ export function InputBar() {
                 id: crypto.randomUUID(),
                 session_id: effectiveSessionId,
                 role: "guide",
-                content: `⚠️ ${parsed.error}`,
+                content: `⚠️ ${t(parsed.error)}`,
                 strategy_id: null,
                 created_at: new Date().toISOString(),
               });

@@ -9,13 +9,13 @@ export async function POST(req: NextRequest) {
 
   const session = getSession(sessionId);
   if (!session) {
-    return NextResponse.json({ error: "会话不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.session_not_found" }, { status: 404 });
   }
 
   const pack = await composeSolutionPack(sessionId, session.age_group as AgeGroup);
 
   if (!pack) {
-    return NextResponse.json({ error: "生成方案包失败。请确认需求已完整填写。" }, { status: 500 });
+    return NextResponse.json({ error: "error.pack_generation_failed" }, { status: 500 });
   }
 
   // Record evidence event

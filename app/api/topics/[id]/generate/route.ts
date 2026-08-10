@@ -17,7 +17,7 @@ function inflightKey(topicId: string, ageGroup: string, language: string): strin
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const topic = getTopic(params.id);
   if (!topic) {
-    return Response.json({ error: "topic not found" }, { status: 404 });
+    return Response.json({ error: "error.topic_not_found" }, { status: 404 });
   }
 
   const { language, force_refresh } = (await req.json().catch(() => ({}))) as {

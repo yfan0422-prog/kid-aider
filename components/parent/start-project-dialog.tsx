@@ -32,7 +32,7 @@ export function StartProjectDialog({ topic, content, open, onClose, onSuccess }:
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || t("explore.project.dialog.error.default"));
+        setError(t(data.error) || t("explore.project.dialog.error.default"));
         setSubmitting(false);
         return;
       }

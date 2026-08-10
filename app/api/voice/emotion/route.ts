@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const text: string = body.text;
     if (!text || typeof text !== "string") {
-      return NextResponse.json({ error: "text is required" }, { status: 400 });
+      return NextResponse.json({ error: "error.text_required" }, { status: 400 });
     }
 
     const result = await classifyEmotion({

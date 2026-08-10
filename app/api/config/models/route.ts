@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   };
 
   if (!body.name || !body.provider || !body.base_url || !body.api_key || !body.model) {
-    return NextResponse.json({ error: "缺少必填字段" }, { status: 400 });
+    return NextResponse.json({ error: "error.missing_required_fields" }, { status: 400 });
   }
 
   const profile = createModelProfile(body);
@@ -44,12 +44,12 @@ export async function PUT(req: NextRequest) {
   const { id, ...attrs } = body;
 
   if (!id) {
-    return NextResponse.json({ error: "缺少 id" }, { status: 400 });
+    return NextResponse.json({ error: "error.missing_id" }, { status: 400 });
   }
 
   const existing = getModelProfile(id);
   if (!existing) {
-    return NextResponse.json({ error: "档案不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.profile_not_found" }, { status: 404 });
   }
 
   // Whitelist allowed fields to prevent arbitrary column injection
@@ -66,7 +66,7 @@ export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) {
-    return NextResponse.json({ error: "缺少 id" }, { status: 400 });
+    return NextResponse.json({ error: "error.missing_id" }, { status: 400 });
   }
 
   deleteModelProfile(id);
@@ -78,12 +78,12 @@ export async function PATCH(req: NextRequest) {
   const { id } = await req.json() as { id: string };
   const profile = getModelProfile(id);
   if (!profile) {
-    return NextResponse.json({ error: "档案不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.profile_not_found" }, { status: 404 });
   }
 
   const routed = routeModelById(id);
   if (!routed) {
-    return NextResponse.json({ error: "无法创建连接" }, { status: 500 });
+    return NextResponse.json({ error: "error.connection_failed" }, { status: 500 });
   }
 
   try {

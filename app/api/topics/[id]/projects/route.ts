@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   const topic = getTopic(params.id);
   if (!topic) {
-    return Response.json({ error: "topic not found" }, { status: 404 });
+    return Response.json({ error: "error.topic_not_found" }, { status: 404 });
   }
 
   const project = getProjectByTopic(params.id);

@@ -11,12 +11,12 @@ export async function POST(
 ) {
   const task = getTask(params.id);
   if (!task) {
-    return NextResponse.json({ error: "任务不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.task_not_found" }, { status: 404 });
   }
 
   const updated = toggleTaskDone(params.id);
   if (!updated) {
-    return NextResponse.json({ error: "操作失败" }, { status: 500 });
+    return NextResponse.json({ error: "error.operation_failed" }, { status: 500 });
   }
 
   addLog(

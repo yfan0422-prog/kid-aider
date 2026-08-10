@@ -11,16 +11,16 @@ export async function POST(req: NextRequest) {
   try {
     const contentLength = Number(req.headers.get("content-length") ?? 0);
     if (contentLength > MAX_UPLOAD_BYTES) {
-      return NextResponse.json({ error: "audio file too large" }, { status: 413 });
+      return NextResponse.json({ error: "error.audio_file_too_large" }, { status: 413 });
     }
 
     const formData = await req.formData();
     const audioFile = formData.get("audio") as File | null;
     if (!audioFile) {
-      return NextResponse.json({ error: "no audio file" }, { status: 400 });
+      return NextResponse.json({ error: "error.audio_file_missing" }, { status: 400 });
     }
     if (audioFile.size > MAX_UPLOAD_BYTES) {
-      return NextResponse.json({ error: "audio file too large" }, { status: 413 });
+      return NextResponse.json({ error: "error.audio_file_too_large" }, { status: 413 });
     }
 
     const tmpDir = path.join(process.cwd(), "data", "audio", "recordings");

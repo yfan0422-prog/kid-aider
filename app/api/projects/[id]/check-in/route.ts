@@ -24,11 +24,11 @@ export async function POST(
 ) {
   const project = getProject(params.id);
   if (!project) {
-    return NextResponse.json({ error: "项目不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
   }
   const { summary } = await req.json() as { summary: string };
   if (!summary) {
-    return NextResponse.json({ error: "请输入今日总结" }, { status: 400 });
+    return NextResponse.json({ error: "error.checkin_summary_required" }, { status: 400 });
   }
   const checkIn = upsertCheckIn(params.id, summary);
   addLog(params.id, "check_in", summary.slice(0, 100));

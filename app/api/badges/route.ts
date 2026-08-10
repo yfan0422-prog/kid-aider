@@ -28,5 +28,5 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ error: "invalid action" }, { status: 400 });
+  return NextResponse.json({ error: "error.invalid_action" }, { status: 400 });
 }

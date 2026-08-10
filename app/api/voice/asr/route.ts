@@ -13,23 +13,23 @@ export async function POST(req: NextRequest) {
   try {
     if (!isModelAvailable()) {
       return NextResponse.json(
-        { error: "whisper model not available" },
+        { error: "error.asr_unavailable" },
         { status: 503 }
       );
     }
 
     const contentLength = Number(req.headers.get("content-length") ?? 0);
     if (contentLength > MAX_UPLOAD_BYTES) {
-      return NextResponse.json({ error: "audio file too large" }, { status: 413 });
+      return NextResponse.json({ error: "error.audio_file_too_large" }, { status: 413 });
     }
 
     const formData = await req.formData();
     const audioFile = formData.get("audio") as File | null;
     if (!audioFile) {
-      return NextResponse.json({ error: "no audio file" }, { status: 400 });
+      return NextResponse.json({ error: "error.audio_file_missing" }, { status: 400 });
     }
     if (audioFile.size > MAX_UPLOAD_BYTES) {
-      return NextResponse.json({ error: "audio file too large" }, { status: 413 });
+      return NextResponse.json({ error: "error.audio_file_too_large" }, { status: 413 });
     }
 
     // 保存上传的原始 blob（webm/opus 或 mp4），再用 ffmpeg 转成 16kHz 单声道 WAV。

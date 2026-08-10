@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   // Get latest solution pack title for project name
   const decomposed = await decomposeSolutionPack(sessionId, ageGroup || "10-12");
   if (!decomposed || decomposed.tracks.length === 0) {
-    return NextResponse.json({ error: "未找到方案包或拆解失败" }, { status: 400 });
+    return NextResponse.json({ error: "error.pack_not_found" }, { status: 400 });
   }
 
   // Extract title from solution pack (via DB lookback)

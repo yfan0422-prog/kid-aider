@@ -23,7 +23,7 @@ export async function POST(
 ) {
   const project = getProject(params.id);
   if (!project) {
-    return NextResponse.json({ error: "项目不存在" }, { status: 404 });
+    return NextResponse.json({ error: "error.project_not_found" }, { status: 404 });
   }
 
   const { type, trigger_ref, q1, q2, q3, q4, ageGroup } = await req.json() as {

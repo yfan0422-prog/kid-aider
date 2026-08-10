@@ -19,7 +19,7 @@ export async function POST(
   // 1. Validate topic
   const topic = getTopic(params.id);
   if (!topic) {
-    return Response.json({ error: "topic not found" }, { status: 404 });
+    return Response.json({ error: "error.topic_not_found" }, { status: 404 });
   }
 
   // 2. Parse body
@@ -36,7 +36,7 @@ export async function POST(
   const content = getActiveContent(params.id, topic.age_group, language);
   if (!content) {
     return Response.json(
-      { error: "no content generated for this topic" },
+      { error: "error.no_content" },
       { status: 400 }
     );
   }
