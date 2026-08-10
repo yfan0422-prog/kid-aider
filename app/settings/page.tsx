@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
+import { AccountManager } from "@/components/ui/account-manager";
 
 export default function SettingsPage() {
   const { t } = useLocale();
@@ -20,6 +21,10 @@ export default function SettingsPage() {
         >
           {t("nav.parent")} →
         </Link>
+      </div>
+
+      <div className="mt-8">
+        <AccountManager />
       </div>
     </div>
   );
