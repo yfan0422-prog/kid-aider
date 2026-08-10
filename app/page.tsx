@@ -1,12 +1,44 @@
 "use client";
 
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChatView } from "@/components/chat/chat-view";
 import { SidePanel } from "@/components/panels/side-panel";
+import { useChatStore } from "@/lib/store/chat-store";
+
+/** Hydrates the chat store from ?session= URL param so seed messages appear. */
+function SessionLoader() {
+  const searchParams = useSearchParams();
+  const sessionParam = searchParams.get("session");
+
+  useEffect(() => {
+    if (!sessionParam) return;
+
+    fetch(`/api/sessions/${sessionParam}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.session) {
+          useChatStore.getState().setSessionId(data.session.id);
+          useChatStore.getState().setAgeGroup(data.session.age_group);
+        }
+        if (data.messages) {
+          useChatStore.getState().setMessages(data.messages);
+        }
+      })
+      .catch(() => {});
+  }, [sessionParam]);
+
+  return null;
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col h-screen">
+    <>
+      <Suspense fallback={null}>
+        <SessionLoader />
+      </Suspense>
+      <div className="flex flex-col h-screen">
       {/* Top nav bar */}
       <header className="flex items-center justify-between px-5 py-3 border-b border-border bg-white/80 backdrop-blur-sm shrink-0">
         <div className="flex items-center gap-2">
@@ -69,6 +101,6 @@ export default function Home() {
         </div>
         <SidePanel />
       </div>
-    </div>
+    </>
   );
 }
