@@ -1,56 +1,119 @@
-import { getDb } from "./index";
 import { v4 as uuid } from "uuid";
-import type { UserAccount } from "@/lib/utils/types";
+import { getDb } from "./index";
 
-const DEFAULT_NAME = "小小探索者";
-const DEFAULT_AVATAR = "🧒";
-const DEFAULT_AGE = "10-12";
-const DEFAULT_LANG = "zh-CN";
+interface UserAccount {
+  id: string;
+  display_name: string;
+  avatar_emoji: string;
+  age_group: string;
+  language: string;
+  total_points: number;
+  current_streak: number;
+  longest_streak: number;
+  created_at: string;
+  updated_at: string;
+}
 
-export function getOrCreateAccount(): UserAccount {
+export type { UserAccount };
+
+/** 列出所有孩子 */
+export function listAccounts(): UserAccount[] {
   const db = getDb();
-  const existing = db.prepare("SELECT * FROM user_account LIMIT 1").get() as UserAccount | undefined;
-  if (existing) return existing;
+  return db.prepare("SELECT * FROM user_account ORDER BY created_at ASC").all() as UserAccount[];
+}
 
-  const now = new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "");
+/** 获取单个孩子 */
+export function getAccount(id: string): UserAccount | null {
+  const db = getDb();
+  return (db.prepare("SELECT * FROM user_account WHERE id = ?").get(id) as UserAccount) ?? null;
+}
+
+/** 创建孩子 */
+export function createAccount(
+  name: string,
+  avatar: string,
+  age: string,
+  lang: string
+): UserAccount {
+  const db = getDb();
   const id = uuid();
-  db.prepare(`
-    INSERT INTO user_account (id, display_name, avatar_emoji, age_group, language, total_points, current_streak, longest_streak, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, ?)
-  `).run(id, DEFAULT_NAME, DEFAULT_AVATAR, DEFAULT_AGE, DEFAULT_LANG, now, now);
-
-  return db.prepare("SELECT * FROM user_account WHERE id = ?").get(id) as UserAccount;
-}
-
-export function updateAccount(fields: {
-  display_name?: string;
-  avatar_emoji?: string;
-  language?: string;
-}): UserAccount {
-  const db = getDb();
-  const account = getOrCreateAccount();
-  const now = new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "");
-
-  const allowedColumns = new Set(["display_name", "avatar_emoji", "language"]);
-  const keys = Object.keys(fields).filter(k => allowedColumns.has(k) && fields[k as keyof typeof fields] !== undefined);
-  if (keys.length === 0) return account;
-
-  const setClause = keys.map(k => `${k} = ?`).join(", ");
-  const values = keys.map(k => (fields as Record<string, unknown>)[k]);
-  db.prepare(`UPDATE user_account SET ${setClause}, updated_at = ? WHERE id = ?`)
-    .run(...values, now, account.id);
-
-  return db.prepare("SELECT * FROM user_account WHERE id = ?").get(account.id) as UserAccount;
-}
-
-/** Directly update points and streak — used by points engine only */
-export function updateAccountStats(
-  id: string,
-  stats: { total_points: number; current_streak: number; longest_streak: number }
-): void {
-  const db = getDb();
-  const now = new Date().toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "");
+  const now = new Date().toISOString();
   db.prepare(
-    "UPDATE user_account SET total_points = ?, current_streak = ?, longest_streak = ?, updated_at = ? WHERE id = ?"
-  ).run(stats.total_points, stats.current_streak, stats.longest_streak, now, id);
+    `INSERT INTO user_account (id, display_name, avatar_emoji, age_group, language, total_points, current_streak, longest_streak, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, ?)`
+  ).run(id, name, avatar, age, lang, now, now);
+  return getAccount(id)!;
+}
+
+/** 更新孩子信息 */
+export function updateAccount(
+  id: string,
+  fields: Partial<Pick<UserAccount, "display_name" | "avatar_emoji" | "age_group" | "language">>
+): UserAccount | null {
+  const db = getDb();
+  const now = new Date().toISOString();
+  const sets: string[] = [];
+  const values: unknown[] = [];
+
+  if (fields.display_name !== undefined) { sets.push("display_name = ?"); values.push(fields.display_name); }
+  if (fields.avatar_emoji !== undefined) { sets.push("avatar_emoji = ?"); values.push(fields.avatar_emoji); }
+  if (fields.age_group !== undefined) { sets.push("age_group = ?"); values.push(fields.age_group); }
+  if (fields.language !== undefined) { sets.push("language = ?"); values.push(fields.language); }
+
+  if (sets.length === 0) return getAccount(id);
+
+  sets.push("updated_at = ?");
+  values.push(now);
+  values.push(id);
+
+  db.prepare(`UPDATE user_account SET ${sets.join(", ")} WHERE id = ?`).run(...values);
+  return getAccount(id);
+}
+
+/** 删除孩子及所有关联数据 */
+export function deleteAccount(id: string): void {
+  const db = getDb();
+  const transaction = db.transaction(() => {
+    // 删除项目及所有子实体
+    const projectIds = db.prepare("SELECT id FROM projects WHERE child_id = ?").all(id) as { id: string }[];
+    for (const p of projectIds) {
+      db.prepare("DELETE FROM tracks WHERE project_id = ?").run(p.id);
+      db.prepare("DELETE FROM milestones WHERE track_id IN (SELECT id FROM tracks WHERE project_id = ?)").run(p.id);
+      db.prepare("DELETE FROM tasks WHERE milestone_id IN (SELECT id FROM milestones WHERE track_id IN (SELECT id FROM tracks WHERE project_id = ?))").run(p.id);
+      db.prepare("DELETE FROM check_ins WHERE project_id = ?").run(p.id);
+      db.prepare("DELETE FROM reflections WHERE project_id = ?").run(p.id);
+      db.prepare("DELETE FROM project_logs WHERE project_id = ?").run(p.id);
+      db.prepare("DELETE FROM projects WHERE id = ?").run(p.id);
+    }
+
+    // 删除会话及关联
+    const sessionIds = db.prepare("SELECT id FROM sessions WHERE child_id = ?").all(id) as { id: string }[];
+    for (const s of sessionIds) {
+      db.prepare("DELETE FROM messages WHERE session_id = ?").run(s.id);
+      db.prepare("DELETE FROM requirement_nodes WHERE session_id = ?").run(s.id);
+      db.prepare("DELETE FROM solution_packs WHERE session_id = ?").run(s.id);
+      db.prepare("DELETE FROM sessions WHERE id = ?").run(s.id);
+    }
+
+    // 删除其他关联数据
+    db.prepare("DELETE FROM voice_sessions WHERE child_id = ?").run(id);
+    db.prepare("DELETE FROM emotion_log WHERE child_id = ?").run(id);
+    db.prepare("DELETE FROM child_profile WHERE child_id = ?").run(id);
+    db.prepare("DELETE FROM profile_updates WHERE child_id = ?").run(id);
+    db.prepare("DELETE FROM competency_snapshots WHERE child_id = ?").run(id);
+    db.prepare("DELETE FROM evidence_events WHERE child_id = ?").run(id);
+    db.prepare("DELETE FROM daily_activity WHERE user_id = ?").run(id);
+    db.prepare("DELETE FROM badge_unlock WHERE user_id = ?").run(id);
+
+    // 删除账户
+    db.prepare("DELETE FROM user_account WHERE id = ?").run(id);
+  });
+  transaction();
+}
+
+/** 获取孩子总数（用于禁止删除最后一个） */
+export function getChildCount(): number {
+  const db = getDb();
+  const row = db.prepare("SELECT COUNT(*) as c FROM user_account").get() as { c: number };
+  return row.c;
 }
