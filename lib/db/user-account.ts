@@ -77,9 +77,10 @@ export function deleteAccount(id: string): void {
     // 删除项目及所有子实体
     const projectIds = db.prepare("SELECT id FROM projects WHERE child_id = ?").all(id) as { id: string }[];
     for (const p of projectIds) {
-      db.prepare("DELETE FROM tracks WHERE project_id = ?").run(p.id);
-      db.prepare("DELETE FROM milestones WHERE track_id IN (SELECT id FROM tracks WHERE project_id = ?)").run(p.id);
+      // 从叶子到根删除，避免子查询因父行先行被删而失效（tracks 必须先于其子实体保留）
       db.prepare("DELETE FROM tasks WHERE milestone_id IN (SELECT id FROM milestones WHERE track_id IN (SELECT id FROM tracks WHERE project_id = ?))").run(p.id);
+      db.prepare("DELETE FROM milestones WHERE track_id IN (SELECT id FROM tracks WHERE project_id = ?)").run(p.id);
+      db.prepare("DELETE FROM tracks WHERE project_id = ?").run(p.id);
       db.prepare("DELETE FROM check_ins WHERE project_id = ?").run(p.id);
       db.prepare("DELETE FROM reflections WHERE project_id = ?").run(p.id);
       db.prepare("DELETE FROM project_logs WHERE project_id = ?").run(p.id);
