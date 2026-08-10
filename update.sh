@@ -14,7 +14,7 @@ echo "🔄 拉取最新代码..."
 git pull
 
 echo "📦 安装依赖..."
-npm ci --production
+npm install
 
 echo "🔨 构建..."
 npm run build
