@@ -1,11 +1,12 @@
 "use client";
 
 import { Suspense, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChatView } from "@/components/chat/chat-view";
 import { SidePanel } from "@/components/panels/side-panel";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
+import { useChild } from "@/components/ui/child-provider";
 import { useChatStore } from "@/lib/store/chat-store";
 import { useLocale } from "@/lib/i18n/context";
 
@@ -34,12 +35,34 @@ function SessionLoader() {
   return null;
 }
 
+/** 路由守卫 — 无 childId 时跳转到孩子选择页；URL 带 child_id 时同步到 state。 */
+function ChildGuard() {
+  const { childId, setChildId, loading } = useChild();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (loading) return;
+    const urlChildId = searchParams.get("child_id");
+    if (urlChildId) {
+      if (childId !== urlChildId) {
+        setChildId(urlChildId);
+      }
+    } else if (!childId) {
+      router.replace("/select");
+    }
+  }, [childId, loading, router, searchParams, setChildId]);
+
+  return null;
+}
+
 export default function Home() {
   const { t } = useLocale();
   return (
     <>
       <Suspense fallback={null}>
         <SessionLoader />
+        <ChildGuard />
       </Suspense>
       <div className="flex flex-col h-screen">
       {/* Top nav bar */}
