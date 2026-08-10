@@ -399,5 +399,61 @@ export function getDb(): Database.Database {
   try { db.exec("ALTER TABLE projects ADD COLUMN source_topic_id TEXT"); } catch {}
   try { db.exec("ALTER TABLE milestones ADD COLUMN challenge_json TEXT"); } catch {}
 
+  // 多子账号迁移（P9）
+  migrateToMultiChild(db);
+
   return db;
+}
+
+function migrateToMultiChild(db: Database.Database): void {
+  // 检测迁移是否已执行（user_account 表已存在的跳过）
+  const migrated = db.pragma("user_version") as number;
+  if (migrated >= 1) return;
+
+  const tables = [
+    "sessions",
+    "projects",
+    "voice_sessions",
+    "emotion_log",
+    "child_profile",
+    "profile_updates",
+    "competency_snapshots",
+    "evidence_events",
+  ];
+
+  for (const table of tables) {
+    // 检测列是否存在
+    const hasColumn = db.prepare(
+      `SELECT COUNT(*) as c FROM pragma_table_info(?) WHERE name = 'child_id'`
+    ).get(table) as { c: number };
+    if (hasColumn.c > 0) continue;
+
+    db.exec(`ALTER TABLE ${table} ADD COLUMN child_id TEXT NOT NULL DEFAULT ''`);
+  }
+
+  // 存量数据归属到第一个用户
+  const firstAccount = db.prepare("SELECT id FROM user_account LIMIT 1").get() as { id: string } | undefined;
+  if (firstAccount) {
+    for (const table of tables) {
+      db.prepare(`UPDATE ${table} SET child_id = ? WHERE child_id = ''`).run(firstAccount.id);
+    }
+  }
+
+  // 创建索引
+  const indexes = [
+    "CREATE INDEX IF NOT EXISTS idx_sessions_child ON sessions(child_id)",
+    "CREATE INDEX IF NOT EXISTS idx_projects_child ON projects(child_id)",
+    "CREATE INDEX IF NOT EXISTS idx_voice_child ON voice_sessions(child_id)",
+    "CREATE INDEX IF NOT EXISTS idx_emotion_child ON emotion_log(child_id)",
+    "CREATE INDEX IF NOT EXISTS idx_profile_child ON child_profile(child_id)",
+    "CREATE INDEX IF NOT EXISTS idx_updates_child ON profile_updates(child_id)",
+    "CREATE INDEX IF NOT EXISTS idx_comp_child ON competency_snapshots(child_id)",
+    "CREATE INDEX IF NOT EXISTS idx_evidence_child ON evidence_events(child_id)",
+  ];
+  for (const idx of indexes) {
+    db.exec(idx);
+  }
+
+  // 标记迁移完成
+  db.pragma("user_version = 1");
 }
