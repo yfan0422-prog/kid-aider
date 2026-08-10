@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
 import type { CheckIn } from "@/lib/utils/types";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function CalendarHeatmap({ checkIns }: Props) {
+  const { t } = useLocale();
   const dates = new Set(checkIns.map(c => c.date));
 
   // Generate last 4 weeks grid
@@ -28,7 +30,15 @@ export function CalendarHeatmap({ checkIns }: Props) {
   }
   if (currentWeek.length > 0) weeks.push(currentWeek);
 
-  const dayLabels = ["日", "一", "二", "三", "四", "五", "六"];
+  const dayLabels = [
+    t("project.calendar.day.sun"),
+    t("project.calendar.day.mon"),
+    t("project.calendar.day.tue"),
+    t("project.calendar.day.wed"),
+    t("project.calendar.day.thu"),
+    t("project.calendar.day.fri"),
+    t("project.calendar.day.sat"),
+  ];
 
   return (
     <div className="flex gap-1">

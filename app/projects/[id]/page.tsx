@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { ProjectHero } from "@/components/projects/project-hero";
 import { TrackColumn } from "@/components/projects/track-column";
 import { CalendarHeatmap } from "@/components/projects/calendar-heatmap";
@@ -38,6 +39,7 @@ interface ProjectData {
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useLocale();
   const [project, setProject] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(true);
   const ageGroup = useChatStore(s => s.ageGroup);
@@ -103,8 +105,8 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="max-w-2xl mx-auto p-6 text-center">
-        <p className="text-body-lg text-ink-tertiary">项目不存在</p>
-        <Link href="/projects" className="text-primary hover:underline mt-4 inline-block">返回项目列表</Link>
+        <p className="text-body-lg text-ink-tertiary">{t("error.project_not_found")}</p>
+        <Link href="/projects" className="text-primary hover:underline mt-4 inline-block">{t("project.detail.back")}</Link>
       </div>
     );
   }
@@ -113,7 +115,7 @@ export default function ProjectDetailPage() {
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex items-center gap-4 mb-6">
         <Link href="/projects" className="text-ink-tertiary hover:text-ink transition-colors">
-          ← 返回项目列表
+          {t("project.detail.back")}
         </Link>
         <h1 className="text-2xl font-bold">{project.title}</h1>
       </div>
@@ -132,31 +134,31 @@ export default function ProjectDetailPage() {
           onClick={() => setShowCheckIn(true)}
           className="bg-primary text-white border-none rounded-btn px-4 py-2 font-semibold text-body-sm"
         >
-          📝 每日总结
+          {t("project.detail.checkin")}
         </button>
         <button
           onClick={() => { setReflectionType("daily"); setShowReflection(true); }}
           className="bg-surface border border-border rounded-btn px-4 py-2 font-medium text-body-sm hover:bg-surface-raised transition-colors"
         >
-          💭 每日复盘
+          {t("project.detail.reflection.daily")}
         </button>
         <button
           onClick={() => { setReflectionType("milestone"); setShowReflection(true); }}
           className="bg-surface border border-border rounded-btn px-4 py-2 font-medium text-body-sm hover:bg-surface-raised transition-colors"
         >
-          🏔 里程碑复盘
+          {t("project.detail.reflection.milestone")}
         </button>
         <button
           onClick={() => { setReflectionType("final"); setShowReflection(true); }}
           className="bg-surface border border-border rounded-btn px-4 py-2 font-medium text-body-sm hover:bg-surface-raised transition-colors"
         >
-          🎯 总复盘
+          {t("project.detail.reflection.final")}
         </button>
       </div>
 
       {/* Calendar and streak */}
       <div className="mt-6 bg-surface border border-border rounded-card p-5">
-        <h3 className="font-semibold text-body mb-3">📅 打卡记录</h3>
+        <h3 className="font-semibold text-body mb-3">{t("project.detail.checkin.history")}</h3>
         <CalendarHeatmap checkIns={checkIns} />
         <div className="mt-3">
           <StreakBadge current={streak.current} longest={streak.longest} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import type { ReflectionType } from "@/lib/utils/types";
 
 interface Question {
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function ReflectionDialog({ projectId, type, triggerRef, onDone, onClose }: Props) {
+  const { t } = useLocale();
   const [step, setStep] = useState(0); // 0=loading questions, 1-4=q1-q4, 5=done
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -93,13 +95,13 @@ export function ReflectionDialog({ projectId, type, triggerRef, onDone, onClose 
         <div className="bg-white rounded-card p-6 shadow-lg max-w-md w-full mx-4 text-center relative">
           <button
             onClick={onClose}
-            aria-label="关闭"
+            aria-label={t("common.close")}
             className="absolute top-3 right-3 text-ink-tertiary hover:text-ink transition-colors text-xl leading-none"
           >
             ✕
           </button>
           <div className="w-8 h-8 border-[3px] border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-body text-ink-tertiary">准备复盘问题……</p>
+          <p className="text-body text-ink-tertiary">{t("project.reflection.loading")}</p>
         </div>
       </div>
     );
@@ -111,13 +113,13 @@ export function ReflectionDialog({ projectId, type, triggerRef, onDone, onClose 
       <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
         <div className="bg-white rounded-card p-6 shadow-lg max-w-md w-full mx-4 text-center">
           <div className="text-4xl mb-3">🤔</div>
-          <h3 className="text-body-lg font-bold mb-2">无法加载复盘问题</h3>
-          <p className="text-body-sm text-ink-tertiary mb-4">请稍后再试</p>
+          <h3 className="text-body-lg font-bold mb-2">{t("project.reflection.load_failed")}</h3>
+          <p className="text-body-sm text-ink-tertiary mb-4">{t("common.try_later")}</p>
           <button
             onClick={onClose}
             className="bg-primary text-white border-none rounded-btn px-6 py-2.5 font-semibold"
           >
-            关闭
+            {t("common.close")}
           </button>
         </div>
       </div>
@@ -129,13 +131,13 @@ export function ReflectionDialog({ projectId, type, triggerRef, onDone, onClose 
       <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
         <div className="bg-white rounded-card p-6 shadow-lg max-w-md w-full mx-4 text-center">
           <div className="text-5xl mb-4">🎉</div>
-          <h3 className="text-body-lg font-bold mb-2">复盘完成！</h3>
-          <p className="text-body-sm text-ink-tertiary mb-4">你的成长记录已保存</p>
+          <h3 className="text-body-lg font-bold mb-2">{t("project.reflection.complete")}</h3>
+          <p className="text-body-sm text-ink-tertiary mb-4">{t("project.reflection.saved")}</p>
           <button
             onClick={onDone}
             className="bg-primary text-white border-none rounded-btn px-6 py-2.5 font-semibold"
           >
-            知道了
+            {t("common.got_it")}
           </button>
         </div>
       </div>
@@ -160,7 +162,7 @@ export function ReflectionDialog({ projectId, type, triggerRef, onDone, onClose 
           </div>
           <button
             onClick={onClose}
-            aria-label="关闭"
+            aria-label={t("common.close")}
             className="text-ink-tertiary hover:text-ink transition-colors text-xl leading-none"
           >
             ✕
@@ -178,7 +180,7 @@ export function ReflectionDialog({ projectId, type, triggerRef, onDone, onClose 
           key={q.id}
           ref={textareaRef}
           className="w-full bg-surface-raised border border-border rounded-btn px-4 py-3 text-body resize-none min-h-[80px] focus:border-primary focus:outline-none"
-          placeholder="写下你的想法……"
+          placeholder={t("project.reflection.answer.placeholder")}
           autoFocus
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -193,14 +195,16 @@ export function ReflectionDialog({ projectId, type, triggerRef, onDone, onClose 
             onClick={handleSkip}
             className="px-4 py-2 text-body-sm text-ink-tertiary hover:text-ink transition-colors"
           >
-            跳过
+            {t("common.skip")}
           </button>
           <button
             onClick={() => handleNext(q.id, textareaRef.current?.value || "")}
             disabled={submitting}
             className="bg-primary text-white border-none rounded-btn px-5 py-2 font-semibold text-body-sm disabled:opacity-40"
           >
-            {step === questions.length ? (submitting ? "保存中……" : "完成") : "下一题"}
+            {step === questions.length
+              ? (submitting ? t("common.saving") : t("common.done"))
+              : t("project.reflection.next")}
           </button>
         </div>
       </div>

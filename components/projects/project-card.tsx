@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import type { Project } from "@/lib/utils/types";
 
 interface Props {
@@ -8,13 +9,17 @@ interface Props {
 }
 
 export function ProjectCard({ project }: Props) {
+  const { t, locale } = useLocale();
   const statusLabel =
-    project.status === "active" ? "进行中" :
-    project.status === "paused" ? "已暂停" : "已完成";
+    project.status === "active" ? t("project.status.active") :
+    project.status === "paused" ? t("project.status.paused") : t("project.status.completed");
   const statusColor =
     project.status === "active" ? "bg-accent-green/10 text-accent-green" :
     project.status === "paused" ? "bg-brand-soft text-[#B26A00]" :
     "bg-surface-raised text-ink-tertiary";
+  const lastActivity = t("project.card.last_activity", {
+    date: new Date(project.updated_at).toLocaleDateString(locale),
+  });
 
   return (
     <Link
@@ -28,7 +33,7 @@ export function ProjectCard({ project }: Props) {
         </span>
       </div>
       <div className="flex items-center gap-2 text-body-sm text-ink-tertiary">
-        <span>上次活动：{new Date(project.updated_at).toLocaleDateString("zh-CN")}</span>
+        <span>{lastActivity}</span>
       </div>
     </Link>
   );
