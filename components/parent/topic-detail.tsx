@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { TopicCatalog, TopicContent, Challenge } from "@/lib/utils/types";
+import { StartProjectDialog } from "./start-project-dialog";
+import { useRouter } from "next/navigation";
+import type { StartProjectResponse } from "@/lib/utils/types";
 
 /** Strip basic markdown markers from LLM-generated intro text for display. */
 function stripMarkdown(text: string): string {
@@ -25,6 +28,9 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const router = useRouter();
+  const [showStartDialog, setShowStartDialog] = useState(false);
+  const [linkedProjectId, setLinkedProjectId] = useState<string | null>(null);
 
   // Cleanup poll on unmount
   useEffect(() => {
@@ -56,6 +62,16 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
   useEffect(() => {
     fetchContent();
   }, [fetchContent]);
+
+  // Check for existing project linked to this topic
+  useEffect(() => {
+    fetch(`/api/topics/${topic.id}/projects`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.has_project) setLinkedProjectId(d.project_id);
+      })
+      .catch(() => {});
+  }, [topic.id]);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -241,15 +257,43 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
           {content.project_prompt && (
             <section className="bg-surface border border-border rounded-card p-5 text-center">
               <p className="text-body-sm text-ink-secondary mb-3">{content.project_prompt}</p>
-              <button
-                onClick={() => {/* TODO: integrate with project funnel in P8 */}}
-                className="bg-primary text-white border-none rounded-btn px-5 py-2.5 font-semibold text-body-sm"
-              >
-                🚀 进入项目工坊
-              </button>
+              {linkedProjectId ? (
+                <button
+                  onClick={() => router.push(`/projects/${linkedProjectId}`)}
+                  className="bg-primary text-white border-none rounded-btn px-5 py-2.5 font-semibold text-body-sm hover:opacity-90 transition-opacity"
+                >
+                  📋 查看项目
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowStartDialog(true)}
+                  className="bg-primary text-white border-none rounded-btn px-5 py-2.5 font-semibold text-body-sm hover:opacity-90 transition-opacity"
+                >
+                  🚀 进入项目工坊
+                </button>
+              )}
             </section>
           )}
         </div>
+      )}
+
+      {/* Start project dialog */}
+      {content && (
+        <StartProjectDialog
+          topic={topic}
+          content={content}
+          open={showStartDialog}
+          onClose={() => setShowStartDialog(false)}
+          onSuccess={(result: StartProjectResponse) => {
+            setShowStartDialog(false);
+            setLinkedProjectId(result.project.id);
+            if (result.session) {
+              router.push(`/?session=${result.session.id}`);
+            } else {
+              router.push(`/projects/${result.project.id}`);
+            }
+          }}
+        />
       )}
     </div>
   );
