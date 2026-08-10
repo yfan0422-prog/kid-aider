@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { TopicCatalog, TopicContent, Challenge } from "@/lib/utils/types";
 import { useLocale } from "@/lib/i18n/context";
+import { useChild } from "@/components/ui/child-provider";
 import { StartProjectDialog } from "./start-project-dialog";
 import { useRouter } from "next/navigation";
 import type { StartProjectResponse } from "@/lib/utils/types";
@@ -25,6 +26,7 @@ interface Props {
 
 export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
   const { t } = useLocale();
+  const { childId } = useChild();
   const [content, setContent] = useState<TopicContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -79,7 +81,7 @@ export function TopicDetail({ topic, onBack, initialLanguage }: Props) {
     setGenerating(true);
     setError(null);
     try {
-      const res = await fetch(`/api/topics/${topic.id}/generate`, {
+      const res = await fetch(`/api/topics/${topic.id}/generate?child_id=${encodeURIComponent(childId || "")}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ language: initialLanguage }),

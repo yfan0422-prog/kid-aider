@@ -52,7 +52,7 @@ export interface EmotionLog {
   source: "voice" | "text" | "fused";
   emotion: string;
   confidence: number | null;
-  voice_features: string | null; // JSON: {pitch, rate, volume} | null
+  voice_features: string | null; // JSON: {pitch, duration, volume} | null
   text_snippet: string | null;
   model_used: string; // 'rule' | 'llm' | 'rule+llm'
   created_at: string;
@@ -243,6 +243,7 @@ import { spawn } from "child_process";
 export interface AudioFeatures {
   pitch: number;   // 平均音高 (Hz), 估算
   rate: number;    // 语速 (音节/秒)
+  duration: number; // 音频时长 (秒)
   volume: number;  // 平均音量 (RMS 归一化 0-1)
 }
 
@@ -383,15 +384,15 @@ function classifyByRules(opts: ClassifyOpts): RuleEmotion {
   let voiceConfusion = 0;
 
   if (audioFeatures) {
-    const { pitch, rate, volume } = audioFeatures;
+    const { pitch, duration, volume } = audioFeatures;
     // 高音高 + 大音量 → 兴奋
     if (pitch > 300 && volume > 0.5) voiceExcitement += 2;
     // 低音高 + 小音量 → 沮丧
     if (pitch < 200 && volume < 0.2) voiceFrustration += 2;
     // 极快语速 → 着急（rate 是音频时长，越短越急）
-    if (rate < 2.0 && volume > 0.4) voiceImpatience += 2;
-    // 停顿多 → 困惑（音频稍长但文字少）
-    if (rate > 5.0 && text.length < 20) voiceConfusion += 2;
+    if (duration < 2.0 && volume > 0.4) voiceImpatience += 2;
+    // 长音频 + 短文本 → 停顿多 → 困惑
+    if (duration > 5.0 && text.length < 20) voiceConfusion += 2;
   }
 
   const scores: { emotion: EmotionLabel; score: number }[] = [
@@ -1020,7 +1021,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       pitch: features.pitch,
-      rate: features.rate,
+      duration: features.duration,
       volume: features.volume,
     });
   } catch (err) {
