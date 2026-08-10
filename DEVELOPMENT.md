@@ -1,7 +1,7 @@
 # Kid-Aider 开发进度
 
 ## 总体进度
-P1 ██████████ 100% | P2 ██████████ 100% | P3 ██████████ 100% | P4 ██████████ 100% | P5 ██████████ 100% | P6 ██████████ 100% | P7 ██████████ 100% | P8a ██████████ 100%
+P1 ██████████ 100% | P2 ██████████ 100% | P3 ██████████ 100% | P4 ██████████ 100% | P5 ██████████ 100% | P6 ██████████ 100% | P7 ██████████ 100% | P8a ██████████ 100% | P8b ██████████ 100%
 
 ## P6 · 智能进化（目标：2026-08-23）
 - [x] Task 1: 类型定义与数据库扩展
@@ -36,6 +36,13 @@ P1 ██████████ 100% | P2 ██████████ 100% 
 - [x] Task 9: /api/user/badges + /api/leaderboard 路由
 - [x] Task 10: /me 页面 + 4 组件（UserCard/DailySummary/BadgeCollection/RankCard）
 - [x] Task 11: 集成——修改 6 个现有文件（导航/check-in/reflect/generate/topic-detail/bubble-guide）
+
+## P8b · 内容-项目集成（目标：2026-08-10）
+- [x] Task 1: 类型定义与数据库扩展（ActionType + Project/Milestone 扩展 + ALTER TABLE）
+- [x] Task 2: 积分引擎扩展 + 关联项目查询 API（GET /api/topics/[id]/projects）
+- [x] Task 3: Start-Project API（POST /api/topics/[id]/start-project，12 步转化流程）
+- [x] Task 4: StartProjectDialog 组件（确认弹窗 + 双入口按钮）
+- [x] Task 5: TopicDetail 集成（按钮替换 + 项目检测 + 聊天种子消息注入）
 
 ## P5 · 语音互联（目标：2026-08-23）
 - [x] Task 1: 类型定义与数据库扩展
