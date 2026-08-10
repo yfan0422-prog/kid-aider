@@ -7,7 +7,8 @@ let db: Database.Database | null = null;
 export function getDb(): Database.Database {
   if (db) return db;
 
-  const dbPath = path.join(process.cwd(), "data", "kid-aider.db");
+  const dataDir = process.env.DATA_DIR || path.join(process.cwd(), "data");
+  const dbPath = path.join(dataDir, "db", "kid-aider.db");
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   db = new Database(dbPath);
   db.pragma("journal_mode = WAL");
