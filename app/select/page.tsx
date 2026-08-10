@@ -31,7 +31,7 @@ export default function SelectPage() {
           <button
             key={child.id}
             onClick={() => handleSelect(child.id)}
-            className="flex flex-col items-center gap-2 p-4 bg-surface rounded-2xl border border-border hover:border-primary hover:shadow-card transition-all active:scale-95"
+            className="flex flex-col items-center gap-2 p-4 bg-surface rounded-2xl border border-border hover:border-primary hover:shadow-lg transition-all active:scale-95"
           >
             <span className="text-4xl">{child.avatar_emoji}</span>
             <span className="text-body-sm font-semibold text-ink">{child.display_name}</span>

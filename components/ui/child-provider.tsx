@@ -1,19 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-
-interface UserAccount {
-  id: string;
-  display_name: string;
-  avatar_emoji: string;
-  age_group: string;
-  language: string;
-  total_points: number;
-  current_streak: number;
-  longest_streak: number;
-  created_at: string;
-  updated_at: string;
-}
+import type { UserAccount } from "@/lib/utils/types";
 
 interface ChildContextValue {
   childId: string | null;
@@ -39,9 +27,14 @@ export function ChildProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refreshAccounts = useCallback(async () => {
-    const res = await fetch("/api/user/accounts");
-    const data = await res.json();
-    setChildAccounts(data.accounts || []);
+    try {
+      const res = await fetch("/api/user/accounts");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChildAccounts(data.accounts || []);
+    } catch {
+      // Silently retain previous accounts; UI shows existing state
+    }
   }, []);
 
   // 恢复上次选择

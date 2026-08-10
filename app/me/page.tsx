@@ -65,6 +65,7 @@ export default function MePage() {
 
   useEffect(() => {
     if (!childId) return;
+    setLoading(true);
     const currentChildId: string = childId;
     async function fetchAll() {
       const qs = `child_id=${encodeURIComponent(currentChildId)}`;

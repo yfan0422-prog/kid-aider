@@ -400,7 +400,7 @@ export function getDb(): Database.Database {
   try { db.exec("ALTER TABLE milestones ADD COLUMN challenge_json TEXT"); } catch {}
 
   // 多子账号迁移（P9）
-  migrateToMultiChild(db);
+  try { migrateToMultiChild(db); } catch { /* migration failure is non-fatal */ }
 
   return db;
 }
