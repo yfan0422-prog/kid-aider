@@ -531,6 +531,7 @@ const en: TranslationDict = {
   "error.invalid_action": "Invalid action",
   "error.invalid_suggestion_status": "Status must be approved or rejected",
   "error.last_child_blocked": "At least one child account is required",
+  "error.last_model_blocked": "At least one enabled model is required",
   "error.missing_id": "Missing id",
   "error.missing_required_fields": "Missing required fields",
   "error.missing_track_id": "Missing trackId",

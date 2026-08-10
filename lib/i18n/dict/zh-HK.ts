@@ -531,6 +531,7 @@ const zhHK: TranslationDict = {
   "error.invalid_action": "無效操作",
   "error.invalid_suggestion_status": "狀態必須是 approved 或 rejected",
   "error.last_child_blocked": "至少需要保留一個孩子帳號",
+  "error.last_model_blocked": "至少需要保留一個啟用嘅模型",
   "error.missing_id": "缺少 id",
   "error.missing_required_fields": "缺少必填欄位",
   "error.missing_track_id": "缺少 trackId",

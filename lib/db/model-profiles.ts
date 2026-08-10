@@ -98,6 +98,20 @@ export function deleteModelProfile(id: string): void {
   db.prepare("DELETE FROM model_profiles WHERE id = ?").run(id);
 }
 
+/** Count how many profiles are currently enabled */
+export function countEnabledProfiles(): number {
+  const db = getDb();
+  const row = db.prepare("SELECT COUNT(*) as c FROM model_profiles WHERE enabled = 1").get() as { c: number };
+  return row.c;
+}
+
+/** Disable all profiles except the one with the given id */
+export function disableAllProfilesExcept(id: string): void {
+  const db = getDb();
+  db.prepare("UPDATE model_profiles SET enabled = 0, updated_at = ? WHERE id != ? AND enabled = 1")
+    .run(new Date().toISOString(), id);
+}
+
 function deserializeProfile(row: Record<string, unknown>): ModelProfile {
   return {
     ...row,

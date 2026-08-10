@@ -5,6 +5,8 @@ import {
   getModelProfile,
   updateModelProfile,
   deleteModelProfile,
+  countEnabledProfiles,
+  disableAllProfilesExcept,
 } from "@/lib/db/model-profiles";
 import { routeModelById } from "@/lib/models/router";
 import type { ModelProvider, ModelRole } from "@/lib/utils/types";
@@ -58,6 +60,20 @@ export async function PUT(req: NextRequest) {
   for (const key of ALLOWED_FIELDS) {
     if (key in attrs) safe[key] = (attrs as Record<string, unknown>)[key];
   }
+
+  // Exclusive enable: when enabling one model, auto-disable all others
+  if (safe.enabled === true) {
+    disableAllProfilesExcept(id);
+  }
+
+  // Prevent disabling the last enabled model
+  if (safe.enabled === false) {
+    const enabledCount = countEnabledProfiles();
+    if (enabledCount <= 1 && existing.enabled) {
+      return NextResponse.json({ error: "error.last_model_blocked" }, { status: 400 });
+    }
+  }
+
   updateModelProfile(id, safe);
   return NextResponse.json({ success: true });
 }

@@ -58,11 +58,16 @@ export function ModelProfileList() {
   };
 
   const handleToggle = async (id: string, enabled: boolean) => {
-    await fetch(`/api/config/models?id=${id}`, {
+    const res = await fetch(`/api/config/models?id=${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enabled: !enabled }),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(t(data.error || "error.unknown"));
+      return;
+    }
     fetchProfiles();
   };
 

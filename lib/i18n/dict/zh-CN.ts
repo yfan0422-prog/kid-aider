@@ -531,6 +531,7 @@ const zhCN: TranslationDict = {
   "error.invalid_action": "无效操作",
   "error.invalid_suggestion_status": "状态必须是 approved 或 rejected",
   "error.last_child_blocked": "至少需要保留一个孩子账号",
+  "error.last_model_blocked": "至少需要保留一个启用的模型",
   "error.missing_id": "缺少 id",
   "error.missing_required_fields": "缺少必填字段",
   "error.missing_track_id": "缺少 trackId",
