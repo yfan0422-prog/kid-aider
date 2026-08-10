@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChatView } from "@/components/chat/chat-view";
 import { SidePanel } from "@/components/panels/side-panel";
+import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { useChatStore } from "@/lib/store/chat-store";
 
 /** Hydrates the chat store from ?session= URL param so seed messages appear. */
@@ -92,6 +93,7 @@ export default function Home() {
             </svg>
             设置
           </Link>
+          <LocaleSwitcher />
         </div>
       </header>
       {/* Main content */}

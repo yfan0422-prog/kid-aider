@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { LocaleProvider } from "@/lib/i18n/context";
+import { detectLocale } from "@/lib/i18n/types";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,9 +14,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const acceptLanguage = headers().get("accept-language");
+  const initialLocale = detectLocale(acceptLanguage);
+
   return (
     <html lang="zh-CN">
-      <body className="bg-page min-h-screen antialiased">{children}</body>
+      <body className="bg-page min-h-screen antialiased">
+        <LocaleProvider initialLocale={initialLocale}>
+          {children}
+        </LocaleProvider>
+      </body>
     </html>
   );
 }
