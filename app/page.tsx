@@ -7,6 +7,7 @@ import { ChatView } from "@/components/chat/chat-view";
 import { SidePanel } from "@/components/panels/side-panel";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { useChatStore } from "@/lib/store/chat-store";
+import { useLocale } from "@/lib/i18n/context";
 
 /** Hydrates the chat store from ?session= URL param so seed messages appear. */
 function SessionLoader() {
@@ -34,6 +35,7 @@ function SessionLoader() {
 }
 
 export default function Home() {
+  const { t } = useLocale();
   return (
     <>
       <Suspense fallback={null}>
@@ -51,47 +53,43 @@ export default function Home() {
             href="/me"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
-            👤 我的
+            {t("nav.me")}
           </Link>
           <Link
             href="/explore"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
-            🔍 探索
+            {t("nav.explore")}
           </Link>
           <Link
             href="/projects"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
-            🚀 项目
+            {t("nav.projects")}
           </Link>
           <Link
             href="/growth"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
-            🌟 成长
+            {t("nav.growth")}
           </Link>
           <Link
             href="/showcase"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
-            🖼 作品
+            {t("nav.showcase")}
           </Link>
           <Link
             href="/report"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
-            📊 报告
+            {t("nav.report")}
           </Link>
           <Link
             href="/settings"
             className="flex items-center gap-1.5 text-body-sm text-ink-tertiary hover:text-primary transition-colors px-3 py-1.5 rounded-btn hover:bg-surface-raised"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="8" cy="8" r="2.5" />
-              <path d="M13.5 8c0-.4-.3-.8-.6-1l.2-.8c.1-.5 0-1.1-.4-1.5l-.6-.6c-.4-.4-1-.5-1.5-.4l-.8.2c-.2-.3-.6-.6-1-.6l-1 .2c-.4-.1-.8.3-1 .6l-.8-.2c-.5-.1-1.1 0-1.5.4l-.6.6c-.4.4-.5 1-.4 1.5l.2.8c-.3.2-.6.6-.6 1l-.2 1c-.1.4.3.8.6 1l.8.2c.1.5 0 1.1.4 1.5l.6.6c.4.4 1 .5 1.5.4l.8-.2c.2.3.6.6 1 .6l1-.2c.4.1.8-.3 1-.6l.8.2c.5.1 1.1 0 1.5-.4l.6-.6c.4-.4.5-1 .4-1.5l-.2-.8c.3-.2.6-.6.6-1l.2-1c.1-.4-.3-.8-.6-1l-.8-.2z" />
-            </svg>
-            设置
+            {t("nav.settings")}
           </Link>
           <LocaleSwitcher />
         </div>

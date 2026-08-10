@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { useChatStore } from "@/lib/store/chat-store";
+import { useLocale } from "@/lib/i18n/context";
 import { BubbleGuide } from "./bubble-guide";
 import { BubbleChild } from "./bubble-child";
 import { StreamingBubble } from "./streaming-bubble";
 
 export function MessageList() {
+  const { t } = useLocale();
   const messages = useChatStore((s) => s.messages);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const streamingContent = useChatStore((s) => s.streamingContent);
@@ -21,8 +23,8 @@ export function MessageList() {
       {messages.length === 0 && !isStreaming && (
         <div className="flex flex-col items-center justify-center h-full text-ink-tertiary">
           <div className="text-6xl mb-4">🌟</div>
-          <p className="text-body-lg font-medium">说说你想做什么吧！</p>
-          <p className="text-body-sm mt-2">我会帮你把想法变成清晰的方案</p>
+          <p className="text-body-lg font-medium">{t("chat.empty")}</p>
+          <p className="text-body-sm mt-2">{t("chat.empty.subtitle")}</p>
         </div>
       )}
       {messages.map((msg) =>

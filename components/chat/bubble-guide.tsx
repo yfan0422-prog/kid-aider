@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
 import { AudioPlayer } from "./audio-player";
 
 interface BadgeNotification {
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function BubbleGuide({ content, strategyId, messageId, badgeNotifications }: Props) {
+  const { t } = useLocale();
   return (
     <div className="flex gap-3 mb-4">
       {/* Avatar */}
@@ -32,7 +34,7 @@ export function BubbleGuide({ content, strategyId, messageId, badgeNotifications
         )}
         {badgeNotifications && badgeNotifications.length > 0 && (
           <div className="mt-3 pt-3 border-t border-border space-y-1">
-            <p className="text-body-sm font-bold text-accent-yellow">🎉 新徽章解锁！</p>
+            <p className="text-body-sm font-bold text-accent-yellow">{t("chat.badge.unlocked")}</p>
             {badgeNotifications.map((b, i) => (
               <div key={i} className="flex items-center gap-2 text-body-sm">
                 <span className="text-xl">{b.icon}</span>

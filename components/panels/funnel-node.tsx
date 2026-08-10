@@ -1,13 +1,14 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n/context";
 import type { RequirementNode } from "@/lib/utils/types";
 
-const LAYER_LABELS: Record<number, string> = {
-  1: "愿望",
-  2: "对象",
-  3: "功能",
-  4: "约束",
-  5: "验收",
+const LAYER_LABEL_KEYS: Record<number, string> = {
+  1: "funnel.layer.wish",
+  2: "funnel.layer.object",
+  3: "funnel.layer.feature",
+  4: "funnel.layer.constraint",
+  5: "funnel.layer.acceptance",
 };
 
 const LAYER_COLORS: Record<number, string> = {
@@ -24,6 +25,11 @@ interface Props {
 }
 
 export function FunnelNode({ node, isActive }: Props) {
+  const { t } = useLocale();
+  const layerLabel = LAYER_LABEL_KEYS[node.layer]
+    ? t(LAYER_LABEL_KEYS[node.layer])
+    : node.label;
+
   return (
     <div
       className={`card border-l-[5px] rounded-2xl p-4 transition-all ${
@@ -34,10 +40,10 @@ export function FunnelNode({ node, isActive }: Props) {
     >
       <div className="flex items-center gap-2 mb-1.5">
         <span className="text-xs font-bold text-ink-tertiary bg-surface-raised px-2 py-0.5 rounded-full">
-          第{node.layer}层
+          {t("funnel.layer.label", { layer: String(node.layer) })}
         </span>
         <span className="text-sm font-semibold text-ink">
-          {LAYER_LABELS[node.layer] || node.label}
+          {layerLabel}
         </span>
         {node.content && (
           <span className="text-xs text-accent-green ml-auto">✓</span>
@@ -46,7 +52,7 @@ export function FunnelNode({ node, isActive }: Props) {
       {node.content ? (
         <p className="text-body-sm text-ink-secondary">{node.content}</p>
       ) : (
-        <p className="text-body-sm text-ink-tertiary italic">等待中……</p>
+        <p className="text-body-sm text-ink-tertiary italic">{t("funnel.node.waiting")}</p>
       )}
     </div>
   );

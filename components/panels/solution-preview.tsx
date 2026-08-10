@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useChatStore } from "@/lib/store/chat-store";
+import { useLocale } from "@/lib/i18n/context";
 
 export function SolutionPreview() {
+  const { t } = useLocale();
   const solutionPack = useChatStore((s) => s.solutionPack);
   const solutionStatus = useChatStore((s) => s.solutionStatus);
   const funnelComplete = useChatStore((s) => s.funnelComplete);
@@ -74,7 +76,7 @@ export function SolutionPreview() {
   return (
     <div className="p-4 border-t border-border">
       <h3 className="text-sm font-bold text-ink-secondary uppercase tracking-wider mb-4">
-        方案包
+        {t("funnel.pack.title")}
       </h3>
 
       {solutionStatus === "idle" && funnelComplete && (
@@ -82,14 +84,14 @@ export function SolutionPreview() {
           onClick={handleGenerate}
           className="w-full bg-brand text-white border-none rounded-btn px-5 py-3.5 font-semibold text-[17px] shadow-[0_4px_12px_rgba(43,45,66,0.10)] hover:-translate-y-px active:translate-y-0 active:scale-[0.98] transition-all"
         >
-          ✨ 生成方案包
+          {t("funnel.pack.generate")}
         </button>
       )}
 
       {solutionStatus === "generating" && (
         <div className="text-center py-8">
           <div className="animate-spin w-8 h-8 border-[3px] border-primary border-t-transparent rounded-full mx-auto mb-3" />
-          <p className="text-body-sm text-ink-tertiary">正在生成方案包……</p>
+          <p className="text-body-sm text-ink-tertiary">{t("funnel.pack.generating")}</p>
         </div>
       )}
 
@@ -107,21 +109,21 @@ export function SolutionPreview() {
                 onClick={handleConfirm}
                 className="flex-1 bg-primary text-white border-none rounded-btn px-4 py-3 font-semibold text-sm hover:bg-primary-dark transition-colors"
               >
-                确认并复制 Agent Prompt
+                {t("funnel.pack.copy_prompt")}
               </button>
             </div>
           )}
           {solutionStatus === "confirmed" && (
             <div className="space-y-3">
               <div className="bg-accent-green/10 text-accent-green rounded-btn px-4 py-3 text-sm font-semibold text-center">
-                ✅ 方案包已确认！Prompt 已复制，去 Claude Code 试试吧！
+                {t("funnel.pack.confirmed")}
               </div>
               <button
                 onClick={handleStartProject}
                 disabled={isStarting}
                 className="w-full bg-accent-green text-white border-none rounded-btn px-4 py-2.5 font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {isStarting ? "正在创建项目……" : "🚀 开始项目"}
+                {isStarting ? t("funnel.pack.starting") : t("funnel.pack.start")}
               </button>
             </div>
           )}

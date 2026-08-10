@@ -2,11 +2,13 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useChatStore } from "@/lib/store/chat-store";
+import { useLocale } from "@/lib/i18n/context";
 import { AgeSwitcher } from "./age-switcher";
 import { VoiceButton } from "./voice-button";
 import { getAgeConfig } from "@/lib/utils/age-config";
 
 export function InputBar() {
+  const { t } = useLocale();
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const ageGroup = useChatStore((s) => s.ageGroup);
@@ -57,7 +59,7 @@ export function InputBar() {
       // Surface server errors
       if (!response.ok) {
         const errBody = await response.json().catch(() => ({}));
-        const errMsg = (errBody as { error?: string }).error || "请求失败，请稍后重试";
+        const errMsg = (errBody as { error?: string }).error || t("chat.input.error.request_failed");
         addMessage({
           id: crypto.randomUUID(),
           session_id: effectiveSessionId,
@@ -141,7 +143,7 @@ export function InputBar() {
         id: crypto.randomUUID(),
         session_id: effectiveSessionId,
         role: "guide",
-        content: "⚠️ 网络连接失败，请检查设置后重试。",
+        content: `⚠️ ${t("error.network")}`,
         strategy_id: null,
         created_at: new Date().toISOString(),
       });
@@ -162,6 +164,7 @@ export function InputBar() {
     setSessionId,
     setSolutionStatus,
     setStreaming,
+    t,
   ]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -186,7 +189,7 @@ export function InputBar() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isStreaming ? "小K正在打字……" : "输入文字，或按住🎤说话"}
+            placeholder={isStreaming ? t("chat.input.placeholder.typing") : t("chat.input.placeholder")}
             rows={1}
             disabled={isStreaming}
             className={`flex-1 resize-none bg-surface-raised border-2 border-border rounded-btn px-5 py-3.5 ${config.fontSize} min-h-[56px] max-h-[120px] focus:border-primary focus:shadow-[0_0_0_4px_rgba(79,124,255,0.15)] focus:outline-none transition-all placeholder:text-ink-tertiary disabled:opacity-50`}
@@ -196,13 +199,13 @@ export function InputBar() {
             disabled={!input.trim() || isStreaming}
             className="shrink-0 bg-primary text-white border-none rounded-btn px-6 py-3.5 font-semibold text-[17px] shadow-[0_4px_12px_rgba(43,45,66,0.10)] hover:bg-primary-dark hover:-translate-y-px active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
-            发送
+            {t("chat.input.send")}
           </button>
         </div>
         <div className="flex items-center justify-between mt-2">
           <AgeSwitcher />
           <span className="text-caption text-ink-tertiary">
-            按 Enter 发送，Shift+Enter 换行
+            {t("chat.input.hint")}
           </span>
         </div>
       </div>

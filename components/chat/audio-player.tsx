@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useLocale } from "@/lib/i18n/context";
 
 interface Props {
   messageId: string;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function AudioPlayer({ text }: Props) {
+  const { t } = useLocale();
   const [state, setState] = useState<"idle" | "loading" | "playing" | "error">("idle");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -76,14 +78,14 @@ export function AudioPlayer({ text }: Props) {
         onClick={state === "playing" ? undefined : replay}
         className={`text-body-xs flex items-center gap-1 px-2 py-0.5 rounded-btn transition-colors
           ${state === "playing" ? "text-primary" : "text-ink-tertiary hover:text-primary"}`}
-        title={state === "idle" ? "点击播放" : state === "loading" ? "加载中..." : "播放中..."}
+        title={state === "idle" ? t("chat.audio.play") : state === "loading" ? t("common.loading") : t("chat.audio.playing")}
       >
         {state === "loading" ? (
           <div className="w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin" />
         ) : (
           <SpeakerIcon playing={state === "playing"} />
         )}
-        <span>小K朗读</span>
+        <span>{t("chat.audio.read")}</span>
       </button>
     </div>
   );

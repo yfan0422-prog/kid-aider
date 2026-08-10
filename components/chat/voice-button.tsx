@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { useLocale } from "@/lib/i18n/context";
 
 type VoiceState = "idle" | "recording" | "processing";
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function VoiceButton({ onTranscription, disabled }: Props) {
+  const { t } = useLocale();
   const [state, setState] = useState<VoiceState>("idle");
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -59,11 +61,11 @@ export function VoiceButton({ onTranscription, disabled }: Props) {
           if (data.text) {
             onTranscription(data.text);
           } else {
-            setError("没听清，可以再说一遍吗？");
+            setError(t("chat.voice.error.unclear"));
             setTimeout(() => setError(null), 3000);
           }
         } catch {
-          setError("语音识别暂不可用");
+          setError(t("chat.voice.error.unavailable"));
           setTimeout(() => setError(null), 3000);
         } finally {
           setState("idle");
@@ -75,12 +77,12 @@ export function VoiceButton({ onTranscription, disabled }: Props) {
       setError(null);
     } catch (err) {
       const msg = err instanceof DOMException && err.name === "NotAllowedError"
-        ? "请允许麦克风权限以使用语音功能"
-        : "麦克风不可用";
+        ? t("chat.voice.error.permission")
+        : t("chat.voice.error.mic");
       setError(msg);
       debounceRef.current = false;
     }
-  }, [onTranscription]);
+  }, [onTranscription, t]);
 
   const stopRecording = useCallback(() => {
     releasedRef.current = true;
@@ -110,7 +112,7 @@ export function VoiceButton({ onTranscription, disabled }: Props) {
           }
           ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
         `}
-        title={state === "recording" ? "松开发送" : "按住说话"}
+        title={state === "recording" ? t("chat.voice.hint.release") : t("chat.voice.hint.hold")}
       >
         {state === "processing" ? (
           <Spinner />

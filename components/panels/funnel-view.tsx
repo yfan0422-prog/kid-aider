@@ -1,10 +1,12 @@
 "use client";
 
 import { useChatStore } from "@/lib/store/chat-store";
+import { useLocale } from "@/lib/i18n/context";
 import type { RequirementNode } from "@/lib/utils/types";
 import { FunnelNode } from "./funnel-node";
 
 export function FunnelView() {
+  const { t } = useLocale();
   const funnelNodes = useChatStore((s) => s.funnelNodes);
   const funnelComplete = useChatStore((s) => s.funnelComplete);
 
@@ -29,11 +31,11 @@ export function FunnelView() {
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold text-ink-secondary uppercase tracking-wider">
-          需求树
+          {t("funnel.tree.title")}
         </h3>
         {funnelComplete && (
           <span className="badge-achievement inline-flex items-center gap-1 bg-brand-soft text-[#B26A00] rounded-full px-3 py-1 text-xs font-semibold">
-            ✨ 完成
+            {t("funnel.badge.done")}
           </span>
         )}
       </div>
