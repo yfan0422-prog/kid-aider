@@ -17,7 +17,7 @@ const DAILY_CAPS: Record<ActionType, number> = {
   task_done: 99,
   check_in: 3,
   reflection: 2,
-  create_project: 5,
+  create_project: 3,
 };
 
 /** Base points per action; check_in/reflection carry the streak multiplier. */
@@ -28,7 +28,7 @@ const POINTS_RULES: Record<ActionType, { base: number; streakEligible: boolean }
   task_done: { base: 10, streakEligible: false },
   check_in: { base: 15, streakEligible: true },
   reflection: { base: 25, streakEligible: true },
-  create_project: { base: 50, streakEligible: false },
+  create_project: { base: 20, streakEligible: false },
 };
 
 /** A badge that was unlocked by this award. */
