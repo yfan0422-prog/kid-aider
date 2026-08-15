@@ -23,11 +23,23 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   const range = req.headers.get("range");
   const m = range ? /^bytes=(\d*)-(\d*)$/.exec(range) : null;
-  if (m) {
-    let start = m[1] ? parseInt(m[1], 10) : 0;
-    let end = m[2] ? parseInt(m[2], 10) : total - 1;
-    if (Number.isNaN(start)) start = 0;
-    if (Number.isNaN(end) || end >= total) end = total - 1;
+  if (m && (m[1] !== "" || m[2] !== "")) {
+    let start: number;
+    let end: number;
+    if (m[1] === "") {
+      // 后缀范围 bytes=-N：返回最后 N 字节
+      const suffixLen = parseInt(m[2], 10);
+      if (Number.isNaN(suffixLen) || suffixLen <= 0) {
+        return new NextResponse(null, { status: 416, headers: { "Content-Range": `bytes */${total}` } });
+      }
+      start = Math.max(total - suffixLen, 0);
+      end = total - 1;
+    } else {
+      start = parseInt(m[1], 10);
+      if (Number.isNaN(start)) start = 0;
+      end = m[2] !== "" ? parseInt(m[2], 10) : total - 1;
+      if (Number.isNaN(end) || end >= total) end = total - 1;
+    }
     if (start > end || start >= total) {
       return new NextResponse(null, { status: 416, headers: { "Content-Range": `bytes */${total}` } });
     }
