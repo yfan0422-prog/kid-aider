@@ -2,9 +2,16 @@ import OpenAI from "openai";
 import type { ModelProfile } from "@/lib/utils/types";
 import { decryptApiKey } from "@/lib/utils/crypto";
 
+export type ChatContent =
+  | string
+  | Array<
+      | { type: "text"; text: string }
+      | { type: "image_url"; image_url: { url: string } }
+    >;
+
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
-  content: string;
+  content: ChatContent;
 }
 
 interface StreamChatOpts {
