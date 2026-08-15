@@ -19,7 +19,7 @@ interface SnapshotResult {
 }
 
 export function DataPanel() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const DIM_LABELS: Record<string, string> = {
     clarification: t("growth.dimension.clarification"), decomposition: t("growth.dimension.decomposition"),
     execution: t("growth.dimension.execution"), reflection: t("growth.dimension.reflection"),
@@ -49,12 +49,12 @@ export function DataPanel() {
   const exportAll = async () => {
     setExporting(true);
     try {
-      const res = await fetch("/api/parent/export");
+      const res = await fetch(`/api/parent/export?lang=${encodeURIComponent(locale)}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "kid-aider-export.json";
+      a.download = "kid-aider-export.html";
       a.click();
       URL.revokeObjectURL(url);
     } finally {
