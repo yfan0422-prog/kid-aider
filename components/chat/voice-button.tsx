@@ -11,9 +11,10 @@ interface Props {
   disabled?: boolean;
 }
 
-// 上滑判定阈值（px）：超过 TEXT_THRESHOLD 转文字，超过 CANCEL_THRESHOLD 取消
-const TEXT_THRESHOLD = 60;
-const CANCEL_THRESHOLD = 120;
+// 上滑判定阈值（px）：超过 TEXT_THRESHOLD 转文字，超过 CANCEL_THRESHOLD 取消。
+// 阈值调高，避免孩子按住时手指轻微抖动就被误判为取消。
+const TEXT_THRESHOLD = 80;
+const CANCEL_THRESHOLD = 160;
 
 export function VoiceButton({ onResult, disabled }: Props) {
   const { t } = useLocale();
@@ -145,6 +146,21 @@ export function VoiceButton({ onResult, disabled }: Props) {
     [resolveMode, resolveAction]
   );
 
+  // 结束录音：根据 actionRef（最后一次指针移动或抬起时已更新）决定去向
+  const finalizeRecording = useCallback(() => {
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state === "recording") {
+      recorder.stop();
+    } else if (recorder && recorder.state === "inactive") {
+      // 授权未完成即松手：停止轨道，startRecording 内部会自行中止
+      streamRef.current?.getTracks().forEach((tr) => tr.stop());
+      streamRef.current = null;
+      recorderRef.current = null;
+      setRecording(false);
+      setSlideMode("none");
+    }
+  }, []);
+
   const handlePointerUp = useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
       if (pointerIdRef.current !== e.pointerId) return;
@@ -155,32 +171,19 @@ export function VoiceButton({ onResult, disabled }: Props) {
       const mode = resolveMode(dy);
       setSlideMode(mode);
       actionRef.current = resolveAction(mode);
-
-      const recorder = recorderRef.current;
-      if (recorder && recorder.state === "recording") {
-        recorder.stop();
-      } else if (recorder && recorder.state === "inactive") {
-        // 授权未完成即松手：停止轨道，startRecording 内部会自行中止
-        streamRef.current?.getTracks().forEach((tr) => tr.stop());
-        streamRef.current = null;
-        recorderRef.current = null;
-        setRecording(false);
-        setSlideMode("none");
-      }
+      finalizeRecording();
     },
-    [resolveMode, resolveAction]
+    [resolveMode, resolveAction, finalizeRecording]
   );
 
   const handlePointerCancel = useCallback(() => {
+    // 浏览器/系统打断（如轻微移动被判定为滚动、iOS 长按呼出菜单等）：
+    // 按最后已知手势结束，而不是一律取消 —— 避免“稍微偏移就自动取消”。
+    if (pointerIdRef.current === null) return;
     pressedRef.current = false;
     pointerIdRef.current = null;
-    actionRef.current = "cancel";
-    if (recorderRef.current && recorderRef.current.state === "recording") {
-      recorderRef.current.stop();
-    }
-    setRecording(false);
-    setSlideMode("none");
-  }, []);
+    finalizeRecording();
+  }, [finalizeRecording]);
 
   const isMediaSupported =
     typeof window !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
@@ -196,8 +199,8 @@ export function VoiceButton({ onResult, disabled }: Props) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        style={{ touchAction: "none" }}
-        className={`w-10 h-10 rounded-btn flex items-center justify-center transition-all duration-200 shrink-0 select-none
+        style={{ touchAction: "none", WebkitTouchCallout: "none" }}
+        className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 select-none
           ${recording
             ? "bg-red-500 text-white scale-110 shadow-lg"
             : "bg-surface border border-border text-ink-tertiary hover:text-primary hover:border-primary"
@@ -258,11 +261,11 @@ export function VoiceButton({ onResult, disabled }: Props) {
 
 function Spinner() {
   return (
-    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
   );
 }
 
-function MicIcon({ active, size = 18 }: { active: boolean; size?: number }) {
+function MicIcon({ active, size = 22 }: { active: boolean; size?: number }) {
   return (
     <svg
       width={size}
