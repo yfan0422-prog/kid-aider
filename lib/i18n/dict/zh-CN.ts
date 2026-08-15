@@ -535,6 +535,17 @@ const zhCN: TranslationDict = {
   "settings.account.last_blocked": "至少需要保留一个孩子账号",
   "settings.account.delete_confirm": "确认删除该孩子及所有关联数据？此操作不可撤销。",
 
+  // ─── 语音播报音色（P11）────────────────────────────
+  "settings.voice.title": "语音播报音色",
+  "settings.voice.desc": "选择「朗读」时的声音风格，点击试听可先听一下。",
+  "settings.voice.preview": "试听",
+  "settings.voice.preview_text": "嗨，我是你的创意小助手，我们一起探索吧！",
+  "settings.voice.v.xiaoxiao": "晓晓 · 温暖女声",
+  "settings.voice.v.xiaoyi": "晓伊 · 温柔女声",
+  "settings.voice.v.yunxi": "云希 · 阳光男声",
+  "settings.voice.v.yunxia": "云夏 · 童声",
+  "settings.voice.v.yunyang": "云扬 · 沉稳男声",
+
   // ─── 孩子选择 select ────────────────────────────────
   "select.title": "选择你的小档案",
   "select.add": "新建",

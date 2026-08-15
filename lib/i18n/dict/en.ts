@@ -535,6 +535,17 @@ const en: TranslationDict = {
   "settings.account.last_blocked": "At least one child account is required",
   "settings.account.delete_confirm": "Delete this child and all associated data? This cannot be undone.",
 
+  // ─── Voice style (P11) ────────────────────────────
+  "settings.voice.title": "Voice style",
+  "settings.voice.desc": "Choose the voice used for read-aloud. Tap preview to listen first.",
+  "settings.voice.preview": "Preview",
+  "settings.voice.preview_text": "Hi, I'm your creative assistant. Let's explore together!",
+  "settings.voice.v.xiaoxiao": "Xiaoxiao · warm female",
+  "settings.voice.v.xiaoyi": "Xiaoyi · gentle female",
+  "settings.voice.v.yunxi": "Yunxi · cheerful male",
+  "settings.voice.v.yunxia": "Yunxia · child",
+  "settings.voice.v.yunyang": "Yunyang · steady male",
+
   // ─── Select ────────────────────────────────────
   "select.title": "Choose Your Profile",
   "select.add": "New",
