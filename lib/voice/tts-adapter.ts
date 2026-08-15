@@ -117,6 +117,12 @@ function removeControlChars(s: string): string {
   }).join("");
 }
 
+// 连续的下划线（如填空模板 "____"）在朗读时会被逐个读成「下划线」，
+// 这里合并为单个「空格」表述，避免重复播报。
+function normalizeForSpeech(s: string): string {
+  return s.replace(/_+/g, "空格");
+}
+
 async function edgeTTS(text: string, voice: string, speed: number): Promise<Buffer> {
   const rate = `${speed > 1 ? "+" : ""}${Math.round((speed - 1) * 100)}%`;
   const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='${voice}'><prosody pitch='+0Hz' rate='${rate}' volume='+0%'>${escapeXml(removeControlChars(text))}</prosody></voice></speak>`;
@@ -242,7 +248,7 @@ export async function synthesizeSpeech(
 ): Promise<TTSResult> {
   const voice = opts.voice || "zh-CN-XiaoxiaoNeural";
   const speed = opts.speed ?? 1.0;
-  const truncated = text.slice(0, 500); // 费用控制
+  const truncated = normalizeForSpeech(text).slice(0, 500); // 费用控制
 
   // 检查缓存
   const key = cacheKey(truncated, voice, speed);
