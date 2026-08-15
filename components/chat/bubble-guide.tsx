@@ -13,9 +13,11 @@ interface Props {
   strategyId?: string | null;
   messageId?: string;
   badgeNotifications?: BadgeNotification[];
+  autoPlay?: boolean;
+  onAutoPlayed?: () => void;
 }
 
-export function BubbleGuide({ content, strategyId, messageId, badgeNotifications }: Props) {
+export function BubbleGuide({ content, strategyId, messageId, badgeNotifications, autoPlay = false, onAutoPlayed }: Props) {
   const { t } = useLocale();
   return (
     <div className="flex gap-3 mb-4">
@@ -26,7 +28,7 @@ export function BubbleGuide({ content, strategyId, messageId, badgeNotifications
       {/* Bubble */}
       <div className="bubble-guide bg-bubble-guide border border-border rounded-tl-sm rounded-tr-bubble rounded-br-bubble rounded-bl-bubble px-5 py-4 text-body-lg shadow-sm max-w-[80%]">
         <p className="whitespace-pre-wrap">{content}</p>
-        <AudioPlayer messageId={messageId || ""} text={content} />
+        <AudioPlayer messageId={messageId || ""} text={content} autoPlay={autoPlay} onAutoPlayed={onAutoPlayed} />
         {strategyId && (
           <span className="inline-block mt-2 text-xs text-ink-tertiary bg-surface-raised px-2 py-0.5 rounded-full">
             {strategyId}

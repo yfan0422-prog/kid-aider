@@ -6,28 +6,29 @@ import { useLocale } from "@/lib/i18n/context";
 interface Props {
   messageId: string;
   text: string;
+  autoPlay?: boolean;
+  onAutoPlayed?: () => void;
 }
 
-export function AudioPlayer({ text }: Props) {
+export function AudioPlayer({ text, autoPlay = false, onAutoPlayed }: Props) {
   const { t } = useLocale();
   const [state, setState] = useState<"idle" | "loading" | "playing" | "error">("idle");
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const urlRef = useRef<string | null>(null);
 
   // 卸载时释放对象 URL，避免内存泄漏
   useEffect(() => {
     return () => {
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     };
-  }, [audioUrl]);
+  }, []);
 
-  // 自动播放：组件挂载时请求 TTS
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchTTS() {
-      setState("loading");
-      try {
+  // 拉取并播放 TTS。首次调用会请求 TTS 并缓存，后续复用。
+  const loadAndPlay = useCallback(async () => {
+    setState("loading");
+    try {
+      let url = urlRef.current;
+      if (!url) {
         const res = await fetch("/api/voice/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -35,38 +36,37 @@ export function AudioPlayer({ text }: Props) {
         });
         if (!res.ok) throw new Error("TTS failed");
         const blob = await res.blob();
-        if (cancelled) return;
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
-
-        // 自动播放
-        const audio = new Audio(url);
-        audioRef.current = audio;
-        audio.onended = () => setState("idle");
-        audio.onerror = () => setState("error");
-        try {
-          await audio.play();
-          setState("playing");
-        } catch {
-          // 浏览器阻止自动播放，保持 idle 状态
-          setState("idle");
-        }
-      } catch {
-        if (!cancelled) setState("error");
+        url = URL.createObjectURL(blob);
+        urlRef.current = url;
       }
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => setState("idle");
+      audio.onerror = () => setState("error");
+      await audio.play();
+      setState("playing");
+    } catch {
+      setState("error");
     }
-
-    fetchTTS();
-    return () => { cancelled = true; };
   }, [text]);
+
+  // 仅当本条消息被标记为自动播报时，挂载后播报一次；播报结束后清除标记。
+  const autoPlayedRef = useRef(false);
+  useEffect(() => {
+    if (!autoPlay || autoPlayedRef.current) return;
+    autoPlayedRef.current = true;
+    loadAndPlay().finally(() => onAutoPlayed?.());
+  }, [autoPlay, loadAndPlay, onAutoPlayed]);
 
   const replay = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play();
       setState("playing");
+    } else {
+      loadAndPlay();
     }
-  }, []);
+  }, [loadAndPlay]);
 
   // 错误或空文本不渲染
   if (state === "error" || !text.trim()) return null;

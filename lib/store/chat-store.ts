@@ -10,6 +10,8 @@ interface ChatState {
   messages: Message[];
   isStreaming: boolean;
   streamingContent: string;
+  // 本条消息自动播报一次（用于新生成的 guide 回复，避免历史消息重进时一起播放）
+  autoPlayId: string | null;
 
   // Funnel
   funnelNodes: RequirementNode[];
@@ -30,6 +32,7 @@ interface ChatState {
   setStreaming: (v: boolean) => void;
   appendStreamContent: (text: string) => void;
   clearStreamContent: () => void;
+  setAutoPlayId: (id: string | null) => void;
   setFunnelNodes: (nodes: RequirementNode[]) => void;
   setFunnelComplete: (v: boolean) => void;
   setSolutionPack: (pack: SolutionPack | null) => void;
@@ -44,6 +47,7 @@ const initialState = {
   messages: [],
   isStreaming: false,
   streamingContent: "",
+  autoPlayId: null,
   funnelNodes: [],
   funnelComplete: false,
   solutionPack: null,
@@ -61,6 +65,7 @@ export const useChatStore = create<ChatState>((set) => ({
   setStreaming: (v) => set({ isStreaming: v }),
   appendStreamContent: (text) => set((s) => ({ streamingContent: s.streamingContent + text })),
   clearStreamContent: () => set({ streamingContent: "" }),
+  setAutoPlayId: (id) => set({ autoPlayId: id }),
   setFunnelNodes: (nodes) => set({ funnelNodes: nodes }),
   setFunnelComplete: (v) => set({ funnelComplete: v }),
   setSolutionPack: (pack) => set({ solutionPack: pack }),

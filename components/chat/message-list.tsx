@@ -12,6 +12,8 @@ export function MessageList() {
   const messages = useChatStore((s) => s.messages);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const streamingContent = useChatStore((s) => s.streamingContent);
+  const autoPlayId = useChatStore((s) => s.autoPlayId);
+  const setAutoPlayId = useChatStore((s) => s.setAutoPlayId);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export function MessageList() {
       )}
       {messages.map((msg) =>
         msg.role === "guide" ? (
-          <BubbleGuide key={msg.id} content={msg.content} strategyId={msg.strategy_id} messageId={msg.id} />
+          <BubbleGuide key={msg.id} content={msg.content} strategyId={msg.strategy_id} messageId={msg.id} autoPlay={msg.id === autoPlayId} onAutoPlayed={() => setAutoPlayId(null)} />
         ) : msg.role === "child" ? (
           <BubbleChild key={msg.id} content={msg.content} />
         ) : null

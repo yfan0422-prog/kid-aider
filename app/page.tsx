@@ -27,6 +27,8 @@ function SessionLoader() {
           useChatStore.getState().setAgeGroup(data.session.age_group);
         }
         if (data.messages) {
+          // 重进会话时清除自动播报标记，避免历史消息一起播报
+          useChatStore.getState().setAutoPlayId(null);
           useChatStore.getState().setMessages(data.messages);
         }
       })

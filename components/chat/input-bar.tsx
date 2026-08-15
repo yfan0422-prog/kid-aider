@@ -24,6 +24,7 @@ export function InputBar() {
   const setFunnelComplete = useChatStore((s) => s.setFunnelComplete);
   const setFunnelNodes = useChatStore((s) => s.setFunnelNodes);
   const setSolutionStatus = useChatStore((s) => s.setSolutionStatus);
+  const setAutoPlayId = useChatStore((s) => s.setAutoPlayId);
 
   // Ref to accumulate streaming text (avoid stale closure on streamingContent)
   const streamAccRef = useRef("");
@@ -131,14 +132,17 @@ export function InputBar() {
       // Persist guide reply to messages (was cleared without persisting)
       const fullReply = streamAccRef.current;
       if (fullReply) {
+        const guideId = crypto.randomUUID();
         addMessage({
-          id: crypto.randomUUID(),
+          id: guideId,
           session_id: effectiveSessionId,
           role: "guide",
           content: fullReply,
           strategy_id: null,
           created_at: new Date().toISOString(),
         });
+        // 仅本次新生成的回复自动播报一次；历史消息不自动播报
+        setAutoPlayId(guideId);
       }
     } catch (error) {
       console.error("Chat error:", error);
@@ -168,6 +172,7 @@ export function InputBar() {
     setSessionId,
     setSolutionStatus,
     setStreaming,
+    setAutoPlayId,
     t,
   ]);
 
