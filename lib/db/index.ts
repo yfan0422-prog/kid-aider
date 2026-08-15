@@ -4,10 +4,14 @@ import fs from "fs";
 
 let db: Database.Database | null = null;
 
+export function getDataDir(): string {
+  return process.env.DATA_DIR || path.join(process.cwd(), "data");
+}
+
 export function getDb(): Database.Database {
   if (db) return db;
 
-  const dataDir = process.env.DATA_DIR || path.join(process.cwd(), "data");
+  const dataDir = getDataDir();
   const dbPath = path.join(dataDir, "db", "kid-aider.db");
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   db = new Database(dbPath);
@@ -238,6 +242,21 @@ export function getDb(): Database.Database {
 
     CREATE INDEX IF NOT EXISTS idx_voice_sessions_session ON voice_sessions(session_id);
     CREATE INDEX IF NOT EXISTS idx_emotion_log_session ON emotion_log(session_id);
+
+    CREATE TABLE IF NOT EXISTS works (
+      id               TEXT PRIMARY KEY,
+      child_id         TEXT NOT NULL DEFAULT '',
+      type             TEXT NOT NULL CHECK(type IN ('photo','video')),
+      file_path        TEXT NOT NULL,
+      mime_type        TEXT NOT NULL,
+      title            TEXT DEFAULT '',
+      description      TEXT DEFAULT '',
+      ai_encouragement TEXT DEFAULT '',
+      size_bytes       INTEGER DEFAULT 0,
+      created_at       TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_works_child ON works(child_id);
 
     CREATE TABLE IF NOT EXISTS child_profile (
       id                TEXT PRIMARY KEY,

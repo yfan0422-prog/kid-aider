@@ -410,3 +410,20 @@ export interface BadgeUnlock {
   badge_id: string;
   unlocked_at: string;
 }
+
+// ─── P10 作品存档 ───────────────────────────────────────────────
+
+export type WorkType = "photo" | "video";
+
+export interface Work {
+  id: string;
+  child_id: string;
+  type: WorkType;
+  file_path: string;   // 相对 DATA_DIR 的路径，如 media/works/<child_id>/<uuid>.jpg
+  mime_type: string;
+  title: string;
+  description: string;
+  ai_encouragement: string;
+  size_bytes: number;
+  created_at: string;
+}
