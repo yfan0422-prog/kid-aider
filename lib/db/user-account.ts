@@ -1,5 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { getDb } from "./index";
+import fs from "fs";
+import { deleteWorksByChild, resolveWorksPath } from "./works";
 
 interface UserAccount {
   id: string;
@@ -113,6 +115,12 @@ export function deleteAccount(id: string): void {
     db.prepare("DELETE FROM user_account WHERE id = ?").run(id);
   });
   transaction();
+
+  // P10: 删除该孩子的作品行 + 磁盘文件
+  const workPaths = deleteWorksByChild(id);
+  for (const p of workPaths) {
+    try { fs.unlinkSync(resolveWorksPath(p)); } catch { /* 文件可能已不存在 */ }
+  }
 }
 
 /** 获取孩子总数（用于禁止删除最后一个） */
