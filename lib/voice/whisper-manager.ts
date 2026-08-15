@@ -59,9 +59,12 @@ export async function transcribe(audioPath: string): Promise<{ text: string; tim
       "-l", "zh",
       "--no-timestamps",
       "-otxt",
+      // 贪心解码 + 关闭 fallback：在低配服务器上把转写从 ~36s 压到 ~5s
+      "-bs", "1",
+      "-nf",
     ], {
       cwd: process.cwd(),
-      timeout: 30000, // 30s timeout
+      timeout: 60000, // 60s timeout（base 模型在低配 CPU 上仍可能较慢）
     });
 
     let stdout = "";
