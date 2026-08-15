@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocale } from "@/lib/i18n/context";
-import { VOICES, getStoredVoice, setStoredVoice } from "@/lib/voice/voices";
+import { VOICES, DEFAULT_VOICE, getStoredVoice, setStoredVoice } from "@/lib/voice/voices";
 
 export function VoiceSelector() {
   const { t } = useLocale();
-  const [selected, setSelected] = useState<string>(() => getStoredVoice());
+  // SSR 与首屏客户端渲染都固定用默认音色，避免水合不匹配；挂载后再从 localStorage 水合。
+  const [selected, setSelected] = useState<string>(DEFAULT_VOICE);
   const [previewing, setPreviewing] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelected(getStoredVoice());
+  }, []);
 
   const select = (id: string) => {
     setStoredVoice(id);
