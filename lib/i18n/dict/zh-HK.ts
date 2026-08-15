@@ -18,6 +18,8 @@ const zhHK: TranslationDict = {
   "history.empty": "暫無歷史對話",
   "history.new": "新對話",
   "history.untitled": "未命名對話",
+  "history.delete": "刪除",
+  "history.delete_confirm": "確定刪除這條對話嗎？此操作不可恢復。",
 
   // ─── 聊天 chat ────────────────────────────────
   "chat.age.10-12": "10-12 歲",

@@ -18,6 +18,8 @@ const en: TranslationDict = {
   "history.empty": "No conversations yet",
   "history.new": "New chat",
   "history.untitled": "Untitled",
+  "history.delete": "Delete",
+  "history.delete_confirm": "Delete this conversation? This cannot be undone.",
 
   // ─── Chat ──────────────────────────────────────
   "chat.age.10-12": "10-12 yrs",

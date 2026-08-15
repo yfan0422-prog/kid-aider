@@ -73,5 +73,12 @@ export function listSessionsByChild(childId: string, limit = 50): (Session & { p
 
 export function deleteSession(id: string): void {
   const db = getDb();
-  db.prepare("DELETE FROM sessions WHERE id = ?").run(id);
+  const tx = db.transaction(() => {
+    // 清理仅以 session_id 关联、无外键级联的日志表
+    db.prepare("DELETE FROM voice_sessions WHERE session_id = ?").run(id);
+    db.prepare("DELETE FROM emotion_log WHERE session_id = ?").run(id);
+    // messages / requirement_nodes / solution_packs 通过外键 ON DELETE CASCADE 自动清理
+    db.prepare("DELETE FROM sessions WHERE id = ?").run(id);
+  });
+  tx();
 }

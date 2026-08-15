@@ -79,6 +79,25 @@ export function SessionHistory() {
     router.push(`/?child_id=${encodeURIComponent(childId || "")}`);
   };
 
+  const remove = async (id: string) => {
+    if (!window.confirm(t("history.delete_confirm"))) return;
+    try {
+      const res = await fetch(
+        `/api/sessions/${id}?child_id=${encodeURIComponent(childId || "")}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) return;
+      setSessions((prev) => prev.filter((s) => s.id !== id));
+      // 若删除的是当前正在查看的会话，清空聊天界面
+      if (useChatStore.getState().sessionId === id) {
+        useChatStore.getState().reset();
+        router.replace(`/?child_id=${encodeURIComponent(childId || "")}`);
+      }
+    } catch {
+      // 删除失败静默保留列表
+    }
+  };
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -116,19 +135,33 @@ export function SessionHistory() {
                 const label = s.title || s.preview || t("history.untitled");
                 const time = formatTime(s.updated_at, locale);
                 return (
-                  <button
+                  <div
                     key={s.id}
-                    onClick={() => resume(s.id)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-surface-raised transition-colors border-b border-border/60 last:border-b-0"
+                    className="flex items-center border-b border-border/60 last:border-b-0 hover:bg-surface-raised transition-colors"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-body-sm text-ink font-medium truncate">{label}</span>
-                      {time && <span className="text-caption text-ink-tertiary shrink-0">{time}</span>}
-                    </div>
-                    {s.preview && (
-                      <p className="text-caption text-ink-tertiary truncate mt-0.5">{s.preview}</p>
-                    )}
-                  </button>
+                    <button
+                      onClick={() => resume(s.id)}
+                      className="flex-1 min-w-0 text-left px-3 py-2.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-body-sm text-ink font-medium truncate">{label}</span>
+                        {time && <span className="text-caption text-ink-tertiary shrink-0">{time}</span>}
+                      </div>
+                      {s.preview && (
+                        <p className="text-caption text-ink-tertiary truncate mt-0.5">{s.preview}</p>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => remove(s.id)}
+                      title={t("history.delete")}
+                      aria-label={t("history.delete")}
+                      className="shrink-0 px-2.5 py-2 text-ink-tertiary hover:text-red-500 transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6h14z" />
+                      </svg>
+                    </button>
+                  </div>
                 );
               })
             )}
