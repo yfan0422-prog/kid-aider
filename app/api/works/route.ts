@@ -35,12 +35,14 @@ function extFor(fileName: string, mimeType: string): string {
 export async function GET(req: NextRequest) {
   const childId = req.nextUrl.searchParams.get("child_id");
   if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+  if (!/^[0-9a-f-]{36}$/i.test(childId)) return NextResponse.json({ error: "child_required" }, { status: 400 });
   return NextResponse.json({ works: listWorks(childId) });
 }
 
 export async function POST(req: NextRequest) {
   const childId = req.nextUrl.searchParams.get("child_id");
   if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+  if (!/^[0-9a-f-]{36}$/i.test(childId)) return NextResponse.json({ error: "child_required" }, { status: 400 });
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;

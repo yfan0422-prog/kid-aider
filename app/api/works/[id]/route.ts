@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const childId = req.nextUrl.searchParams.get("child_id");
   if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+  if (!/^[0-9a-f-]{36}$/i.test(childId)) return NextResponse.json({ error: "child_required" }, { status: 400 });
 
   const work = getWork(params.id);
   if (!work || work.child_id !== childId) {
@@ -24,6 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const childId = req.nextUrl.searchParams.get("child_id");
   if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
+  if (!/^[0-9a-f-]{36}$/i.test(childId)) return NextResponse.json({ error: "child_required" }, { status: 400 });
 
   const work = getWork(params.id);
   if (!work || work.child_id !== childId) {
