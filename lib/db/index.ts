@@ -21,6 +21,7 @@ export function getDb(): Database.Database {
       age_group TEXT NOT NULL DEFAULT '10-12',
       status TEXT NOT NULL DEFAULT 'active',
       funnel_step INTEGER DEFAULT 0,
+      mode TEXT NOT NULL DEFAULT 'creative',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
@@ -397,6 +398,7 @@ export function getDb(): Database.Database {
 
   // P8b: schema migration for topic→project integration
   try { db.exec("ALTER TABLE projects ADD COLUMN source TEXT DEFAULT 'funnel'"); } catch {}
+  try { db.exec("ALTER TABLE sessions ADD COLUMN mode TEXT NOT NULL DEFAULT 'creative'"); } catch {}
   try { db.exec("ALTER TABLE projects ADD COLUMN source_topic_id TEXT"); } catch {}
   try { db.exec("ALTER TABLE milestones ADD COLUMN challenge_json TEXT"); } catch {}
 

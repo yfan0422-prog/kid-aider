@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import type { AgeGroup, Message, RequirementNode, SolutionPack } from "@/lib/utils/types";
+import type { AgeGroup, InteractionMode, Message, RequirementNode, SolutionPack } from "@/lib/utils/types";
 
 interface ChatState {
   // Session
   sessionId: string | null;
   ageGroup: AgeGroup;
+  mode: InteractionMode;
 
   // Messages
   messages: Message[];
@@ -27,6 +28,7 @@ interface ChatState {
   // Actions
   setSessionId: (id: string) => void;
   setAgeGroup: (ag: AgeGroup) => void;
+  setMode: (mode: InteractionMode) => void;
   addMessage: (msg: Message) => void;
   setMessages: (msgs: Message[]) => void;
   setStreaming: (v: boolean) => void;
@@ -44,6 +46,7 @@ interface ChatState {
 const initialState = {
   sessionId: null,
   ageGroup: "10-12" as AgeGroup,
+  mode: "creative" as InteractionMode,
   messages: [],
   isStreaming: false,
   streamingContent: "",
@@ -60,6 +63,7 @@ export const useChatStore = create<ChatState>((set) => ({
 
   setSessionId: (id) => set({ sessionId: id }),
   setAgeGroup: (ag) => set({ ageGroup: ag }),
+  setMode: (mode) => set({ mode }),
   addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
   setMessages: (msgs) => set({ messages: msgs }),
   setStreaming: (v) => set({ isStreaming: v }),

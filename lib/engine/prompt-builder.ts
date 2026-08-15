@@ -1,4 +1,4 @@
-import type { AgeGroup } from "@/lib/utils/types";
+import type { AgeGroup, InteractionMode } from "@/lib/utils/types";
 import type { Message } from "@/lib/utils/types";
 import { buildSystemPrompt } from "@/lib/prompts/system-prompt";
 import { pickStrategy, formatStrategyPrompt } from "./strategy-picker";
@@ -13,12 +13,13 @@ export interface ChatMessage {
 export function buildChatPrompt(opts: {
   ageGroup: AgeGroup;
   funnelStep: number;
+  mode: InteractionMode;
   funnelState?: FunnelState;
   recentMessages: Message[];
   currentInput: string;
   profileContext?: string;  // ← 新增 P6
 }): ChatMessage[] {
-  const systemPrompt = buildSystemPrompt(opts.ageGroup, opts.funnelStep);
+  const systemPrompt = buildSystemPrompt(opts.ageGroup, opts.funnelStep, opts.mode);
   const messages: ChatMessage[] = [{ role: "system", content: systemPrompt }];
 
   // P6: 注入画像上下文（在情绪上下文之前，对终端用户不可见）

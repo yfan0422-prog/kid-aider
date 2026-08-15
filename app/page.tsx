@@ -26,6 +26,7 @@ function SessionLoader() {
         if (data.session) {
           useChatStore.getState().setSessionId(data.session.id);
           useChatStore.getState().setAgeGroup(data.session.age_group);
+          useChatStore.getState().setMode(data.session.mode || "creative");
         }
         if (data.messages) {
           // 重进会话时清除自动播报标记，避免历史消息一起播报

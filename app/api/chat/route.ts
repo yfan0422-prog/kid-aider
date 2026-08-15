@@ -14,7 +14,7 @@ import { classifyEmotion, classifyEmotionByRules } from "@/lib/voice/emotion-cla
 import { createEmotionLog } from "@/lib/db/emotion-log";
 import { getOrCreateChildProfile, updateChildProfile, createProfileUpdate } from "@/lib/db/child-profile";
 import { buildProfileContext } from "@/lib/engine/profile-builder";
-import type { AgeGroup, FunnelLayer } from "@/lib/utils/types";
+import type { AgeGroup, FunnelLayer, InteractionMode } from "@/lib/utils/types";
 
 /**
  * Build an SSE response carrying a single "blocked" guide message.
@@ -44,11 +44,16 @@ export async function POST(req: NextRequest) {
   const childId = req.nextUrl.searchParams.get("child_id");
   if (!childId) return NextResponse.json({ error: "child_required" }, { status: 400 });
 
-  const { message, sessionId, ageGroup } = await req.json() as {
+  const { message, sessionId, ageGroup, mode } = await req.json() as {
     message: string;
     sessionId?: string;
     ageGroup?: AgeGroup;
+    mode?: InteractionMode;
   };
+  const validModes: InteractionMode[] = ["knowledge", "writing", "creative"];
+  const interactionMode: InteractionMode = validModes.includes(mode as InteractionMode)
+    ? (mode as InteractionMode)
+    : "creative";
 
   // ── P4 usage check ──────────────────────────────────────────
   const usageConfig = getUsageConfig();
@@ -88,8 +93,13 @@ export async function POST(req: NextRequest) {
     session = createSession({
       age_group: ageGroup || "10-12",
       child_id: childId,
+      mode: interactionMode,
       title: message.slice(0, 30).replace(/\s+/g, " ").trim(),
     });
+  } else if (session.mode !== interactionMode) {
+    // 孩子在同一会话中切换了交互方式，同步到会话记录
+    updateSession(session.id, { mode: interactionMode });
+    session.mode = interactionMode;
   }
 
   const ag = (ageGroup || session.age_group) as AgeGroup;
@@ -100,15 +110,15 @@ export async function POST(req: NextRequest) {
   // Classify intent
   const intent = classifyIntent(message);
 
-  // Determine if entering funnel
-  let funnelState = session.funnel_step > 0 ? createFunnelState() : undefined;
+  // Determine if entering funnel — 仅「创意共创」模式启用需求澄清漏斗
+  let funnelState = interactionMode === "creative" && session.funnel_step > 0 ? createFunnelState() : undefined;
   let justEnteredFunnel = false;
-  if (intent === "project" && session.funnel_step === 0) {
+  if (interactionMode === "creative" && intent === "project" && session.funnel_step === 0) {
     // Start funnel — this message is the intent signal, not a layer answer
     updateSession(session.id, { status: "funneling", funnel_step: 1 });
     funnelState = createFunnelState();
     justEnteredFunnel = true;
-  } else if (session.funnel_step > 0) {
+  } else if (interactionMode === "creative" && session.funnel_step > 0) {
     // Restore funnel state from existing requirement nodes
     funnelState = createFunnelState();
     const nodes = getRequirementNodes(session.id);
@@ -189,6 +199,7 @@ export async function POST(req: NextRequest) {
   let promptMessages = buildChatPrompt({
     ageGroup: ag,
     funnelStep: session.funnel_step,
+    mode: interactionMode,
     funnelState,
     recentMessages,
     currentInput: message,

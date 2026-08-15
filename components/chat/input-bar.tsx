@@ -5,6 +5,7 @@ import { useChatStore } from "@/lib/store/chat-store";
 import { useLocale } from "@/lib/i18n/context";
 import { useChild } from "@/components/ui/child-provider";
 import { AgeSwitcher } from "./age-switcher";
+import { ModeSwitcher } from "./mode-switcher";
 import { VoiceButton } from "./voice-button";
 import type { VoiceAction } from "./voice-button";
 import { getAgeConfig } from "@/lib/utils/age-config";
@@ -15,6 +16,7 @@ export function InputBar() {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const ageGroup = useChatStore((s) => s.ageGroup);
+  const mode = useChatStore((s) => s.mode);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const sessionId = useChatStore((s) => s.sessionId);
   const addMessage = useChatStore((s) => s.addMessage);
@@ -55,7 +57,7 @@ export function InputBar() {
       const response = await fetch(chatUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, sessionId, ageGroup }),
+        body: JSON.stringify({ message: text, sessionId, ageGroup, mode }),
       });
 
       // Surface server errors
@@ -161,6 +163,7 @@ export function InputBar() {
     isStreaming,
     sessionId,
     ageGroup,
+    mode,
     childId,
     addMessage,
     appendStreamContent,
@@ -198,6 +201,9 @@ export function InputBar() {
   return (
     <div className="border-t border-border bg-surface px-4 py-3">
       <div className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-center mb-3">
+          <ModeSwitcher />
+        </div>
         <div className="flex items-end gap-3">
           <VoiceButton
             onResult={handleVoiceResult}

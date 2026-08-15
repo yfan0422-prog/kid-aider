@@ -1,11 +1,12 @@
 import { v4 as uuid } from "uuid";
 import { getDb } from "./index";
-import type { Session, AgeGroup } from "@/lib/utils/types";
+import type { Session, AgeGroup, InteractionMode } from "@/lib/utils/types";
 
 export function createSession(attrs: {
   title?: string;
   age_group?: AgeGroup;
   child_id?: string;
+  mode?: InteractionMode;
 }): Session {
   const db = getDb();
   const now = new Date().toISOString();
@@ -16,13 +17,14 @@ export function createSession(attrs: {
     status: "active",
     funnel_step: 0,
     child_id: attrs.child_id || "",
+    mode: attrs.mode || "creative",
     created_at: now,
     updated_at: now,
   };
   db.prepare(
-    `INSERT INTO sessions (id, title, age_group, status, funnel_step, child_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(session.id, session.title, session.age_group, session.status, session.funnel_step, session.child_id, session.created_at, session.updated_at);
+    `INSERT INTO sessions (id, title, age_group, status, funnel_step, child_id, mode, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(session.id, session.title, session.age_group, session.status, session.funnel_step, session.child_id, session.mode, session.created_at, session.updated_at);
   return session;
 }
 
@@ -31,7 +33,7 @@ export function getSession(id: string): Session | undefined {
   return db.prepare("SELECT * FROM sessions WHERE id = ?").get(id) as Session | undefined;
 }
 
-export function updateSession(id: string, attrs: Partial<Pick<Session, "title" | "status" | "funnel_step" | "age_group">>): void {
+export function updateSession(id: string, attrs: Partial<Pick<Session, "title" | "status" | "funnel_step" | "age_group" | "mode">>): void {
   const db = getDb();
   const fields: string[] = [];
   const values: unknown[] = [];

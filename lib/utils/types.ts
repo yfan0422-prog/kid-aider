@@ -1,4 +1,5 @@
 export type AgeGroup = "6-9" | "10-12" | "13-15";
+export type InteractionMode = "knowledge" | "writing" | "creative";
 export type SessionStatus = "active" | "funneling" | "composing" | "completed";
 export type MessageRole = "child" | "guide" | "system";
 export type FunnelLayer = 1 | 2 | 3 | 4 | 5;
@@ -13,6 +14,7 @@ export interface Session {
   status: SessionStatus;
   funnel_step: number;
   child_id?: string;
+  mode: InteractionMode;
   created_at: string;
   updated_at: string;
 }
