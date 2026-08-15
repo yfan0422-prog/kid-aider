@@ -13,6 +13,11 @@ const en: TranslationDict = {
   "nav.settings": "⚙ Settings",
   "nav.parent": "👨‍👩‍👧 Parent",
   "nav.language": "🌐 Language",
+  "nav.history": "🕘 History",
+  "history.title": "History",
+  "history.empty": "No conversations yet",
+  "history.new": "New chat",
+  "history.untitled": "Untitled",
 
   // ─── Chat ──────────────────────────────────────
   "chat.age.10-12": "10-12 yrs",

@@ -12,6 +12,7 @@ export interface Session {
   age_group: AgeGroup;
   status: SessionStatus;
   funnel_step: number;
+  child_id?: string;
   created_at: string;
   updated_at: string;
 }

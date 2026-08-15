@@ -62,6 +62,7 @@ export async function POST(
   const session = createSession({
     title: projectName,
     age_group: sessionAgeGroup,
+    child_id: childId,
   });
 
   // 6. Parse challenges

@@ -5,6 +5,7 @@ import type { Session, AgeGroup } from "@/lib/utils/types";
 export function createSession(attrs: {
   title?: string;
   age_group?: AgeGroup;
+  child_id?: string;
 }): Session {
   const db = getDb();
   const now = new Date().toISOString();
@@ -14,13 +15,14 @@ export function createSession(attrs: {
     age_group: attrs.age_group || "10-12",
     status: "active",
     funnel_step: 0,
+    child_id: attrs.child_id || "",
     created_at: now,
     updated_at: now,
   };
   db.prepare(
-    `INSERT INTO sessions (id, title, age_group, status, funnel_step, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(session.id, session.title, session.age_group, session.status, session.funnel_step, session.created_at, session.updated_at);
+    `INSERT INTO sessions (id, title, age_group, status, funnel_step, child_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(session.id, session.title, session.age_group, session.status, session.funnel_step, session.child_id, session.created_at, session.updated_at);
   return session;
 }
 
@@ -49,6 +51,24 @@ export function updateSession(id: string, attrs: Partial<Pick<Session, "title" |
 export function listSessions(limit = 20): Session[] {
   const db = getDb();
   return db.prepare("SELECT * FROM sessions ORDER BY updated_at DESC LIMIT ?").all(limit) as Session[];
+}
+
+/** 列出某个孩子的历史会话（带最后一条孩子消息预览），按最近更新倒序 */
+export function listSessionsByChild(childId: string, limit = 50): (Session & { preview: string })[] {
+  const db = getDb();
+  return db.prepare(
+    `SELECT s.*,
+       COALESCE(
+         (SELECT m.content FROM messages m
+           WHERE m.session_id = s.id AND m.role = 'child'
+           ORDER BY m.created_at DESC LIMIT 1),
+         ''
+       ) AS preview
+     FROM sessions s
+     WHERE s.child_id = ?
+     ORDER BY s.updated_at DESC
+     LIMIT ?`
+  ).all(childId, limit) as (Session & { preview: string })[];
 }
 
 export function deleteSession(id: string): void {

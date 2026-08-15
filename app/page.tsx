@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChatView } from "@/components/chat/chat-view";
 import { SidePanel } from "@/components/panels/side-panel";
 import { ChildSwitcher } from "@/components/ui/child-switcher";
+import { SessionHistory } from "@/components/ui/session-history";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { useChild } from "@/components/ui/child-provider";
 import { useChatStore } from "@/lib/store/chat-store";
@@ -74,6 +75,7 @@ export default function Home() {
           <span className="text-xl">🧒</span>
           <h1 className="text-body-lg font-bold text-ink">Kid-Aider</h1>
           <ChildSwitcher />
+          <SessionHistory />
         </div>
         <div className="flex items-center gap-1">
           <Link

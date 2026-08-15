@@ -406,6 +406,15 @@ export function getDb(): Database.Database {
   // 多子账号迁移（P9）
   try { migrateToMultiChild(db); } catch { /* migration failure is non-fatal */ }
 
+  // 兜底：把历史遗留的无归属会话（child_id=''）归属到第一个孩子。
+  // 迁移只跑一次（user_version>=1 后跳过），此处幂等补账，保证存量会话可被历史列表检索。
+  try {
+    const firstAccount = db.prepare("SELECT id FROM user_account ORDER BY created_at ASC LIMIT 1").get() as { id: string } | undefined;
+    if (firstAccount) {
+      db.prepare("UPDATE sessions SET child_id = ? WHERE child_id = ''").run(firstAccount.id);
+    }
+  } catch { /* backfill failure is non-fatal */ }
+
   return db;
 }
 

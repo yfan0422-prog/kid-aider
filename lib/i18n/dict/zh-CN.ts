@@ -13,6 +13,11 @@ const zhCN: TranslationDict = {
   "nav.settings": "⚙ 设置",
   "nav.parent": "👨‍👩‍👧 家长",
   "nav.language": "🌐 语言",
+  "nav.history": "🕘 历史",
+  "history.title": "历史对话",
+  "history.empty": "暂无历史对话",
+  "history.new": "新对话",
+  "history.untitled": "未命名对话",
 
   // ─── 聊天 chat ────────────────────────────────
   "chat.age.10-12": "10-12 岁",

@@ -84,7 +84,12 @@ export async function POST(req: NextRequest) {
   // Get or create session
   let session = sessionId ? getSession(sessionId) : null;
   if (!session) {
-    session = createSession({ age_group: ageGroup || "10-12" });
+    // 新会话归属到当前孩子，并以首条孩子消息作为标题，便于历史列表展示
+    session = createSession({
+      age_group: ageGroup || "10-12",
+      child_id: childId,
+      title: message.slice(0, 30).replace(/\s+/g, " ").trim(),
+    });
   }
 
   const ag = (ageGroup || session.age_group) as AgeGroup;
