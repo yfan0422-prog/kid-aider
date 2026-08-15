@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocale } from "@/lib/i18n/context";
+import { getStoredVoice } from "@/lib/voice/voices";
 
 interface Props {
   messageId: string;
@@ -15,6 +16,7 @@ export function AudioPlayer({ text, autoPlay = false, onAutoPlayed }: Props) {
   const [state, setState] = useState<"idle" | "loading" | "playing" | "error">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const urlRef = useRef<string | null>(null);
+  const voiceRef = useRef<string | null>(null);
 
   // 卸载时释放对象 URL，避免内存泄漏
   useEffect(() => {
@@ -27,17 +29,19 @@ export function AudioPlayer({ text, autoPlay = false, onAutoPlayed }: Props) {
   const loadAndPlay = useCallback(async () => {
     setState("loading");
     try {
+      const voice = getStoredVoice();
       let url = urlRef.current;
-      if (!url) {
+      if (!url || voiceRef.current !== voice) {
         const res = await fetch("/api/voice/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, speed: 1.0 }),
+          body: JSON.stringify({ text, voice, speed: 1.0 }),
         });
         if (!res.ok) throw new Error("TTS failed");
         const blob = await res.blob();
         url = URL.createObjectURL(blob);
         urlRef.current = url;
+        voiceRef.current = voice;
       }
       const audio = new Audio(url);
       audioRef.current = audio;
