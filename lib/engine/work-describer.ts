@@ -24,6 +24,13 @@ export async function describeWork(opts: {
   const routed = routeModel("dialogue");
   if (!routed) return { title: opts.title ?? "", description: "", encouragement: "" };
 
+  // 看图仅支持 OpenAI 兼容（多模态）模型；Anthropic 文本模型无法接收图片，显式降级
+  if (routed.profile.provider === "anthropic") {
+    return { title: opts.title ?? "", description: "", encouragement: "" };
+  }
+
+  const adapter = routed.adapter as OpenAIAdapter;
+
   const isEnglish = opts.lang === "en";
   const system = isEnglish
     ? 'You are a warm companion for a child. Look at this child\'s offline creation photo. Respond ONLY with a strict JSON object with keys: "title" (short title), "description" (2-3 sentences), "encouragement" (one sincere sentence).'
@@ -33,9 +40,8 @@ export async function describeWork(opts: {
     : `孩子的年龄段：${opts.ageGroup}。请描述这件作品。`;
 
   try {
-    // Vision requires the multimodal OpenAI adapter; the Anthropic adapter's chat
-    // only accepts string content, so narrow the union here (runtime fallback below).
-    const raw = await (routed.adapter as OpenAIAdapter).chat({
+    // 上面的 provider 检查已排除 Anthropic，此处 cast 到 OpenAIAdapter 是安全的
+    const raw = await adapter.chat({
       messages: [
         { role: "system", content: system },
         {
