@@ -462,6 +462,26 @@ const zhHK: TranslationDict = {
   "parent.usage.saved": "設定已保存",
   "parent.usage.unlimited": "不限",
 
+  // ─── 數據匯出（P4 HTML）────────────────────────────
+  "parent.export.report_title": "Kid-Aider 數據匯出",
+  "parent.export.exported_at": "匯出時間",
+  "parent.export.date_range": "日期範圍",
+  "parent.export.all": "全部",
+  "parent.export.rows": "行數",
+  "parent.export.tbl.sessions": "會話",
+  "parent.export.tbl.messages": "訊息",
+  "parent.export.tbl.projects": "項目",
+  "parent.export.tbl.tracks": "項目主線",
+  "parent.export.tbl.milestones": "里程碑",
+  "parent.export.tbl.tasks": "任務",
+  "parent.export.tbl.check_ins": "打卡記錄",
+  "parent.export.tbl.reflections": "復盤",
+  "parent.export.tbl.project_logs": "項目日誌",
+  "parent.export.tbl.competency_snapshots": "能力快照",
+  "parent.export.tbl.badges": "徽章",
+  "parent.export.tbl.evidence_events": "證據事件",
+  "parent.export.tbl.usage_log": "使用日誌",
+
   // ─── 設定 settings ────────────────────────────────
   "settings.back": "← 返回",
   "settings.language": "語言",

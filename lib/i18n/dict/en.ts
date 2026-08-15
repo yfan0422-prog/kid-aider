@@ -462,6 +462,26 @@ const en: TranslationDict = {
   "parent.usage.saved": "Settings saved",
   "parent.usage.unlimited": "Unlimited",
 
+  // ─── Data export (P4 HTML) ────────────────────────────
+  "parent.export.report_title": "Kid-Aider Data Export",
+  "parent.export.exported_at": "Exported at",
+  "parent.export.date_range": "Date range",
+  "parent.export.all": "All",
+  "parent.export.rows": "rows",
+  "parent.export.tbl.sessions": "Sessions",
+  "parent.export.tbl.messages": "Messages",
+  "parent.export.tbl.projects": "Projects",
+  "parent.export.tbl.tracks": "Tracks",
+  "parent.export.tbl.milestones": "Milestones",
+  "parent.export.tbl.tasks": "Tasks",
+  "parent.export.tbl.check_ins": "Check-ins",
+  "parent.export.tbl.reflections": "Reflections",
+  "parent.export.tbl.project_logs": "Project logs",
+  "parent.export.tbl.competency_snapshots": "Competency snapshots",
+  "parent.export.tbl.badges": "Badges",
+  "parent.export.tbl.evidence_events": "Evidence events",
+  "parent.export.tbl.usage_log": "Usage log",
+
   // ─── Settings ──────────────────────────────────
   "settings.back": "← Back",
   "settings.language": "Language",

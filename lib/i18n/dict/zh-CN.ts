@@ -462,6 +462,26 @@ const zhCN: TranslationDict = {
   "parent.usage.saved": "设置已保存",
   "parent.usage.unlimited": "不限",
 
+  // ─── 数据导出（P4 HTML）────────────────────────────
+  "parent.export.report_title": "Kid-Aider 数据导出",
+  "parent.export.exported_at": "导出时间",
+  "parent.export.date_range": "日期范围",
+  "parent.export.all": "全部",
+  "parent.export.rows": "行数",
+  "parent.export.tbl.sessions": "会话",
+  "parent.export.tbl.messages": "消息",
+  "parent.export.tbl.projects": "项目",
+  "parent.export.tbl.tracks": "项目主线",
+  "parent.export.tbl.milestones": "里程碑",
+  "parent.export.tbl.tasks": "任务",
+  "parent.export.tbl.check_ins": "打卡记录",
+  "parent.export.tbl.reflections": "复盘",
+  "parent.export.tbl.project_logs": "项目日志",
+  "parent.export.tbl.competency_snapshots": "能力快照",
+  "parent.export.tbl.badges": "徽章",
+  "parent.export.tbl.evidence_events": "证据事件",
+  "parent.export.tbl.usage_log": "使用日志",
+
   // ─── 设置 settings ────────────────────────────────
   "settings.back": "← 返回",
   "settings.language": "语言",
