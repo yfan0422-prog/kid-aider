@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
 import { AccountManager } from "@/components/ui/account-manager";
+import { VoiceSelector } from "@/components/ui/voice-selector";
 
 export default function SettingsPage() {
   const { t } = useLocale();
@@ -14,6 +15,13 @@ export default function SettingsPage() {
         </Link>
         <h1 className="text-2xl font-bold">{t("settings.title")}</h1>
       </div>
+
+      <section className="mt-8 pt-4 border-t border-border">
+        <h2 className="text-body-lg font-bold mb-2">{t("settings.voice.title")}</h2>
+        <p className="text-body-sm text-ink-tertiary mb-4">{t("settings.voice.desc")}</p>
+        <VoiceSelector />
+      </section>
+
       <div className="mt-8 pt-4 border-t border-border">
         <Link
           href="/parent"
