@@ -55,6 +55,10 @@ const zhHK: TranslationDict = {
   "chat.voice.error.unclear": "冇聽清楚，可以再講一次嗎？",
   "chat.voice.hint.hold": "按住講嘢",
   "chat.voice.hint.release": "放開發送",
+  "chat.voice.hint.releaseText": "放開轉文字",
+  "chat.voice.hint.releaseCancel": "放開取消",
+  "chat.voice.hint.slideText": "上滑轉文字",
+  "chat.voice.hint.slideCancel": "繼續上滑取消",
 
   // ─── 漏斗 funnel ──────────────────────────────
   "funnel.badge.done": "✨ 完成",

@@ -6,6 +6,7 @@ import { useLocale } from "@/lib/i18n/context";
 import { useChild } from "@/components/ui/child-provider";
 import { AgeSwitcher } from "./age-switcher";
 import { VoiceButton } from "./voice-button";
+import type { VoiceAction } from "./voice-button";
 import { getAgeConfig } from "@/lib/utils/age-config";
 
 export function InputBar() {
@@ -29,15 +30,12 @@ export function InputBar() {
   // Ref to accumulate streaming text (avoid stale closure on streamingContent)
   const streamAccRef = useRef("");
 
-  const handleVoiceTranscription = useCallback((text: string) => {
-    setInput(text);
-  }, []);
-
-  const handleSend = useCallback(async () => {
-    const text = input.trim();
+  const handleSend = useCallback(async (textOverride?: string) => {
+    const fromVoice = textOverride !== undefined;
+    const text = (fromVoice ? textOverride : input).trim();
     if (!text || isStreaming) return;
 
-    setInput("");
+    if (!fromVoice) setInput("");
     const effectiveSessionId = sessionId || "";
     addMessage({
       id: crypto.randomUUID(),
@@ -176,6 +174,18 @@ export function InputBar() {
     t,
   ]);
 
+  // 语音结果：fill 填入输入框供修改，send 直接发送
+  const handleVoiceResult = useCallback(
+    (text: string, action: VoiceAction) => {
+      if (action === "fill") {
+        setInput(text);
+      } else {
+        handleSend(text);
+      }
+    },
+    [handleSend]
+  );
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
@@ -190,7 +200,7 @@ export function InputBar() {
       <div className="max-w-3xl mx-auto">
         <div className="flex items-end gap-3">
           <VoiceButton
-            onTranscription={handleVoiceTranscription}
+            onResult={handleVoiceResult}
             disabled={isStreaming}
           />
           <textarea
@@ -204,7 +214,7 @@ export function InputBar() {
             className={`flex-1 resize-none bg-surface-raised border-2 border-border rounded-btn px-5 py-3.5 ${config.fontSize} min-h-[56px] max-h-[120px] focus:border-primary focus:shadow-[0_0_0_4px_rgba(79,124,255,0.15)] focus:outline-none transition-all placeholder:text-ink-tertiary disabled:opacity-50`}
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={!input.trim() || isStreaming}
             className="shrink-0 bg-primary text-white border-none rounded-btn px-6 py-3.5 font-semibold text-[17px] shadow-[0_4px_12px_rgba(43,45,66,0.10)] hover:bg-primary-dark hover:-translate-y-px active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >

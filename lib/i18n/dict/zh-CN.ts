@@ -55,6 +55,10 @@ const zhCN: TranslationDict = {
   "chat.voice.error.unclear": "没听清，可以再说一遍吗？",
   "chat.voice.hint.hold": "按住说话",
   "chat.voice.hint.release": "松开发送",
+  "chat.voice.hint.releaseText": "松开转文字",
+  "chat.voice.hint.releaseCancel": "松开取消",
+  "chat.voice.hint.slideText": "上滑转文字",
+  "chat.voice.hint.slideCancel": "继续上滑取消",
 
   // ─── 漏斗 funnel ──────────────────────────────
   "funnel.badge.done": "✨ 完成",

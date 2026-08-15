@@ -55,6 +55,10 @@ const en: TranslationDict = {
   "chat.voice.error.unclear": "I didn't quite catch that. Could you say it again?",
   "chat.voice.hint.hold": "Hold to talk",
   "chat.voice.hint.release": "Release to send",
+  "chat.voice.hint.releaseText": "Release to convert to text",
+  "chat.voice.hint.releaseCancel": "Release to cancel",
+  "chat.voice.hint.slideText": "Slide up for text",
+  "chat.voice.hint.slideCancel": "Slide up more to cancel",
 
   // ─── Funnel ────────────────────────────────────
   "funnel.badge.done": "✨ Done",
